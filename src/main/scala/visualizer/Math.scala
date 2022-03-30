@@ -11,14 +11,19 @@ class Pos(private var xHidden:Double,private var yHidden:Double,private var zHid
   def x=xHidden
   def y=yHidden
   def z=zHidden
-  def addX(amount:Double){
-    xHidden+=amount
+  def addX(x:Double){
+    xHidden+=x
   }
-  def addY(amount:Double){
-    yHidden+=amount
+  def addY(y:Double){
+    yHidden+=y
   }
-  def addZ(amount:Double){
-    zHidden+=amount
+  def addZ(y:Double){
+    zHidden+=y
+  }
+  def add(x:Double,y:Double,z:Double){
+    addX(x)
+    addY(y)
+    addZ(z)
   }
   def set(newX:Double,newY:Double,newZ:Double){
     xHidden=newX
