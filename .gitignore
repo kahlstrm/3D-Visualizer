@@ -1,6 +1,10 @@
-/.bsp/
+/.bsp
 target/
 /.vscode
 /.metals
 /.idea
-/.bloop
+.bloop/
+/null
+.scalafmt.conf
+
+
