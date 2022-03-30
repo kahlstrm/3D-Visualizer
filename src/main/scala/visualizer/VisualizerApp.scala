@@ -21,9 +21,20 @@ object VisualizerApp extends SimpleSwingApplication{
     listenTo(area.mouse.clicks)
     listenTo(area.keys)
     reactions +={
-      case KeyPressed(src,Key.Escape,_,_)=>println("bye");scala.sys.exit()
-      case KeyPressed(src,key,_,_)=>println(key)
-      case MousePressed(src,point,_,_,_)=>println("hello team")
+      case KeyPressed(_,key,_,_)=>{
+        key match {
+          case Key.Escape=>println("bye");scala.sys.exit()
+          case Key.W=>Player.pos.addZ(5)
+          case Key.S=>Player.pos.addZ(-5)
+          case Key.A=>Player.pos.addX(-5)
+          case Key.D=>Player.pos.addX(5)
+          case a=>println(a)
+        }
+      }
+      case KeyReleased(_,key,_,_)=>{
+        
+      }
+      case MousePressed(_,point,_,_,_)=>println(Player)
     }
   }
 }
