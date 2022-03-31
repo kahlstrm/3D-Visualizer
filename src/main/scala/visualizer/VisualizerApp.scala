@@ -48,6 +48,7 @@ object VisualizerApp extends SimpleSwingApplication {
           case Key.S => Player.moveBackward = false
           case Key.A => Player.moveLeft = false
           case Key.D => Player.moveRight = false
+          case _ =>
         }
       }
       case MousePressed(_, point, _, _, _) => {
