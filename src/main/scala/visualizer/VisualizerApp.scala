@@ -4,10 +4,17 @@ import scala.swing.event._
 import scala.collection.mutable.Buffer
 import java.awt.Color
 import java.awt.event.ActionListener
+import java.awt.Robot
 
+import java.awt.Toolkit
+import java.awt.image.BufferedImage
 object VisualizerApp extends SimpleSwingApplication {
-  val width = 1600
-  val height = 1200
+  private val robot=new Robot()
+  private val cursorImg=new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB)
+  private val emptyCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg,new Point(0,0),"empty cursor")
+
+  val width = 1200
+  val height = 800
   val fov = 90
   var previousMouse:Option[Point] = None
   val Wall = new Wall(
@@ -22,7 +29,7 @@ object VisualizerApp extends SimpleSwingApplication {
       Pos(0, 400, 0)
     ),
     Pos(-200, 0, 600),
-    Pos(0, math.Pi / 2, 0)
+    Pos(0, math.Pi/2, 0)
   )
   val Wall2 = new Wall(
     Vector[Pos](
@@ -54,12 +61,21 @@ object VisualizerApp extends SimpleSwingApplication {
         g.setColor(Color.WHITE)
         Wall.draw(g)
         Wall2.draw(g)
+        g.setColor(Color.WHITE)
+        g.drawString("press ESCAPE to close",50,50)
+        g.drawString(Player.pos.toString(),50,70)
+        g.drawString(Player.camera.toString(),50,90)
+        g.drawLine(width/2,height/2+10,width/2,height/2-10)
+        g.drawLine(width/2+10,height/2,width/2-10,height/2)
       }
     }
     contents = area
+    area.cursor_=(emptyCursor)
     listenTo(area.mouse.clicks)
     listenTo(area.mouse.moves)
     listenTo(area.keys)
+    
+        robot.mouseMove(width/2, height/2);
     reactions += {
       case e: MouseDragged=>{
         print(e.point)
@@ -93,10 +109,11 @@ object VisualizerApp extends SimpleSwingApplication {
       case MouseMoved(_,point,_)=>{
         if(previousMouse.isDefined){
         val prev = previousMouse.get
-        Player.camera.y+=(prev.x-point.x).toDouble/100
-        Player.camera.x+=(prev.y-point.y).toDouble/100
+        Player.camera.y=(Player.camera.y+(prev.x-point.x).toDouble/100)%(2*math.Pi)
+        Player.camera.x=(Player.camera.x-(prev.y-point.y).toDouble/100)%(2*math.Pi)
         print(Player.camera)
-        previousMouse=Some(point)
+        robot.mouseMove(width/2, height/2);
+        previousMouse=None
         }else
           {
             previousMouse=Some(point)
