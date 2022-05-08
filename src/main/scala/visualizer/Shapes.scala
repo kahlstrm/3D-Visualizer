@@ -2,6 +2,8 @@ package visualizer
 
 import java.awt.Graphics2D
 import java.awt.Color._
+import java.awt.TexturePaint
+import java.awt.image.BufferedImage
 import GfxMath._
 import java.awt.Color
 import scala.collection.mutable.Buffer
@@ -18,6 +20,14 @@ class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) extends Shapes {
   }
   def draw(g: Graphics2D, color: Color) = {
     g.setColor(color)
+    g.fillPolygon(
+      Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
+      Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
+      3
+    )
+  }
+  def draw(g:Graphics2D,texture:TexturePaint)={
+    g.setPaint(texture)
     g.fillPolygon(
       Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
       Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
@@ -108,7 +118,7 @@ val poses = Vector[Pos](
       newTriangles.foreach(n => {
         val normal = getNormal(n)
         if (getNormal(n).z < 0) {
-          n.draw(g)
+          n.draw(g,VisualizerApp.texture)
         }
       })
   }

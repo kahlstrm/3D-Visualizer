@@ -1,9 +1,10 @@
 package visualizer
 import java.io._
 import scala.collection.mutable.Buffer
+import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
 object FileLoader {
   def loadFile(source: String): (Array[Wall],Pos) = {
-
     val fileReader = try {
       new FileReader(source)
     }catch{
@@ -34,4 +35,15 @@ object FileLoader {
     fileReader.close()
     return (walls.toArray,playerPos)
   }
+  def loadTexture(source:String):BufferedImage={
+    val img = try {
+      ImageIO.read(new File(source))
+    }catch{
+      case e: FileNotFoundException=>{
+        println("image File not found")
+        throw e
+      }
+  }
+  img
+}
 }

@@ -5,10 +5,12 @@ import scala.collection.mutable.Buffer
 import java.awt.Color
 import java.awt.event.ActionListener
 import java.awt.Robot
-
+import java.awt.TexturePaint
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
 object VisualizerApp extends SimpleSwingApplication {
+  val textureImg=FileLoader.loadTexture("brick3.png")
+  val texture = new TexturePaint(textureImg,new Rectangle(new Dimension(100,100)))
   private val robot = new Robot()
   private val cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
   private val emptyCursor = Toolkit
