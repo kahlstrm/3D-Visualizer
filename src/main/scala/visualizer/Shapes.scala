@@ -7,6 +7,8 @@ import java.awt.image.BufferedImage
 import GfxMath._
 import java.awt.Color
 import scala.collection.mutable.Buffer
+import java.awt.Rectangle
+import java.awt.Dimension
 trait Shapes {
   def draw(g: Graphics2D): Unit
 }
@@ -26,7 +28,7 @@ class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) extends Shapes {
       3
     )
   }
-  def draw(g:Graphics2D,texture:TexturePaint)={
+  def draw(g: Graphics2D, texture:TexturePaint) = {
     g.setPaint(texture)
     g.fillPolygon(
       Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
@@ -47,18 +49,17 @@ object Triangle {
   }
 }
 
-class Wall( position: Pos, rotation: Pos)
-    extends Shapes {
-val poses = Vector[Pos](
-      Pos(-300, -200, -100),
-      Pos(300, -200, -100),
-      Pos(300, 200, -100),
-      Pos(300, 200, 100),
-      Pos(-300, 200, 100),
-      Pos(-300, -200, 100),
-      Pos(300, -200, 100),
-      Pos(-300, 200, -100)
-    )
+class Wall(position: Pos, rotation: Pos) extends Shapes {
+  val poses = Vector[Pos](
+    Pos(-300, -200, -100),
+    Pos(300, -200, -100),
+    Pos(300, 200, -100),
+    Pos(300, 200, 100),
+    Pos(-300, 200, 100),
+    Pos(-300, -200, 100),
+    Pos(300, -200, 100),
+    Pos(-300, 200, -100)
+  )
   val triangles = Vector[Triangle](
     Triangle(poses(0), poses(7), poses(2)),
     Triangle(poses(0), poses(2), poses(1)),
@@ -73,17 +74,33 @@ val poses = Vector[Pos](
     Triangle(poses(6), poses(5), poses(0)),
     Triangle(poses(6), poses(0), poses(1))
   )
+  def worldSpace = {
+    poses.map(pos =>
+      pos
+        .rotate(rotation)
+        .translate(position)
+        .translate(-Player.pos)
+    )
+  }
+  def isInside(pos:Pos)={
+    val worldSpace=this.worldSpace
+    val bottomCorner=worldSpace(0)
+    val topCorner=worldSpace(3)
+    def isBetween(a:Double,b:Double,c:Double)= Math.min(a,b)-1 < c && Math.max(a,b)+1>c
+    isBetween(bottomCorner.x,topCorner.x,pos.x)&&
+    isBetween(bottomCorner.y,topCorner.y,pos.y)&&
+    isBetween(bottomCorner.z,topCorner.z,pos.z)
+  }
   def draw(g: Graphics2D) = {
     val newTriangles = Buffer[Triangle]()
     triangles
       .foreach(tri => {
-       val worldSpaceTri= Triangle(
+        val worldSpaceTri = Triangle(
           tri.pos1
             .rotate(rotation)
             .translate(position)
             .translate(-Player.pos)
             .rotate(Player.camera),
-
           tri.pos2
             .rotate(rotation)
             .translate(position)
@@ -95,31 +112,32 @@ val poses = Vector[Pos](
             .translate(-Player.pos)
             .rotate(Player.camera)
         )
-        val clippedTriangles=calcClipping(worldSpaceTri)
-        clippedTriangles.foreach(n=>
-          newTriangles+=
+        val clippedTriangles = calcClipping(worldSpaceTri)
+        clippedTriangles.foreach(n =>
+          newTriangles +=
             Triangle(
-            n.pos1
-            .perspective()
-            .center(),
-            n.pos2
-            .perspective()
-            .center(),
-            n.pos3
-            .perspective()
-            .center())
-          )
+              n.pos1
+                .perspective()
+                .center(),
+              n.pos2
+                .perspective()
+                .center(),
+              n.pos3
+                .perspective()
+                .center()
+            )
+        )
         // Triangle(
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos1,rotation),position),-Player.pos),Player.camera))),
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos2,rotation),position),-Player.pos),Player.camera))),
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos3,rotation),position),-Player.pos),Player.camera)))
         // )
       })
-      newTriangles.foreach(n => {
-        val normal = getNormal(n)
-        if (getNormal(n).z < 0) {
-          n.draw(g,VisualizerApp.texture)
-        }
-      })
+    newTriangles.foreach(n => {
+      val normal = getNormal(n)
+      if (getNormal(n).z < 0) {
+        n.draw(g)
+      }
+    })
   }
 }

@@ -9,15 +9,14 @@ import java.awt.TexturePaint
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
 object VisualizerApp extends SimpleSwingApplication {
-  val textureImg=FileLoader.loadTexture("brick3.png")
+  val textureImg = FileLoader.loadTexture("minecraft.jpg")
   val texture = new TexturePaint(textureImg,new Rectangle(new Dimension(100,100)))
   private val robot = new Robot()
   private val cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
   private val emptyCursor = Toolkit
     .getDefaultToolkit()
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
-  private val fileLoad = FileLoader.loadFile("test.map")
-  Player.pos.update(fileLoad._2)
+  val (walls, playerPos) = FileLoader.loadFile("test.map")
   val width = 1200
   val height = 800
   val fov = 90
@@ -37,7 +36,7 @@ object VisualizerApp extends SimpleSwingApplication {
         g.setColor(Color.WHITE)
         // Wall.draw(g)
         // Wall2.draw(g)
-        fileLoad._1.foreach(n=>n.draw(g))
+        walls.foreach(n => n.draw(g))
         g.setColor(Color.WHITE)
         g.drawString("press ESCAPE to close", 50, 50)
         g.drawString(Player.pos.toString(), 50, 70)
@@ -83,14 +82,15 @@ object VisualizerApp extends SimpleSwingApplication {
       case MouseMoved(_, point, _) => {
         if (previousMouse.isDefined) {
           val prev = previousMouse.get
-          Player.camera.y ={
+          Player.camera.y = {
 
-            val newVal =(Player.camera.y + (prev.x - point.x).toDouble / 100)% (2 * math.Pi)
-            if(newVal>Math.PI){
-              newVal-Math.PI*2
-            }else if(newVal< -Math.PI){
-              newVal+Math.PI*2
-            }else newVal
+            val newVal =
+              (Player.camera.y + (prev.x - point.x).toDouble / 100) % (2 * math.Pi)
+            if (newVal > Math.PI) {
+              newVal - Math.PI * 2
+            } else if (newVal < -Math.PI) {
+              newVal + Math.PI * 2
+            } else newVal
           }
           Player.camera.x = Math.max(
             -Math.PI / 2.0,
@@ -109,7 +109,13 @@ object VisualizerApp extends SimpleSwingApplication {
 
     val listener = new ActionListener() {
       def actionPerformed(e: java.awt.event.ActionEvent) = {
-        Player.move()
+        val oldPlayerPos=Player.move()
+        walls.foreach(n => {
+          if(n.isInside(Pos(0,0,0))){
+            println("siel on ihminen sisällä!")
+        Player.updatePos(oldPlayerPos)
+          }
+        })
         area.repaint()
       }
     }

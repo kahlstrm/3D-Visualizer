@@ -1,29 +1,35 @@
 package visualizer
 
 object Player {
-  val pos = new Pos(0, 0, 0)
+  def pos = hiddenPos+Pos(0,0,0)
   val camera = Camera
-
-  
-  def move() {
+  private var hiddenPos=VisualizerApp.playerPos
+  def updatePos(pos:Pos)={
+    hiddenPos=pos
+  }
+  def move():Pos ={
+    val oldPos=pos
+    val newPos=pos
     if (moveForward) {
-      pos.z+=20
+      newPos.z+=20
     }
     if (moveBackward) {
-      pos.z-=20
+      newPos.z-=20
     }
     if (moveLeft) {
-      pos.x-=20
+      newPos.x-=20
     }
     if (moveRight) {
-      pos.x+=20
+      newPos.x+=20
     }
     if(moveUp){
-      pos.y-=20
+      newPos.y-=20
     }
     if(moveDown){
-      pos.y+=20
+      newPos.y+=20
     }
+    hiddenPos=newPos
+    oldPos
   }
   var moveForward = false
   var moveBackward = false
