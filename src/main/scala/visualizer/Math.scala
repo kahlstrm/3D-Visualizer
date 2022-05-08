@@ -126,7 +126,10 @@ class Pos(
     )
   }
 
-  override def toString(): String = s"x: ${x*180/Math.PI} y: ${y*180/Math.PI} z: ${z*180/Math.PI}"
+  override def toString(): String = s"x: ${x} y: ${y} z: ${z}"
+}
+object Camera extends Pos(0,0,0) {
+  override def toString(): String = s"x: ${180/Math.PI*x} y: ${180/Math.PI*y} z: ${180/Math.PI*z}"
 }
 
 object Pos {

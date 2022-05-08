@@ -2,9 +2,9 @@ package visualizer
 
 object Player {
   val pos = new Pos(0, 0, 0)
-  val camera = new Pos(0,0,0)
+  val camera = Camera
 
-  
+
   def move() {
     if (moveForward) {
       pos.z+=20
