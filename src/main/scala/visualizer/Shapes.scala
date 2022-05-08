@@ -11,15 +11,20 @@ trait Shapes {
 class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) extends Shapes {
 
   def draw(g: Graphics2D) = {
-    g.drawLine(pos1.x.toInt, pos1.y.toInt, pos2.x.toInt, pos2.y.toInt)
-    g.drawLine(pos2.x.toInt, pos2.y.toInt, pos3.x.toInt, pos3.y.toInt)
-    g.drawLine(pos3.x.toInt, pos3.y.toInt, pos1.x.toInt, pos1.y.toInt)
+    if(pos1.z>0)g.drawLine(pos1.x.toInt, pos1.y.toInt, pos2.x.toInt, pos2.y.toInt)
+    if(pos2.z>0)g.drawLine(pos2.x.toInt, pos2.y.toInt, pos3.x.toInt, pos3.y.toInt)
+    if(pos3.z>0)g.drawLine(pos3.x.toInt, pos3.y.toInt, pos1.x.toInt, pos1.y.toInt)
   }
-  def draw(g:Graphics2D,color:Color)={
+  def draw(g: Graphics2D, color: Color) = {
     g.setColor(color)
-    g.fillPolygon(Array[Int](pos1.x.toInt,pos2.x.toInt,pos3.x.toInt),Array[Int](pos1.y.toInt,pos2.y.toInt,pos3.y.toInt),3)
+    g.fillPolygon(
+      Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
+      Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
+      3
+    )
   }
-override def toString(): String = pos1.toString+pos2.toString+pos3.toString()
+  override def toString(): String =
+    pos1.toString + pos2.toString + pos3.toString()
 }
 
 object Triangle {
@@ -31,24 +36,29 @@ object Triangle {
   }
 }
 
-class Wall(val poses:Vector[Pos],position:Pos,rotation:Pos) extends Shapes {
-
+class Wall( position: Pos, rotation: Pos)
+    extends Shapes {
+val poses = Vector[Pos](
+      Pos(-300, -200, -100),
+      Pos(300, -200, -100),
+      Pos(300, 200, -100),
+      Pos(300, 200, 100),
+      Pos(-300, 200, 100),
+      Pos(-300, -200, 100),
+      Pos(300, -200, 100),
+      Pos(-300, 200, -100)
+    )
   val triangles = Vector[Triangle](
     Triangle(poses(0), poses(7), poses(2)),
     Triangle(poses(0), poses(2), poses(1)),
-
     Triangle(poses(1), poses(2), poses(3)),
     Triangle(poses(1), poses(3), poses(6)),
-
     Triangle(poses(6), poses(3), poses(4)),
     Triangle(poses(6), poses(4), poses(5)),
-
     Triangle(poses(5), poses(4), poses(7)),
     Triangle(poses(5), poses(7), poses(0)),
-
     Triangle(poses(7), poses(4), poses(3)),
     Triangle(poses(7), poses(3), poses(2)),
-    
     Triangle(poses(6), poses(5), poses(0)),
     Triangle(poses(6), poses(0), poses(1))
   )
@@ -56,17 +66,39 @@ class Wall(val poses:Vector[Pos],position:Pos,rotation:Pos) extends Shapes {
     triangles
       .map(tri => {
         Triangle(
-          center(perspective(rotate(translatePos(translatePos(rotate(tri.pos1,rotation),position),-Player.pos),Player.camera))),
-          center(perspective(rotate(translatePos(translatePos(rotate(tri.pos2,rotation),position),-Player.pos),Player.camera))),
-          center(perspective(rotate(translatePos(translatePos(rotate(tri.pos3,rotation),position),-Player.pos),Player.camera)))
+          tri.pos1
+            .rotate(rotation)
+            .translate(position)
+            .translate(-Player.pos)
+            .rotate(Player.camera)
+            .perspective()
+            .center(),
+          tri.pos2
+            .rotate(rotation)
+            .translate(position)
+            .translate(-Player.pos)
+            .rotate(Player.camera)
+            .perspective()
+            .center(),
+          tri.pos3
+            .rotate(rotation)
+            .translate(position)
+            .translate(-Player.pos)
+            .rotate(Player.camera)
+            .perspective()
+            .center()
         )
+        // Triangle(
+        //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos1,rotation),position),-Player.pos),Player.camera))),
+        //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos2,rotation),position),-Player.pos),Player.camera))),
+        //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos3,rotation),position),-Player.pos),Player.camera)))
+        // )
       })
-      .foreach(n=>{
-        val normal =getNormal(n)
-        if(getNormal(n).z<0){
-      n.draw(g)
+      .foreach(n => {
+        val normal = getNormal(n)
+        if (getNormal(n).z < 0) {
+          n.draw(g)
         }
-      }
-      )
+      })
   }
 }
