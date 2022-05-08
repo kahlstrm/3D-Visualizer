@@ -18,31 +18,11 @@ object VisualizerApp extends SimpleSwingApplication {
   val fov = 90
   var previousMouse:Option[Point] = None
   val Wall = new Wall(
-    Vector[Pos](
-      Pos(0, 0, 0),
-      Pos(600, 0, 0),
-      Pos(600, 400, 0),
-      Pos(600, 400, 200),
-      Pos(0, 400, 200),
-      Pos(0, 0, 200),
-      Pos(600, 0, 200),
-      Pos(0, 400, 0)
-    ),
-    Pos(-200, 0, 600),
+    Pos(-300, 0, 600),
     Pos(0, math.Pi/2, 0)
   )
   val Wall2 = new Wall(
-    Vector[Pos](
-      Pos(0, 0, 0),
-      Pos(600, 0, 0),
-      Pos(600, 400, 0),
-      Pos(600, 400, 200),
-      Pos(0, 400, 200),
-      Pos(0, 0, 200),
-      Pos(600, 0, 200),
-      Pos(0, 400, 0)
-    ),
-    Pos(0, 0, 600),
+    Pos(0, 0, 1000),
     Pos(0, 0, 0)
   )
   val windowHeight = height + 30
@@ -110,7 +90,7 @@ object VisualizerApp extends SimpleSwingApplication {
         if(previousMouse.isDefined){
         val prev = previousMouse.get
         Player.camera.y=(Player.camera.y+(prev.x-point.x).toDouble/100)%(2*math.Pi)
-        Player.camera.x=(Player.camera.x-(prev.y-point.y).toDouble/100)%(2*math.Pi)
+        Player.camera.x=Math.max(-Math.PI/2.0,Math.min(Math.PI/2.0,(Player.camera.x-(prev.y-point.y).toDouble/100)%(2*math.Pi)))
         print(Player.camera)
         robot.mouseMove(width/2, height/2);
         previousMouse=None

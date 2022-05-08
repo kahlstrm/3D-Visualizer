@@ -1,63 +1,26 @@
 package visualizer
 import scala.math._
 object GfxMath {
-  private val width = VisualizerApp.width
-  private val height = VisualizerApp.height
-  private val fovinRadians = VisualizerApp.fov * math.Pi / 180.0
-  private val renderDistance = VisualizerApp.renderDistance
-  private val zNear = (width / 2.0) / tan(fovinRadians / 2.0)
-  
-  def translatePos(pos: Pos, transpos: Pos): Pos = {
-    Pos(
-      pos.x + transpos.x,
-      pos.y + transpos.y,
-      pos.z + transpos.z
-    )
-  }
-
-  def rotate(original:Pos,rotation:Pos)={
-    Pos(
-    	original.x * (cos(rotation.z) * cos(rotation.y)) + 
-				 original.y * (cos(rotation.z) * sin(rotation.y) * sin(rotation.x) - sin(rotation.z) * cos(rotation.x)) +
-				 original.z * (cos(rotation.z) * sin(rotation.y) * cos(rotation.x) + sin(rotation.z) * sin(rotation.x)),
-	original.x * (sin(rotation.z) * cos(rotation.y)) +
-				 original.y * (sin(rotation.z) * sin(rotation.y) * sin(rotation.x) + cos(rotation.z) * cos(rotation.x)) +
-				 original.z * (sin(rotation.z) * sin(rotation.y) * cos(rotation.x) - cos(rotation.z) * sin(rotation.x)),
-	original.x * (- sin(rotation.y)) +
-				 original.y * (cos(rotation.y) * sin(rotation.x)) +
-				 original.z * (cos(rotation.y) * cos(rotation.x)),
-    )
-  }
-  def perspective(pos:Pos):Pos={
-    Pos(
-      pos.x*zNear/(zNear+pos.z),
-      pos.y*zNear/(zNear+pos.z),
-      pos.z
-    )
-  }
-
-  def center(pos:Pos):Pos={
-    Pos(
-      pos.x+width/2,
-      pos.y+height/2,
-      pos.z
-    )
-  }
-  def getNormal(tri:Triangle):Pos={
-    val a= Pos(
-      tri.pos2.x-tri.pos1.x,
-      tri.pos2.y-tri.pos1.y,
-      tri.pos2.y-tri.pos1.z
+  val width = VisualizerApp.width
+  val height = VisualizerApp.height
+  val fovinRadians = VisualizerApp.fov * math.Pi / 180.0
+  val renderDistance = VisualizerApp.renderDistance
+  val zNear = (width / 2.0) / tan(fovinRadians / 2.0)
+  def getNormal(tri: Triangle): Pos = {
+    val a = Pos(
+      tri.pos2.x - tri.pos1.x,
+      tri.pos2.y - tri.pos1.y,
+      tri.pos2.y - tri.pos1.z
     )
     val b = Pos(
-      tri.pos3.x-tri.pos1.x,
-      tri.pos3.y-tri.pos1.y,
-      tri.pos3.y-tri.pos1.z
+      tri.pos3.x - tri.pos1.x,
+      tri.pos3.y - tri.pos1.y,
+      tri.pos3.y - tri.pos1.z
     )
-    val normalX=a.y*b.z-a.z*b.y
-    val normalY=a.z*b.x-a.x*b.z
-    val normalZ=a.x*b.y-a.y*b.x
-    Pos(normalX,normalY,normalZ)
+    val normalX = a.y * b.z - a.z * b.y
+    val normalY = a.z * b.x - a.x * b.z
+    val normalZ = a.x * b.y - a.y * b.x
+    Pos(normalX, normalY, normalZ)
   }
   // val proj = Array.ofDim[Double](4, 4)
   // proj(0)(0) = aspectRatio * fovMultiplier
@@ -100,14 +63,65 @@ class Pos(
       )
     )
   }
-  def unary_-():Pos={
+  def unary_-(): Pos = {
     Pos(
       -this.x,
       -this.y,
       -this.z
     )
   }
-  override def toString(): String = s"x: ${x} y: ${y} z: ${z}"
+  def *(mul: Double) = {
+    Pos(
+      this.x * mul,
+      this.y * mul,
+      this.z * mul
+    )
+  }
+  
+  def translate(transpos: Pos): Pos = {
+    Pos(
+      this.x + transpos.x,
+      this.y + transpos.y,
+      this.z + transpos.z
+    )
+  }
+  def center(): Pos = {
+    Pos(
+      this.x + GfxMath.width / 2,
+      this.y + GfxMath.height / 2,
+      this.z
+    )
+  }
+  def perspective(): Pos = {
+    Pos(
+      this.x * GfxMath.zNear/z,
+      this.y * GfxMath.zNear/z,
+      this.z
+    )
+  }
+  def rotate(rotation: Pos) = {
+    Pos(
+      this.x * (cos(rotation.z) * cos(rotation.y)) +
+        this.y * (cos(rotation.z) * sin(rotation.y) * sin(rotation.x) - sin(
+          rotation.z
+        ) * cos(rotation.x)) +
+        this.z * (cos(rotation.z) * sin(rotation.y) * cos(rotation.x) + sin(
+          rotation.z
+        ) * sin(rotation.x)),
+      this.x * (sin(rotation.z) * cos(rotation.y)) +
+        this.y * (sin(rotation.z) * sin(rotation.y) * sin(rotation.x) + cos(
+          rotation.z
+        ) * cos(rotation.x)) +
+        this.z * (sin(rotation.z) * sin(rotation.y) * cos(rotation.x) - cos(
+          rotation.z
+        ) * sin(rotation.x)),
+      this.x * (-sin(rotation.y)) +
+        this.y * (cos(rotation.y) * sin(rotation.x)) +
+        this.z * (cos(rotation.y) * cos(rotation.x))
+    )
+  }
+
+  override def toString(): String = s"x: ${x*180/Math.PI} y: ${y*180/Math.PI} z: ${z*180/Math.PI}"
 }
 
 object Pos {
