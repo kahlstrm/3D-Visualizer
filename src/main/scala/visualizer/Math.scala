@@ -6,6 +6,7 @@ object GfxMath {
   val fovinRadians = VisualizerApp.fov * math.Pi / 180.0
   val renderDistance = VisualizerApp.renderDistance
   val zNear = (width / 2.0) / tan(fovinRadians / 2.0)
+  val zPlane=Pos(0,0,1)
   def getNormal(tri: Triangle): Pos = {
     val a = Pos(
       tri.pos2.x - tri.pos1.x,
@@ -21,6 +22,101 @@ object GfxMath {
     val normalY = a.z * b.x - a.x * b.z
     val normalZ = a.x * b.y - a.y * b.x
     Pos(normalX, normalY, normalZ)
+  }
+  def intersectPointWithZ(pos1: Pos, pos2: Pos): Pos = {
+    val u = pos2 + (-pos1)
+    val dot = zPlane.dotProduct(u)
+    val w=pos1+(-zPlane)
+    val factor = -((zPlane.dotProduct(w)) / dot)
+    val mul = (u * factor)
+    return  mul+pos1
+  }
+  def calcClipping(tri: Triangle): Array[Triangle] = {
+    if (tri.pos1.z < zPlane.z && tri.pos2.z < zPlane.z && tri.pos3.z < zPlane.z) {
+      return Array[Triangle]()
+    }
+    if (tri.pos1.z < zPlane.z && tri.pos2.z < zPlane.z) {
+      val newpos1 = intersectPointWithZ(tri.pos1, tri.pos3)
+      val newpos2 = intersectPointWithZ(tri.pos2, tri.pos3)
+      return Array[Triangle](
+        Triangle(
+          newpos1,
+          newpos2,
+          tri.pos3
+        )
+      )
+    }
+    if (tri.pos1.z < zPlane.z && tri.pos3.z < zPlane.z) {
+      val newpos1 = intersectPointWithZ(tri.pos1, tri.pos2)
+      val newpos3 = intersectPointWithZ(tri.pos3, tri.pos2)
+      return Array[Triangle](
+        Triangle(
+          newpos1,
+          tri.pos2,
+          newpos3
+        )
+      )
+    }
+    if (tri.pos2.z < zPlane.z && tri.pos3.z < zPlane.z) {
+      val newpos2 = intersectPointWithZ(tri.pos2, tri.pos1)
+      val newpos3 = intersectPointWithZ(tri.pos3, tri.pos1)
+      return Array[Triangle](
+        Triangle(
+          tri.pos1,
+          newpos2,
+          newpos3
+        )
+      )
+    }
+    if (tri.pos1.z < zPlane.z) {
+      val newpos1 = intersectPointWithZ(tri.pos1,tri.pos3)
+      val newpos2 = intersectPointWithZ(tri.pos1,tri.pos2)
+      return Array[Triangle](
+        Triangle(
+          newpos1,
+          tri.pos2,
+          tri.pos3
+        ),
+        Triangle(
+          newpos2,
+          tri.pos2,
+          tri.pos3
+        )
+      )
+    }
+    if (tri.pos2.z < zPlane.z) {
+      val newpos1 = intersectPointWithZ(tri.pos2,tri.pos1)
+      val newpos2 = intersectPointWithZ(tri.pos2,tri.pos3)
+      return Array[Triangle](
+        Triangle(
+          tri.pos1,
+          newpos1,
+          tri.pos3
+        ),
+        Triangle(
+          tri.pos1,
+          newpos2,
+          tri.pos3
+        )
+      )
+    }
+    if (tri.pos3.z < zPlane.z) {
+      val newpos1 = intersectPointWithZ(tri.pos3,tri.pos1)
+      val newpos2 = intersectPointWithZ(tri.pos3,tri.pos2)
+      return Array[Triangle](
+        Triangle(
+          tri.pos1,
+          tri.pos2,
+          newpos1
+        ),
+        Triangle(
+          tri.pos1,
+          tri.pos2,
+          newpos2
+        )
+      )
+    }
+    Array[Triangle](tri)
   }
   // val proj = Array.ofDim[Double](4, 4)
   // proj(0)(0) = aspectRatio * fovMultiplier
@@ -63,10 +159,12 @@ class Pos(
       )
     )
   }
-  def update(that:Pos):Unit={
-    this.x=that.x
-    this.y=that.y
-    this.z=that.z
+  def length = this.distance(Pos(0, 0, 0))
+
+  def update(that: Pos): Unit = {
+    this.x = that.x
+    this.y = that.y
+    this.z = that.z
   }
   def unary_-(): Pos = {
     Pos(
@@ -75,14 +173,19 @@ class Pos(
       -this.z
     )
   }
-  def *(mul: Double) = {
+  def *(mul: Double): Pos = {
     Pos(
       this.x * mul,
       this.y * mul,
       this.z * mul
     )
   }
-  
+  def dotProduct(that: Pos): Double = {
+    this.x * that.x + this.y * that.y + this.z * that.z
+  }
+
+  def +(pos: Pos) = translate(pos)
+
   def translate(transpos: Pos): Pos = {
     Pos(
       this.x + transpos.x,
@@ -99,12 +202,12 @@ class Pos(
   }
   def perspective(): Pos = {
     Pos(
-      this.x * GfxMath.zNear/z,
-      this.y * GfxMath.zNear/z,
+      this.x * GfxMath.zNear / z,
+      this.y * GfxMath.zNear / z,
       this.z
     )
   }
-  def rotate(rotation: Pos) = {
+  def rotate(rotation: Pos): Pos = {
     Pos(
       this.x * (cos(rotation.z) * cos(rotation.y)) +
         this.y * (cos(rotation.z) * sin(rotation.y) * sin(rotation.x) - sin(
@@ -128,8 +231,9 @@ class Pos(
 
   override def toString(): String = s"x: ${x} y: ${y} z: ${z}"
 }
-object Camera extends Pos(0,0,0) {
-  override def toString(): String = s"x: ${180/Math.PI*x} y: ${180/Math.PI*y} z: ${180/Math.PI*z}"
+object Camera extends Pos(0, 0, 0) {
+  override def toString(): String =
+    s"x: ${180 / Math.PI * x} y: ${180 / Math.PI * y} z: ${180 / Math.PI * z}"
 }
 
 object Pos {
@@ -139,4 +243,11 @@ object Pos {
   def apply(pos: Pos): Pos = {
     new Pos(pos.x, pos.y, pos.z)
   }
+}
+object test extends App {
+  import GfxMath._
+  val a =Pos(0,2,0)
+  val b = Pos(0,0,3)
+  println(intersectPointWithZ(a,b))
+  println(intersectPointWithZ(b,a))
 }

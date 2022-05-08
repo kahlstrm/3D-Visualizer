@@ -4,6 +4,7 @@ import java.awt.Graphics2D
 import java.awt.Color._
 import GfxMath._
 import java.awt.Color
+import scala.collection.mutable.Buffer
 trait Shapes {
   def draw(g: Graphics2D): Unit
 }
@@ -11,9 +12,9 @@ trait Shapes {
 class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) extends Shapes {
 
   def draw(g: Graphics2D) = {
-    if(pos1.z>0)g.drawLine(pos1.x.toInt, pos1.y.toInt, pos2.x.toInt, pos2.y.toInt)
-    if(pos2.z>0)g.drawLine(pos2.x.toInt, pos2.y.toInt, pos3.x.toInt, pos3.y.toInt)
-    if(pos3.z>0)g.drawLine(pos3.x.toInt, pos3.y.toInt, pos1.x.toInt, pos1.y.toInt)
+    g.drawLine(pos1.x.toInt, pos1.y.toInt, pos2.x.toInt, pos2.y.toInt)
+    g.drawLine(pos2.x.toInt, pos2.y.toInt, pos3.x.toInt, pos3.y.toInt)
+    g.drawLine(pos3.x.toInt, pos3.y.toInt, pos1.x.toInt, pos1.y.toInt)
   }
   def draw(g: Graphics2D, color: Color) = {
     g.setColor(color)
@@ -63,38 +64,48 @@ val poses = Vector[Pos](
     Triangle(poses(6), poses(0), poses(1))
   )
   def draw(g: Graphics2D) = {
+    val newTriangles = Buffer[Triangle]()
     triangles
-      .map(tri => {
-        Triangle(
+      .foreach(tri => {
+       val worldSpaceTri= Triangle(
           tri.pos1
             .rotate(rotation)
             .translate(position)
             .translate(-Player.pos)
-            .rotate(Player.camera)
-            .perspective()
-            .center(),
+            .rotate(Player.camera),
+
           tri.pos2
             .rotate(rotation)
             .translate(position)
             .translate(-Player.pos)
-            .rotate(Player.camera)
-            .perspective()
-            .center(),
+            .rotate(Player.camera),
           tri.pos3
             .rotate(rotation)
             .translate(position)
             .translate(-Player.pos)
             .rotate(Player.camera)
-            .perspective()
-            .center()
         )
+        val clippedTriangles=calcClipping(worldSpaceTri)
+        clippedTriangles.foreach(n=>
+          newTriangles+=
+            Triangle(
+            n.pos1
+            .perspective()
+            .center(),
+            n.pos2
+            .perspective()
+            .center(),
+            n.pos3
+            .perspective()
+            .center())
+          )
         // Triangle(
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos1,rotation),position),-Player.pos),Player.camera))),
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos2,rotation),position),-Player.pos),Player.camera))),
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos3,rotation),position),-Player.pos),Player.camera)))
         // )
       })
-      .foreach(n => {
+      newTriangles.foreach(n => {
         val normal = getNormal(n)
         if (getNormal(n).z < 0) {
           n.draw(g)
