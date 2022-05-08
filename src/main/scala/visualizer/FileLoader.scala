@@ -22,7 +22,7 @@ object FileLoader {
       line.zipWithIndex.foreach({case (c,i)=>{
         c match{
           case '_'=> walls+=new Wall(Pos(i*600,0,lineCounter*(-600)),Pos(0, 0, 0))
-          case '|'=> walls+=new Wall(Pos(-300+i*600,0,200+lineCounter*(-600)),Pos(0, Math.PI/2, 0))
+          case '|'=> walls+=new Wall(Pos(i*600,0,200+lineCounter*(-600)),Pos(0, Math.PI/2, 0))
           case 'S'=>playerPos=Pos(i*600,0,lineCounter*(-600))
           case _=>
         }
