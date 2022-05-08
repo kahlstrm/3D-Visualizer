@@ -38,7 +38,6 @@ object VisualizerApp extends SimpleSwingApplication {
     val area = new Panel {
       focusable = true
       override def paintComponent(g: Graphics2D) = {
-        println(Player.pos)
         g.setColor(Color.BLACK)
         g.fillRect(0, 0, width, height)
         g.setColor(Color.WHITE)
@@ -102,7 +101,6 @@ object VisualizerApp extends SimpleSwingApplication {
               (Player.camera.x - (prev.y - point.y).toDouble / 100) % (2 * math.Pi)
             )
           )
-          print(Player.camera)
           robot.mouseMove(width / 2, height / 2);
           previousMouse = None
         } else {
@@ -117,7 +115,7 @@ object VisualizerApp extends SimpleSwingApplication {
         area.repaint()
       }
     }
-    val timer = new javax.swing.Timer(6, listener)
+    val timer = new javax.swing.Timer(8, listener)
     timer.start()
   }
 }
