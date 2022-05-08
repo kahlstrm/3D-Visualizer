@@ -20,14 +20,6 @@ object VisualizerApp extends SimpleSwingApplication {
   val height = 800
   val fov = 90
   var previousMouse: Option[Point] = None
-  // val Wall = new Wall(
-  //   Pos(-300, 0, 600),
-  //   Pos(0, math.Pi / 2, 0)
-  // )
-  // val Wall2 = new Wall(
-  //   Pos(0, 0, 1000),
-  //   Pos(0, 0, 0)
-  // )
   val windowHeight = height + 30
   val renderDistance = 1000.0
   def top = new MainFrame {
@@ -86,14 +78,18 @@ object VisualizerApp extends SimpleSwingApplication {
           case _         =>
         }
       }
-      case MousePressed(_, point, _, _, _) => {
-        println(point)
-      }
       case MouseMoved(_, point, _) => {
         if (previousMouse.isDefined) {
           val prev = previousMouse.get
-          Player.camera.y =
-            (Player.camera.y + (prev.x - point.x).toDouble / 100) % (2 * math.Pi)
+          Player.camera.y ={
+
+            val newVal =(Player.camera.y + (prev.x - point.x).toDouble / 100)% (2 * math.Pi)
+            if(newVal>Math.PI){
+              newVal-Math.PI*2
+            }else if(newVal< -Math.PI){
+              newVal+Math.PI*2
+            }else newVal
+          }
           Player.camera.x = Math.max(
             -Math.PI / 2.0,
             Math.min(

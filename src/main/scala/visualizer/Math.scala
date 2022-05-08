@@ -233,6 +233,10 @@ class Pos(
   override def toString(): String = s"x: ${x} y: ${y} z: ${z}"
 }
 object Camera extends Pos(0, 0, 0) {
+  
+  def forwardVector():Pos={
+???
+  }
   override def toString(): String =
     s"x: ${180 / Math.PI * x} y: ${180 / Math.PI * y} z: ${180 / Math.PI * z}"
 }
@@ -245,6 +249,9 @@ object Pos {
     new Pos(pos.x, pos.y, pos.z)
   }
 }
+
+
+// A test for intersectPoint calculations
 object test extends App {
   import GfxMath._
   val a =Pos(0,2,0)
