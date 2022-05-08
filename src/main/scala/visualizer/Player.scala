@@ -3,6 +3,7 @@ package visualizer
 object Player {
   val pos = new Pos(0, 0, 0)
   val camera = new Pos(0,0,0)
+
   
   def move() {
     if (moveForward) {

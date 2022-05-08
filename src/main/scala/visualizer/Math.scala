@@ -63,6 +63,11 @@ class Pos(
       )
     )
   }
+  def update(that:Pos):Unit={
+    this.x=that.x
+    this.y=that.y
+    this.z=that.z
+  }
   def unary_-(): Pos = {
     Pos(
       -this.x,
