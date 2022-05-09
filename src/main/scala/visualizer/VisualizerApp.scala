@@ -11,20 +11,18 @@ import java.awt.image.BufferedImage
 object VisualizerApp extends SimpleSwingApplication {
   val textureImg = FileLoader.loadTexture("minecraft.jpg")
   val texture = new TexturePaint(textureImg,new Rectangle(new Dimension(100,100)))
+  val sun = Pos(1000,-2000,2000)
   private val robot = new Robot()
   private val cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
   private val emptyCursor = Toolkit
     .getDefaultToolkit()
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
   val (walls, playerPos) = FileLoader.loadFile("test.map")
-  val tablLeg= new Object(FileLoader.loadObject("tableleg.obj"),Pos(0,100,0),Pos(0,0,0),100)
-  val tablLeg1= new Object(FileLoader.loadObject("tableleg.obj"),Pos(0,100,600),Pos(0,0,0),100)
-  val tablLeg2= new Object(FileLoader.loadObject("tableleg.obj"),Pos(600,100,600),Pos(0,0,0),100)
-  val tablLeg3= new Object(FileLoader.loadObject("tableleg.obj"),Pos(600,100,0),Pos(0,0,0),100)
-  val tableTop= new Object(FileLoader.loadObject("tabletop.obj"),Pos(300,-50,300),Pos(0,0,0),450)
-  val worldObjects =walls++Array[Shapes](tablLeg,tablLeg1,tablLeg2,tablLeg3,tableTop)
-  val width = 1920
-  val height = 1080
+  val worldObjects =walls++Array[Shapes](
+  new Object(FileLoader.loadObject("benchtest.obj"),Pos(0,0,100),Pos(0,0,0),100)
+  )
+  val width = 1600
+  val height = 900
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30

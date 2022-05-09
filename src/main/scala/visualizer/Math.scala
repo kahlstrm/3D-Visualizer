@@ -193,6 +193,9 @@ class Pos(
   def dotProduct(that: Pos): Double = {
     this.x * that.x + this.y * that.y + this.z * that.z
   }
+  def cosBetween(that:Pos):Double={
+    this.dotProduct(that)/(this.length*that.length)
+  }
 
   def +(pos: Pos) = translate(pos)
 

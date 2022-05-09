@@ -59,39 +59,36 @@ val tris = Buffer[Array[Int]]()
 val lineReader = new BufferedReader(fileReader)
 var line = ""
 while({line=lineReader.readLine();line!=null}){
-  val first = line.take(2).strip
+  val first = line.take(2).trim()
   first match{
     case "v"=> {
       val rest = line.drop(2).strip
       val vectorCoords=rest.split(" ").map(_.toDouble)
-      val newPos=Pos(vectorCoords(0),vectorCoords(1),vectorCoords(2)).unit
+      val newPos=Pos(vectorCoords(0),vectorCoords(1),vectorCoords(2))
       poses+=newPos
-      println(newPos)
     }
     case "f"=>{
       val indices = line.drop(2)
       .strip
       .split(" ")
       if(indices.length==3){
-        val newTri = indices.map(_.head.asDigit-1)
+        val newTri = indices.map(_.toInt-1)
         tris+=newTri
-        println("Triangle of following poses:")
-      }else if(indices.length==4){
-        val pointsIndices=indices.map(_.head.asDigit-1)
-        tris+=Array[Int](pointsIndices(0),pointsIndices(1),pointsIndices(2))
-        tris+=Array[Int](pointsIndices(0),pointsIndices(2),pointsIndices(3))
-      }else println("unsupported format")
+      }
+      else println("unsupported format")
     }
     case _=>
   }
 }
 fileReader.close()
-
-(poses.toVector,tris.map(n=>new Triangle(poses(n(0)),poses(n(1)),poses(n(2)))).toVector)
+val Triangles=tris.map(n=>new Triangle(poses(n(0)),poses(n(1)),poses(n(2)))).toVector
+println(s"${source} ${poses.length} vertices and ${Triangles.length} Triangles")
+(poses.toVector,Triangles)
 }
 }
 
 object loadTest extends App{
-  val obj=FileLoader.loadObject("cube.obj")
-  obj._2.foreach(println)
+  val obj=FileLoader.loadObject("pallo.obj")
+  // obj._2.foreach(println)
+  // println(obj._2.length)
 }
