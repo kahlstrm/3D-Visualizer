@@ -137,7 +137,7 @@ class Wall(position: Pos, rotation: Pos) extends Shapes {
       val normal = getNormal(n)
       if (normal.z < 0) {
         val cosBetweenZandNormal = (zPlane.dotProduct(normal))/(zPlane.length*normal.length)
-        val color = (230*Math.abs(cosBetweenZandNormal)).toInt+25
+        val color = (150*Math.abs(cosBetweenZandNormal)).toInt+(55/(1+n.pos1.distance(Pos(0,0,0)))).toInt+50
         n.draw(g,new Color(color,color,color))
       }
     })
