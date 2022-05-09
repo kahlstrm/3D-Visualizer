@@ -183,6 +183,13 @@ class Pos(
       this.z * mul
     )
   }
+  def /(div:Double):Pos={
+    Pos(
+      this.x / div,
+      this.y / div,
+      this.z / div
+    )
+  }
   def dotProduct(that: Pos): Double = {
     this.x * that.x + this.y * that.y + this.z * that.z
   }
@@ -210,6 +217,7 @@ class Pos(
       this.z
     )
   }
+  def unit():Pos=this/this.length
   def rotate(rotation: Pos): Pos = {
     Pos(
       this.x * (cos(rotation.z) * cos(rotation.y)) +
@@ -237,10 +245,10 @@ class Pos(
 object Camera extends Pos(0, 0, 0) {
   
   def rightVector():Pos={
-    Pos(cos(y),0,sin(y))
+    Pos(cos(y),0,sin(y)).unit()
   }
   def forwardVector():Pos={
-    rightVector().rotate(Pos(0,-Math.PI/2,0))
+    rightVector().rotate(Pos(0,-Math.PI/2,0)).unit()
   }
   override def toString(): String =
     s"x: ${180 / Math.PI * x} y: ${180 / Math.PI * y} z: ${180 / Math.PI * z}"

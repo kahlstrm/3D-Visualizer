@@ -16,7 +16,13 @@ object VisualizerApp extends SimpleSwingApplication {
   private val emptyCursor = Toolkit
     .getDefaultToolkit()
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
-  val (walls, playerPos) = FileLoader.loadFile("hello.map")
+  val (walls, playerPos) = FileLoader.loadFile("test.map")
+  val tablLeg= new Object(FileLoader.loadObject("tableleg.obj"),Pos(0,100,0),Pos(0,0,0),100)
+  val tablLeg1= new Object(FileLoader.loadObject("tableleg.obj"),Pos(0,100,600),Pos(0,0,0),100)
+  val tablLeg2= new Object(FileLoader.loadObject("tableleg.obj"),Pos(600,100,600),Pos(0,0,0),100)
+  val tablLeg3= new Object(FileLoader.loadObject("tableleg.obj"),Pos(600,100,0),Pos(0,0,0),100)
+  val tableTop= new Object(FileLoader.loadObject("tabletop.obj"),Pos(300,-50,300),Pos(0,0,0),450)
+  val worldObjects =walls++Array[Shapes](tablLeg,tablLeg1,tablLeg2,tablLeg3,tableTop)
   val width = 1920
   val height = 1080
   val fov = 90
@@ -35,7 +41,7 @@ object VisualizerApp extends SimpleSwingApplication {
         g.setColor(Color.WHITE)
         // Wall.draw(g)
         // Wall2.draw(g)
-        walls.sortBy(n=> -(n.worldSpace(0).rotate(Player.camera).z+n.worldSpace(3).rotate(Player.camera).z)/2).foreach(n => n.draw(g))
+        worldObjects.sortBy(n=> -(n.worldSpace(0).rotate(Player.camera).z+n.worldSpace(3).rotate(Player.camera).z)/2).foreach(n => n.draw(g))
         g.setColor(Color.WHITE)
         g.drawString("press ESCAPE to close", 50, 50)
         g.drawString(Player.pos.toString(), 50, 70)
@@ -109,7 +115,7 @@ object VisualizerApp extends SimpleSwingApplication {
       def actionPerformed(e: java.awt.event.ActionEvent) = {
         val oldPlayerPos=Player.move()
         walls.foreach(n => {
-          if(n.isInside(Pos(0,0,0))){
+          if(n.asInstanceOf[Wall].isInside(Pos(0,0,0))){
             println("siel on ihminen sisällä!")
         Player.updatePos(oldPlayerPos)
           }
