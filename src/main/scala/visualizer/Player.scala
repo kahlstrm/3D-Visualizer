@@ -9,18 +9,20 @@ object Player {
   }
   def move():Pos ={
     val oldPos=pos
-    val newPos=pos
+    var newPos=pos
+    val forwardVec= camera.forwardVector()
+    val rightVec=camera.rightVector()
     if (moveForward) {
-      newPos.z+=20
+      newPos=newPos.+(forwardVec*20)
     }
     if (moveBackward) {
-      newPos.z-=20
+      newPos=newPos.+(forwardVec*(-20))
     }
     if (moveLeft) {
-      newPos.x-=20
+      newPos=newPos.+(rightVec*(-20))
     }
     if (moveRight) {
-      newPos.x+=20
+      newPos=newPos.+(rightVec*20)
     }
     if(moveUp){
       newPos.y-=20

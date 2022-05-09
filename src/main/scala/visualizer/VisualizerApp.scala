@@ -85,7 +85,7 @@ object VisualizerApp extends SimpleSwingApplication {
           Player.camera.y = {
 
             val newVal =
-              (Player.camera.y + (prev.x - point.x).toDouble / 100) % (2 * math.Pi)
+              (Player.camera.y + (prev.x - point.x).toDouble / 500) % (2 * math.Pi)
             if (newVal > Math.PI) {
               newVal - Math.PI * 2
             } else if (newVal < -Math.PI) {
@@ -96,7 +96,7 @@ object VisualizerApp extends SimpleSwingApplication {
             -Math.PI / 2.0,
             Math.min(
               Math.PI / 2.0,
-              (Player.camera.x - (prev.y - point.y).toDouble / 100) % (2 * math.Pi)
+              (Player.camera.x - (prev.y - point.y).toDouble / 500) % (2 * math.Pi)
             )
           )
           robot.mouseMove(width / 2, height / 2);

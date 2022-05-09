@@ -234,8 +234,11 @@ class Pos(
 }
 object Camera extends Pos(0, 0, 0) {
   
+  def rightVector():Pos={
+    Pos(cos(y),0,sin(y))
+  }
   def forwardVector():Pos={
-???
+    rightVector().rotate(Pos(0,-Math.PI/2,0))
   }
   override def toString(): String =
     s"x: ${180 / Math.PI * x} y: ${180 / Math.PI * y} z: ${180 / Math.PI * z}"
