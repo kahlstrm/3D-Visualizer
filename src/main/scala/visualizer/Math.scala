@@ -7,6 +7,8 @@ object GfxMath {
   val zNear = (width / 2.0) / tan(fovinRadians / 2.0)
   val zPlane=Pos(0,0,1)
   val zPlaneNormal=Pos(0,0,1)
+
+  //calculate surface Normal https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
   def getNormal(tri: Triangle): Pos = {
     val a = Pos(
       tri.pos2.x - tri.pos1.x,
@@ -23,6 +25,7 @@ object GfxMath {
     val normalZ = a.x * b.y - a.y * b.x
     Pos(normalX, normalY, normalZ)
   }
+  // point intersecting the zPlane and the line between pos1 and pos2
   def intersectPointWithZ(pos1: Pos, pos2: Pos): Pos = {
     val u = pos2 + (-pos1)
     val dot = zPlaneNormal.dotProduct(u)

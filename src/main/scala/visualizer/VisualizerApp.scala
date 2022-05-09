@@ -16,9 +16,9 @@ object VisualizerApp extends SimpleSwingApplication {
   private val emptyCursor = Toolkit
     .getDefaultToolkit()
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
-  val (walls, playerPos) = FileLoader.loadFile("test.map")
-  val width = 1200
-  val height = 800
+  val (walls, playerPos) = FileLoader.loadFile("hello.map")
+  val width = 1920
+  val height = 1080
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
@@ -35,7 +35,7 @@ object VisualizerApp extends SimpleSwingApplication {
         g.setColor(Color.WHITE)
         // Wall.draw(g)
         // Wall2.draw(g)
-        walls.sortBy(n=> -n.worldSpace(0).rotate(Player.camera).z).foreach(n => n.draw(g))
+        walls.sortBy(n=> -(n.worldSpace(0).rotate(Player.camera).z+n.worldSpace(3).rotate(Player.camera).z)/2).foreach(n => n.draw(g))
         g.setColor(Color.WHITE)
         g.drawString("press ESCAPE to close", 50, 50)
         g.drawString(Player.pos.toString(), 50, 70)

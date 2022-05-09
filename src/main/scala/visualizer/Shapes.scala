@@ -86,7 +86,7 @@ class Wall(position: Pos, rotation: Pos) extends Shapes {
     val worldSpace=this.worldSpace
     val bottomCorner=worldSpace(0)
     val topCorner=worldSpace(3)
-    def isBetween(a:Double,b:Double,c:Double)= Math.min(a,b)-1 < c && Math.max(a,b)+1>c
+    def isBetween(a:Double,b:Double,c:Double)= Math.min(a,b)-20 < c && Math.max(a,b)+20>c
     isBetween(bottomCorner.x,topCorner.x,pos.x)&&
     isBetween(bottomCorner.y,topCorner.y,pos.y)&&
     isBetween(bottomCorner.z,topCorner.z,pos.z)
@@ -137,7 +137,8 @@ class Wall(position: Pos, rotation: Pos) extends Shapes {
       val normal = getNormal(n)
       if (normal.z < 0) {
         val cosBetweenZandNormal = (zPlane.dotProduct(normal))/(zPlane.length*normal.length)
-        val color = (150*Math.abs(cosBetweenZandNormal)).toInt+(55/(1+n.pos1.distance(Pos(0,0,0)))).toInt+50
+        val color = (180*Math.abs(cosBetweenZandNormal)).toInt+(55/(1+n.pos1.distance(Pos(0,0,0)))).toInt+20
+        
         n.draw(g,new Color(color,color,color))
       }
     })
