@@ -135,8 +135,10 @@ class Wall(position: Pos, rotation: Pos) extends Shapes {
       })
     newTriangles.foreach(n => {
       val normal = getNormal(n)
-      if (getNormal(n).z < 0) {
-        n.draw(g)
+      if (normal.z < 0) {
+        val cosBetweenZandNormal = (zPlane.dotProduct(normal))/(zPlane.length*normal.length)
+        val color = (230*Math.abs(cosBetweenZandNormal)).toInt+25
+        n.draw(g,new Color(color,color,color))
       }
     })
   }

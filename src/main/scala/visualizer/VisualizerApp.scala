@@ -22,7 +22,6 @@ object VisualizerApp extends SimpleSwingApplication {
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
-  val renderDistance = 1000.0
   def top = new MainFrame {
     title = "3d-visualizer"
     minimumSize = new Dimension(width, windowHeight)
@@ -36,7 +35,7 @@ object VisualizerApp extends SimpleSwingApplication {
         g.setColor(Color.WHITE)
         // Wall.draw(g)
         // Wall2.draw(g)
-        walls.foreach(n => n.draw(g))
+        walls.sortBy(n=> -n.worldSpace(0).rotate(Player.camera).z).foreach(n => n.draw(g))
         g.setColor(Color.WHITE)
         g.drawString("press ESCAPE to close", 50, 50)
         g.drawString(Player.pos.toString(), 50, 70)
@@ -92,13 +91,13 @@ object VisualizerApp extends SimpleSwingApplication {
               newVal + Math.PI * 2
             } else newVal
           }
-          Player.camera.x = Math.max(
-            -Math.PI / 2.0,
-            Math.min(
-              Math.PI / 2.0,
-              (Player.camera.x - (prev.y - point.y).toDouble / 500) % (2 * math.Pi)
-            )
-          )
+          // Player.camera.x = Math.max(
+          //   -Math.PI / 2.0,
+          //   Math.min(
+          //     Math.PI / 2.0,
+          //     (Player.camera.x - (prev.y - point.y).toDouble / 500) % (2 * math.Pi)
+          //   )
+          // )
           robot.mouseMove(width / 2, height / 2);
           previousMouse = None
         } else {
