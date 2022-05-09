@@ -26,10 +26,10 @@ object VisualizerApp extends SimpleSwingApplication {
     title = "3d-visualizer"
     minimumSize = new Dimension(width, windowHeight)
     resizable = false
-
     val area = new Panel {
       focusable = true
       override def paintComponent(g: Graphics2D) = {
+        
         g.setColor(Color.BLACK)
         g.fillRect(0, 0, width, height)
         g.setColor(Color.WHITE)
@@ -49,8 +49,7 @@ object VisualizerApp extends SimpleSwingApplication {
     listenTo(area.mouse.clicks)
     listenTo(area.mouse.moves)
     listenTo(area.keys)
-
-    robot.mouseMove(width / 2, height / 2);
+    
     reactions += {
       case e: MouseDragged => {
         print(e.point)
@@ -79,10 +78,9 @@ object VisualizerApp extends SimpleSwingApplication {
         }
       }
       case MouseMoved(_, point, _) => {
-        if (previousMouse.isDefined) {
+        if (previousMouse.isDefined &&this.area.peer.isFocusOwner()) {
           val prev = previousMouse.get
           Player.camera.y = {
-
             val newVal =
               (Player.camera.y + (prev.x - point.x).toDouble / 500) % (2 * math.Pi)
             if (newVal > Math.PI) {
@@ -98,6 +96,7 @@ object VisualizerApp extends SimpleSwingApplication {
           //     (Player.camera.x - (prev.y - point.y).toDouble / 500) % (2 * math.Pi)
           //   )
           // )
+
           robot.mouseMove(width / 2, height / 2);
           previousMouse = None
         } else {
@@ -116,6 +115,7 @@ object VisualizerApp extends SimpleSwingApplication {
           }
         })
         area.repaint()
+        
       }
     }
     val timer = new javax.swing.Timer(8, listener)
