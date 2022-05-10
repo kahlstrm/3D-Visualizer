@@ -34,14 +34,17 @@ object GfxMath {
     val mul = (u * factor)
     return  mul+pos1
   }
-  def calcClipping(tri: Triangle): Array[Triangle] = {
+  def calcClipping(tri: Triangle): Vector[Triangle] = {
     if (tri.pos1.z < zPlane.z && tri.pos2.z < zPlane.z && tri.pos3.z < zPlane.z) {
-      return Array[Triangle]()
+      return Vector[Triangle]()
+    }
+    if (tri.pos1.z > zPlane.z && tri.pos2.z > zPlane.z && tri.pos3.z > zPlane.z) {
+      return Vector[Triangle](tri)
     }
     if (tri.pos1.z < zPlane.z && tri.pos2.z < zPlane.z) {
       val newpos1 = intersectPointWithZ(tri.pos1, tri.pos3)
       val newpos2 = intersectPointWithZ(tri.pos2, tri.pos3)
-      return Array[Triangle](
+      return Vector[Triangle](
         Triangle(
           newpos1,
           newpos2,
@@ -52,7 +55,7 @@ object GfxMath {
     if (tri.pos1.z < zPlane.z && tri.pos3.z < zPlane.z) {
       val newpos1 = intersectPointWithZ(tri.pos1, tri.pos2)
       val newpos3 = intersectPointWithZ(tri.pos3, tri.pos2)
-      return Array[Triangle](
+      return Vector[Triangle](
         Triangle(
           newpos1,
           tri.pos2,
@@ -63,7 +66,7 @@ object GfxMath {
     if (tri.pos2.z < zPlane.z && tri.pos3.z < zPlane.z) {
       val newpos2 = intersectPointWithZ(tri.pos2, tri.pos1)
       val newpos3 = intersectPointWithZ(tri.pos3, tri.pos1)
-      return Array[Triangle](
+      return Vector[Triangle](
         Triangle(
           tri.pos1,
           newpos2,
@@ -74,7 +77,7 @@ object GfxMath {
     if (tri.pos1.z < zPlane.z) {
       val newpos1 = intersectPointWithZ(tri.pos1,tri.pos3)
       val newpos2 = intersectPointWithZ(tri.pos1,tri.pos2)
-      return Array[Triangle](
+      return Vector[Triangle](
         Triangle(
           newpos1,
           tri.pos2,
@@ -90,7 +93,7 @@ object GfxMath {
     if (tri.pos2.z < zPlane.z) {
       val newpos1 = intersectPointWithZ(tri.pos2,tri.pos1)
       val newpos2 = intersectPointWithZ(tri.pos2,tri.pos3)
-      return Array[Triangle](
+      return Vector[Triangle](
         Triangle(
           tri.pos1,
           newpos1,
@@ -106,7 +109,7 @@ object GfxMath {
     if (tri.pos3.z < zPlane.z) {
       val newpos1 = intersectPointWithZ(tri.pos3,tri.pos1)
       val newpos2 = intersectPointWithZ(tri.pos3,tri.pos2)
-      return Array[Triangle](
+      return Vector[Triangle](
         Triangle(
           tri.pos1,
           tri.pos2,
@@ -119,7 +122,7 @@ object GfxMath {
         )
       )
     }
-    Array[Triangle](tri)
+    Vector[Triangle](tri)
   }
   // val proj = Array.ofDim[Double](4, 4)
   // proj(0)(0) = aspectRatio * fovMultiplier

@@ -43,40 +43,43 @@ trait Shapes {
             .translate(-Player.pos)
             .rotate(Player.camera)
         )
+
         val clippedTriangles = calcClipping(worldSpaceTri)
-        clippedTriangles.foreach(n =>
-          newTriangles +=
-            Triangle(
-              n.pos1
-                .perspective()
-                .center(),
-              n.pos2
-                .perspective()
-                .center(),
-              n.pos3
-                .perspective()
-                .center()
-            )
-        )
+        clippedTriangles.foreach(n => {
+          val newTri = Triangle(
+            n.pos1
+              .perspective()
+              .center(),
+            n.pos2
+              .perspective()
+              .center(),
+            n.pos3
+              .perspective()
+              .center()
+          )
+          if(getNormal(newTri).z<0) newTriangles+=newTri
+        })
         // Triangle(
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos1,rotation),position),-Player.pos),Player.camera))),
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos2,rotation),position),-Player.pos),Player.camera))),
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos3,rotation),position),-Player.pos),Player.camera)))
         // )
       })
+
     newTriangles
       .sortBy(tri => -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3)
       .foreach(tri => {
         val normal = getNormal(tri).unit()
-        if (normal.z < 0) {
-          val avgPos = (tri.pos1 + tri.pos2 + tri.pos3) / 3
-          val playerPos = Pos(VisualizerApp.width / 2, VisualizerApp.height / 2, 0)
-          val r = (avgPos).distance(playerPos)
-          val color = (175 / (Math.pow(r,2)/50000+1)).toInt + 80
-          tri.draw(g, new Color(color, color, color))
-        }
+        val avgPos = (tri.pos1 + tri.pos2 + tri.pos3) / 3
+        val playerPos =
+          Pos(VisualizerApp.width / 2, VisualizerApp.height / 2, 0)
+        val r = (avgPos).distance(playerPos)
+        val color = (170 / (Math.pow(r, 2) / 500000 + 1)).toInt + 85
+        tri.draw(g, new Color(color, color, color))
       })
+
   }
+
 }
 
 class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) {

@@ -50,8 +50,7 @@ def loadObject(source:String):(Vector[Pos],Vector[Triangle])={
       new FileReader(source)
     }catch{
       case e: FileNotFoundException=>{
-        println("Object File not found")
-        return (Vector[Pos](),Vector[Triangle]())
+        throw new Exception("Object File not found, check path or don't load")
       }
     }
 val poses = Buffer[Pos]()

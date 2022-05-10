@@ -11,7 +11,6 @@ import java.awt.image.BufferedImage
 object VisualizerApp extends SimpleSwingApplication {
   val textureImg = FileLoader.loadTexture("minecraft.jpg")
   val texture = new TexturePaint(textureImg,new Rectangle(new Dimension(100,100)))
-  val sun = Pos(1000,-2000,2000)
   private val robot = new Robot()
   private val cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
   private val emptyCursor = Toolkit
@@ -19,7 +18,7 @@ object VisualizerApp extends SimpleSwingApplication {
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val worldObjects =walls++Array[Shapes](
-  new Object(FileLoader.loadObject("benchtest.obj"),Pos(0,0,100),Pos(0,0,0),100)
+  new Object(FileLoader.loadObject("dragon.obj"),Pos(0,0,300),Pos(0,0,0),100)
   )
   val width = 1600
   val height = 900
