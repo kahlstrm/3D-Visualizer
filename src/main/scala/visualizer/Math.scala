@@ -13,12 +13,12 @@ object GfxMath {
     val a = Pos(
       tri.pos2.x - tri.pos1.x,
       tri.pos2.y - tri.pos1.y,
-      tri.pos2.y - tri.pos1.z
+      tri.pos2.z - tri.pos1.z
     )
     val b = Pos(
       tri.pos3.x - tri.pos1.x,
       tri.pos3.y - tri.pos1.y,
-      tri.pos3.y - tri.pos1.z
+      tri.pos3.z - tri.pos1.z
     )
     val normalX = a.y * b.z - a.z * b.y
     val normalY = a.z * b.x - a.x * b.z
