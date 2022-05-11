@@ -16,9 +16,9 @@ object VisualizerApp extends SimpleSwingApplication {
   private val emptyCursor = Toolkit
     .getDefaultToolkit()
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
-  val (walls, playerPos) = FileLoader.loadFile("test.map")
+  val (walls, playerPos) = FileLoader.loadFile("hello.map")
   val worldObjects =walls++Array[Shapes](
-  new Object(FileLoader.loadObject("dragon.obj"),Pos(0,0,300),Pos(0,0,0),100)
+  //new Object(FileLoader.loadObject("dragon.obj"),Pos(0,0,300),Pos(0,0,0),100)
   )
   val width = 1600
   val height = 900
@@ -38,7 +38,9 @@ object VisualizerApp extends SimpleSwingApplication {
         g.setColor(Color.WHITE)
         // Wall.draw(g)
         // Wall2.draw(g)
-        worldObjects.sortBy(n=> -(n.worldSpace(0).rotate(Player.camera).z+n.worldSpace(3).rotate(Player.camera).z)/2).foreach(n => n.draw(g))
+        val worldSpaceTriangles =worldObjects.flatMap(_.worldSpaceTris)
+        
+        renderer.draw(g,worldSpaceTriangles)
         g.setColor(Color.WHITE)
         g.drawString("press ESCAPE to close", 50, 50)
         g.drawString(Player.pos.toString(), 50, 70)

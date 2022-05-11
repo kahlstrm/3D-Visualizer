@@ -13,12 +13,34 @@ trait Shapes {
   val position: Pos
   val rotation: Pos
   val poses: Vector[Pos]
-  def worldSpace = {
+  def worldSpacePos = {
     poses.map(pos =>
       pos
         .rotate(rotation)
         .translate(position)
         .translate(-Player.pos)
+    )
+  }
+  def worldSpaceTris = {
+    triangles.map(tri=>{
+    Triangle(
+      tri.pos1
+        .rotate(rotation)
+        .translate(position)
+        .translate(-Player.pos)
+        .rotate(Player.camera),
+      tri.pos2
+        .rotate(rotation)
+        .translate(position)
+        .translate(-Player.pos)
+        .rotate(Player.camera),
+      tri.pos3
+        .rotate(rotation)
+        .translate(position)
+        .translate(-Player.pos)
+        .rotate(Player.camera)
+    )
+    }
     )
   }
   val triangles: Vector[Triangle]
@@ -158,7 +180,7 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
   )
 
   def isInside(pos: Pos) = {
-    val worldSpace = this.worldSpace
+    val worldSpace = this.worldSpacePos
     val bottomCorner = worldSpace(0)
     val topCorner = worldSpace(3)
     def isBetween(a: Double, b: Double, c: Double) =
@@ -168,4 +190,54 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
     isBetween(bottomCorner.z, topCorner.z, pos.z)
   }
 
+}
+
+object renderer{
+  def draw(g: Graphics2D,triangles:Array[Triangle]) = {
+    val newTriangles = Buffer[Triangle]()
+    triangles
+      .foreach(tri => {
+
+        val clippedTriangles = calcClipping(tri)
+        clippedTriangles.foreach(n => {
+          val newTri = Triangle(
+            n.pos1
+              .perspective()
+              .center(),
+            n.pos2
+              .perspective()
+              .center(),
+            n.pos3
+              .perspective()
+              .center()
+          )
+          if(getNormal(newTri).z<0) newTriangles+=newTri
+        })
+        // Triangle(
+        //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos1,rotation),position),-Player.pos),Player.camera))),
+        //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos2,rotation),position),-Player.pos),Player.camera))),
+        //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos3,rotation),position),-Player.pos),Player.camera)))
+        // )
+      })
+
+    newTriangles
+      .sortBy(tri => 
+        {
+        -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3
+        }
+        )
+      .foreach(tri => {
+        val normal = getNormal(tri).unit()
+        val avgPos = (tri.pos1 + tri.pos2 + tri.pos3) / 3
+        val playerPos =
+          Pos(VisualizerApp.width / 2, VisualizerApp.height / 2, 0)
+        val r = (avgPos).distance(playerPos)//"flashlight"
+        val cosBetweenTriandZ =normal.dotProduct(Pos(0,0,-1))
+        val rSquaredAndConstant=(Math.pow(r, 2) / 10000 + 1) 
+        val distanceFromZPlane=(avgPos).z/2000 + 1 //"ambient light"
+        val color = (((225/distanceFromZPlane).toInt+30)*Math.sqrt(cosBetweenTriandZ)).toInt
+        tri.draw(g, new Color(color, color, color))
+      })
+
+  }
 }
