@@ -73,8 +73,11 @@ trait Shapes {
         val avgPos = (tri.pos1 + tri.pos2 + tri.pos3) / 3
         val playerPos =
           Pos(VisualizerApp.width / 2, VisualizerApp.height / 2, 0)
-        val r = (avgPos).distance(playerPos)
-        val color = (170 / (Math.pow(r, 2) / 500000 + 1)).toInt + 85
+        val r = (avgPos).distance(playerPos)//"flashlight"
+        val cosBetweenTriandZ =normal.dotProduct(Pos(0,0,-1))
+        val rSquaredAndConstant=(Math.pow(r, 2) / 10000 + 1) 
+        val distanceFromZPlane=(avgPos).z/2000 + 1 //"ambient light"
+        val color = (((225/distanceFromZPlane).toInt+30)*Math.sqrt(cosBetweenTriandZ)).toInt
         tri.draw(g, new Color(color, color, color))
       })
 
