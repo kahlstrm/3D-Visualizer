@@ -16,10 +16,11 @@ object VisualizerApp extends SimpleSwingApplication {
   private val emptyCursor = Toolkit
     .getDefaultToolkit()
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
-  val (walls, playerPos) = FileLoader.loadFile("box.map")
+  val (walls, playerPos) = FileLoader.loadFile("hello.map")
   val worldObjects =walls++Array[Shapes](
-  // new Object(FileLoader.loadObject("dragon.obj"),Pos(0,0,300),Pos(0,0,0),300)
+  new Object(FileLoader.loadObject("dragon_low_poly.obj"),Pos(0,0,300),Pos(0,0,0),300)
   )
+  var frametime=0.0
   val width = 1600
   val height = 900
   val fov = 90
@@ -45,6 +46,7 @@ object VisualizerApp extends SimpleSwingApplication {
         g.drawString("press ESCAPE to close", 50, 50)
         g.drawString(Player.pos.toString(), 50, 70)
         g.drawString(Player.camera.toString(), 50, 90)
+        g.drawString(s"frametime: ${frametime} s",50,110)
         g.drawLine(width / 2, height / 2 + 10, width / 2, height / 2 - 10)
         g.drawLine(width / 2 + 10, height / 2, width / 2 - 10, height / 2)
       }
@@ -98,7 +100,7 @@ object VisualizerApp extends SimpleSwingApplication {
             -Math.PI / 2.0 max
             (Player.camera.x + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
               Math.PI / 2.0
-            
+          
           
 
           robot.mouseMove(width / 2, height / 2);
@@ -111,6 +113,7 @@ object VisualizerApp extends SimpleSwingApplication {
 
     val listener = new ActionListener() {
       def actionPerformed(e: java.awt.event.ActionEvent) = {
+
         val oldPlayerPos=Player.move()
         walls.foreach(n => {
           if(n.asInstanceOf[Wall].isInside(Pos(0,0,0))){
@@ -118,9 +121,11 @@ object VisualizerApp extends SimpleSwingApplication {
         Player.updatePos(oldPlayerPos)
           }
         })
-        area.repaint()
         
+        area.repaint()
+
       }
+      
     }
     val timer = new javax.swing.Timer(8, listener)
     timer.start()

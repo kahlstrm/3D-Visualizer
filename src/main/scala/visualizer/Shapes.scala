@@ -1,5 +1,4 @@
 package visualizer
-
 import java.awt.Graphics2D
 import java.awt.Color._
 import java.awt.TexturePaint
@@ -7,6 +6,7 @@ import java.awt.image.BufferedImage
 import GfxMath._
 import java.awt.Color
 import scala.collection.mutable.Buffer
+import scala.collection.parallel.CollectionConverters._
 import java.awt.Rectangle
 import java.awt.Dimension
 trait Shapes {
@@ -14,7 +14,7 @@ trait Shapes {
   val rotation: Pos
   val poses: Vector[Pos]
   def worldSpacePos = {
-    poses.map(pos =>
+    poses.par.map(pos =>
       pos
         .rotate(rotation)
         .translate(position)
@@ -22,23 +22,23 @@ trait Shapes {
     )
   }
   def worldSpaceTris = {
-    triangles.map(tri=>{
+    triangles.par.map(tri=>{
     Triangle(
       tri.pos1
         .rotate(rotation)
         .translate(position)
         .translate(-Player.pos)
-        .rotate(Player.camera.cameraVector()),
+        .cameraRotate(),
       tri.pos2
         .rotate(rotation)
         .translate(position)
         .translate(-Player.pos)
-        .rotate(Player.camera),
+        .cameraRotate(),
       tri.pos3
         .rotate(rotation)
         .translate(position)
         .translate(-Player.pos)
-        .rotate(Player.camera.cameraVector())
+        .cameraRotate()
     )
     }
     )
@@ -194,12 +194,12 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
 
 object renderer{
   def draw(g: Graphics2D,triangles:Array[Triangle]) = {
-    val newTriangles = Buffer[Triangle]()
-    triangles
-      .foreach(tri => {
+    val start = System.currentTimeMillis()
+    val newTriangles = triangles.par
+      .flatMap(tri => {
 
         val clippedTriangles = calcClipping(tri)
-        clippedTriangles.foreach(n => {
+        clippedTriangles.map(n => {
           val newTri = Triangle(
             n.pos1
               .perspective()
@@ -211,8 +211,8 @@ object renderer{
               .perspective()
               .center()
           )
-          if(getNormal(newTri).z<0) newTriangles+=newTri
-        })
+          newTri
+        }).filter(getNormal(_).z<0)
         // Triangle(
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos1,rotation),position),-Player.pos),Player.camera))),
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos2,rotation),position),-Player.pos),Player.camera))),
@@ -220,7 +220,7 @@ object renderer{
         // )
       })
 
-    newTriangles
+    newTriangles.seq
       .sortBy(tri => 
         {
         -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3
@@ -238,6 +238,7 @@ object renderer{
         val color = (((225/distanceFromZPlane).toInt+30)*Math.sqrt(cosBetweenTriandZ)).toInt
         tri.draw(g, new Color(color, color, color))
       })
-
+      val end = System.currentTimeMillis()
+      VisualizerApp.frametime=(end-start)/1000.0
   }
 }

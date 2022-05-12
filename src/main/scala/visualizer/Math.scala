@@ -224,6 +224,19 @@ class Pos(
       this.z
     )
   }
+  // def cameraRotate():Pos = {
+  //   val forwardVec=Camera.forwardVector()
+  //   val rightVec=Camera.rightVector()
+  //   val upVec=Camera.upVector()
+  //   Pos(
+  //     this.x*rightVec.x+this.y*upVec.x+this.z*forwardVec.x,
+  //     this.x*rightVec.y+this.y*upVec.y+this.z*forwardVec.y,
+  //     this.x*rightVec.z+this.y*upVec.z+this.z*forwardVec.z
+  //   )
+  // }
+  def cameraRotate():Pos ={
+    this.rotate(Player.camera.cameraVector())
+  }
   def dropX():Pos ={
     Pos(
       0,
