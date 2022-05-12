@@ -28,7 +28,7 @@ trait Shapes {
         .rotate(rotation)
         .translate(position)
         .translate(-Player.pos)
-        .rotate(Player.camera),
+        .rotate(Player.camera.cameraVector()),
       tri.pos2
         .rotate(rotation)
         .translate(position)
@@ -38,7 +38,7 @@ trait Shapes {
         .rotate(rotation)
         .translate(position)
         .translate(-Player.pos)
-        .rotate(Player.camera)
+        .rotate(Player.camera.cameraVector())
     )
     }
     )
@@ -53,17 +53,17 @@ trait Shapes {
             .rotate(rotation)
             .translate(position)
             .translate(-Player.pos)
-            .rotate(Player.camera),
+            .rotate(-Player.camera.cameraVector()),
           tri.pos2
             .rotate(rotation)
             .translate(position)
             .translate(-Player.pos)
-            .rotate(Player.camera),
+            .rotate(-Player.camera.cameraVector()),
           tri.pos3
             .rotate(rotation)
             .translate(position)
             .translate(-Player.pos)
-            .rotate(Player.camera)
+            .rotate(-Player.camera.cameraVector())
         )
 
         val clippedTriangles = calcClipping(worldSpaceTri)

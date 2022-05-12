@@ -16,9 +16,9 @@ object VisualizerApp extends SimpleSwingApplication {
   private val emptyCursor = Toolkit
     .getDefaultToolkit()
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
-  val (walls, playerPos) = FileLoader.loadFile("hello.map")
+  val (walls, playerPos) = FileLoader.loadFile("box.map")
   val worldObjects =walls++Array[Shapes](
-  //new Object(FileLoader.loadObject("dragon.obj"),Pos(0,0,300),Pos(0,0,0),100)
+  // new Object(FileLoader.loadObject("dragon.obj"),Pos(0,0,300),Pos(0,0,0),300)
   )
   val width = 1600
   val height = 900
@@ -94,13 +94,12 @@ object VisualizerApp extends SimpleSwingApplication {
               newVal + Math.PI * 2
             } else newVal
           }
-          // Player.camera.x = Math.max(
-          //   -Math.PI / 2.0,
-          //   Math.min(
-          //     Math.PI / 2.0,
-          //     (Player.camera.x - (prev.y - point.y).toDouble / 500) % (2 * math.Pi)
-          //   )
-          // )
+          Player.camera.x = 
+            -Math.PI / 2.0 max
+            (Player.camera.x + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
+              Math.PI / 2.0
+            
+          
 
           robot.mouseMove(width / 2, height / 2);
           previousMouse = None

@@ -10,25 +10,26 @@ object Player {
   def move():Pos ={
     val oldPos=pos
     var newPos=pos
-    val forwardVec= camera.forwardVector()
-    val rightVec=camera.rightVector()
+    val forwardMove= camera.forwardVector().dropY().unit()
+    val rightMove=camera.rightVector().dropY().unit()
+    val upMove=Pos(0,1,0)
     if (moveForward) {
-      newPos=newPos.+(forwardVec*20)
+      newPos=newPos.+(forwardMove*20)
     }
     if (moveBackward) {
-      newPos=newPos.+(forwardVec*(-20))
+      newPos=newPos.+(forwardMove*(-20))
     }
     if (moveLeft) {
-      newPos=newPos.+(rightVec*(-20))
+      newPos=newPos.+(rightMove*(-20))
     }
     if (moveRight) {
-      newPos=newPos.+(rightVec*20)
+      newPos=newPos.+(rightMove*20)
     }
     if(moveUp){
-      newPos.y-=20
+      newPos=newPos.+(upMove*(-20))
     }
     if(moveDown){
-      newPos.y+=20
+      newPos=newPos.+(upMove*20)
     }
     hiddenPos=newPos
     oldPos

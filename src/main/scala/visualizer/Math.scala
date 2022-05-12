@@ -1,5 +1,6 @@
 package visualizer
 import scala.math._
+
 object GfxMath {
   val width = VisualizerApp.width
   val height = VisualizerApp.height
@@ -223,6 +224,27 @@ class Pos(
       this.z
     )
   }
+  def dropX():Pos ={
+    Pos(
+      0,
+      this.x,
+      this.z
+    )
+  }
+  def dropY():Pos ={
+    Pos(
+      this.x,
+      0,
+      this.z
+    )
+  }
+  def dropZ():Pos ={
+    Pos(
+      this.x,
+      this.y,
+      0
+    )
+  }
   def unit():Pos=this/this.length
   def rotate(rotation: Pos): Pos = {
     Pos(
@@ -249,15 +271,35 @@ class Pos(
   override def toString(): String = s"x: ${x} y: ${y} z: ${z}"
 }
 object Camera extends Pos(0, 0, 0) {
-  
+  def cameraVector():Pos={
+    Pos(
+      this.x,
+      this.y,
+      0
+    )
+  }
   def rightVector():Pos={
     Pos(cos(y),0,sin(y)).unit()
   }
   def forwardVector():Pos={
-    rightVector().rotate(Pos(0,-Math.PI/2,0)).unit()
+    Pos(
+      -cos(x)*sin(y),
+      sin(x),
+      cos(x)*cos(y)
+    ).unit()
   }
-  override def toString(): String =
-    s"x: ${180 / Math.PI * x} y: ${180 / Math.PI * y} z: ${180 / Math.PI * z}"
+  def upVector():Pos = {
+    Pos(
+    sin(x)*sin(y),
+    cos(x),
+    -sin(x)*cos(y)
+    )
+  }
+  override def toString(): String ={
+    val cam = this.cameraVector()
+  s"x: ${180 / Math.PI * cam.x} y: ${180 / Math.PI * cam.y} z: ${180 / Math.PI * cam.z}"
+  }
+    
 }
 
 object Pos {
