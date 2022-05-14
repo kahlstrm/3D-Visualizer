@@ -141,10 +141,7 @@ object VisualizerApp extends SimpleSwingApplication {
             Player.updatePos(oldPlayerPos)
           }
         })
-        val start = System.currentTimeMillis()
         createFrames()
-        val end = System.currentTimeMillis()
-        VisualizerApp.frametimeMulti = (end - start) / 1000.0
         area.repaint()
       }
 
@@ -157,6 +154,7 @@ object VisualizerApp extends SimpleSwingApplication {
     def createFrames()(implicit
         ec: ExecutionContext
     ): /*Future[Vector[Triangle]]*/ Unit = {
+        val start = System.currentTimeMillis()
         val repainter = Promise[Vector[Triangle]]
         val worldSpaceTriangles = Future(worldObjects.flatMap(_.worldSpaceTris))
         worldSpaceTriangles.onComplete {
@@ -169,7 +167,11 @@ object VisualizerApp extends SimpleSwingApplication {
         val repaintF = repainter.future
         val p = Promise[Vector[Triangle]]
         repaintF.onComplete({
-          case Success(frame) => drawFrame=frame
+          case Success(frame) => {
+          drawFrame=frame
+        val end = System.currentTimeMillis()
+        VisualizerApp.frametimeMulti = (end - start) / 1000.0
+          }
           case Failure(exception) => throw exception
         })
       
