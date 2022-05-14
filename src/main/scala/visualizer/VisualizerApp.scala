@@ -61,8 +61,8 @@ object VisualizerApp extends SimpleSwingApplication {
         g.setColor(Color.WHITE)
         // Wall.draw(g)
         // Wall2.draw(g)
-        
-        Await.ready(drawFrames(createFrames(),g,wireFrame),Duration.Inf)
+
+        Await.ready(drawFrames(createFrames(), g, wireFrame), Duration.Inf)
         g.setColor(Color.GRAY)
         g.fillRect(40, 30, 300, 110)
         g.setColor(Color.WHITE)
@@ -84,7 +84,7 @@ object VisualizerApp extends SimpleSwingApplication {
     listenTo(area.mouse.clicks)
     listenTo(area.mouse.moves)
     listenTo(area.keys)
-
+    
     reactions += {
       case KeyPressed(_, key, _, _) => {
         key match {
@@ -125,7 +125,8 @@ object VisualizerApp extends SimpleSwingApplication {
           Player.camera.y = -Math.PI / 2.0 max
             (Player.camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
             Math.PI / 2.0
-          robot.mouseMove(width / 2, height / 2);
+          val centerOfWindow = area.peer.getLocationOnScreen()
+          robot.mouseMove(centerOfWindow.x+width / 2, centerOfWindow.y+height / 2);
           previousMouse = None
         } else {
           previousMouse = Some(point)
@@ -137,16 +138,18 @@ object VisualizerApp extends SimpleSwingApplication {
       def actionPerformed(e: java.awt.event.ActionEvent) = {
 
         val oldPlayerPos = Player.move()
-        val isInsideWall= !walls.par.forall(!_.asInstanceOf[Wall].isInside(Pos(0, 0, 0)))
-        if(isInsideWall){
-          println("siellä on ihminen sisällä!")
-          Player.updatePos(oldPlayerPos)
+        Future {
+          val isInsideWall =
+            !walls.forall(!_.asInstanceOf[Wall].isInside(Pos(0, 0, 0)))
+          if (isInsideWall) {
+            println("siellä on ihminen sisällä!")
+            Player.updatePos(oldPlayerPos)
+          }
         }
         area.repaint()
       }
 
     }
-
 
     val timer = new javax.swing.Timer(8, listener)
     timer.start()
