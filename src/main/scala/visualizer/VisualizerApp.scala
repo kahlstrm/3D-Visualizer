@@ -19,7 +19,7 @@ object VisualizerApp extends SimpleSwingApplication {
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
   val (walls, playerPos) = FileLoader.loadFile("hello.map")
   val worldObjects =walls++Array[Shapes](
-  //new Object(FileLoader.loadObject("dragon_low_poly.obj"),Pos(0,0,600),Pos(0,0,0),100)
+  //new Object(FileLoader.loadObject("dragon_low_poly.obj"),Pos(0,0,0),Pos(0,0,0),100)
   )
   var frametime=0.0
   val width = 1280
@@ -42,6 +42,7 @@ object VisualizerApp extends SimpleSwingApplication {
         // Wall2.draw(g)
         val worldSpaceTriangles =worldObjects.flatMap(_.worldSpaceTris)
         renderer.draw(g,worldSpaceTriangles)
+        val (xAxis,yAxis,zAxis)=Player.pos.xyzAxes(Camera.y,Camera.x)
         g.setColor(Color.GRAY)
         g.fillRect(40,30,300,110)
         g.setColor(Color.WHITE)
@@ -50,6 +51,9 @@ object VisualizerApp extends SimpleSwingApplication {
         g.drawString(Player.camera.toString(), 50, 90)
         g.drawString(s"frametime: ${frametime} s",50,110)
         g.drawString("press R to toggle wireframe",50,130)
+        g.drawString(s"${xAxis.toString()}",50,150)
+        g.drawString(s"${yAxis.toString()}",50,170)
+        g.drawString(s"${zAxis.toString()}",50,190)
         g.drawLine(width / 2, height / 2 + 10, width / 2, height / 2 - 10)
         g.drawLine(width / 2 + 10, height / 2, width / 2 - 10, height / 2)
       }
@@ -97,10 +101,10 @@ object VisualizerApp extends SimpleSwingApplication {
               newVal + Math.PI * 2
             } else newVal
           }
-          // Player.camera.y = 
-          //   -Math.PI / 2.0 max
-          //   (Player.camera.y - (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
-          //     Math.PI / 2.0
+          Player.camera.y = 
+            -Math.PI / 2.0+0.001 max
+            (Player.camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
+              Math.PI / 2.0-0.001
           
           
 

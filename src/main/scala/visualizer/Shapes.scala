@@ -28,17 +28,25 @@ trait Shapes {
           .rotate(rotation)
           .translate(position)
           .translate(-Player.pos)
-          .cameraRotate(Camera.forwardVector,Pos(0,1,0)),
+          .fpsRotate(0,Camera.x)
+          .fpsRotate(Camera.y,0)
+          // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
+          ,
         tri.pos2
           .rotate(rotation)
           .translate(position)
           .translate(-Player.pos)
-          .cameraRotate(Camera.forwardVector,Pos(0,1,0)),
+          .fpsRotate(0,Camera.x)
+          .fpsRotate(Camera.y,0) 
+          // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
+          ,
         tri.pos3
           .rotate(rotation)
           .translate(position)
           .translate(-Player.pos)
-          .cameraRotate(Camera.forwardVector,Pos(0,1,0))
+          .fpsRotate(0,Camera.x)
+          .fpsRotate(Camera.y,0)
+          // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
       )
     })
   }

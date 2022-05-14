@@ -11,27 +11,30 @@ object Player {
     val movementSpeed=20
     val oldPos=pos
     var newPos=pos
-    val forwardMove=Camera.test
-    val rightMove=camera.rightVector().dropY.unit()
-    val upMove=camera.upVector().dropX().dropZ().unit()
+    val forwardMove=Camera.forwardVector.unit()
+    val rightMove=Camera.rightVector
+    val upMove=Pos(0,1,0)
+    var moveVecXZ= Pos(0,0,0)
+    var moveVecY= Pos(0,0,0)
     if (moveForward) {
-      newPos=newPos.+(forwardMove*movementSpeed)
+      moveVecXZ+=(forwardMove)
     }
     if (moveBackward) {
-      newPos=newPos.+(forwardMove*(-movementSpeed))
+      moveVecXZ+=(-forwardMove)
     }
     if (moveLeft) {
-      newPos=newPos.+(rightMove*(-movementSpeed))
+      moveVecXZ+=(-rightMove)
     }
     if (moveRight) {
-      newPos=newPos.+(rightMove*movementSpeed)
+      moveVecXZ+=(rightMove)
     }
     if(moveUp){
-      newPos=newPos.+(upMove* (-movementSpeed))
+      moveVecY+=(-upMove)
     }
     if(moveDown){
-      newPos=newPos.+(upMove* movementSpeed)
+      moveVecY+=(upMove)
     }
+    newPos+=moveVecXZ.unit()*movementSpeed+moveVecY*movementSpeed
     hiddenPos=newPos
     oldPos
   }
