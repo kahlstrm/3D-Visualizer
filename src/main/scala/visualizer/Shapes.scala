@@ -9,6 +9,7 @@ import scala.collection.mutable.Buffer
 import scala.collection.parallel.CollectionConverters._
 import java.awt.Rectangle
 import java.awt.Dimension
+import scala.collection.parallel.immutable.ParVector
 trait Shapes {
   val position: Pos
   val rotation: Pos
@@ -28,25 +29,25 @@ trait Shapes {
           .rotate(rotation)
           .translate(position)
           .translate(-Player.pos)
-          .fpsRotate(0,Camera.x)
-          .fpsRotate(Camera.y,0)
-          // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
-          ,
+          .fpsRotate(0, Camera.x)
+          .fpsRotate(Camera.y, 0)
+        // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
+        ,
         tri.pos2
           .rotate(rotation)
           .translate(position)
           .translate(-Player.pos)
-          .fpsRotate(0,Camera.x)
-          .fpsRotate(Camera.y,0) 
-          // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
-          ,
+          .fpsRotate(0, Camera.x)
+          .fpsRotate(Camera.y, 0)
+        // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
+        ,
         tri.pos3
           .rotate(rotation)
           .translate(position)
           .translate(-Player.pos)
-          .fpsRotate(0,Camera.x)
-          .fpsRotate(Camera.y,0)
-          // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
+          .fpsRotate(0, Camera.x)
+          .fpsRotate(Camera.y, 0)
+        // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
       )
     })
   }
@@ -200,8 +201,33 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
 }
 
 object renderer {
-  def draw(g: Graphics2D, triangles: Array[Triangle]) = {
-    val start = System.currentTimeMillis()
+  def draw(g: Graphics2D, triangles: Vector[Triangle]) = {
+
+    triangles
+      .sortBy(tri => {
+        -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3
+      })
+      .foreach(tri => {
+        if (VisualizerApp.wireFrame) {
+          tri.draw(g)
+        } else {
+          val normal = getNormal(tri).unit()
+          val avgPos = (tri.pos1 + tri.pos2 + tri.pos3) / 3
+          val playerPos =
+            Pos(VisualizerApp.width / 2, VisualizerApp.height / 2, 0)
+          val r = (avgPos).distance(playerPos) // "flashlight"
+          val cosBetweenTriandZ = normal.dotProduct(Pos(0, 0, -1))
+          val rSquaredAndConstant = (Math.pow(r, 2) / 10000 + 1)
+          val distanceFromZPlane = (avgPos).z / 2000 + 1 // "ambient light"
+          val color = (((225 / distanceFromZPlane).toInt + 30) * Math
+            .sqrt(cosBetweenTriandZ)).toInt
+
+          tri.draw(g, new Color(color, color, color))
+        }
+      })
+  }
+  def generateViewTriangles(triangles: Vector[Triangle]) = {
+
     val newTriangles = triangles.par
       .flatMap(tri => {
 
@@ -227,31 +253,8 @@ object renderer {
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos2,rotation),position),-Player.pos),Player.camera))),
         //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos3,rotation),position),-Player.pos),Player.camera)))
         // )
-      })
-
-    newTriangles.seq
-      .sortBy(tri => {
-        -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3
-      })
-      .foreach(tri => {
-        if (VisualizerApp.wireFrame) {
-        tri.draw(g)} else {
-          val normal = getNormal(tri).unit()
-          val avgPos = (tri.pos1 + tri.pos2 + tri.pos3) / 3
-          val playerPos =
-            Pos(VisualizerApp.width / 2, VisualizerApp.height / 2, 0)
-          val r = (avgPos).distance(playerPos) // "flashlight"
-          val cosBetweenTriandZ = normal.dotProduct(Pos(0, 0, -1))
-          val rSquaredAndConstant = (Math.pow(r, 2) / 10000 + 1)
-          val distanceFromZPlane = (avgPos).z / 2000 + 1 // "ambient light"
-          val color = (((225 / distanceFromZPlane).toInt + 30) * Math
-            .sqrt(cosBetweenTriandZ)).toInt
-
-          tri.draw(g, new Color(color, color, color))
-        }
 
       })
-    val end = System.currentTimeMillis()
-    VisualizerApp.frametime = (end - start) / 1000.0
+    newTriangles.toVector
   }
 }

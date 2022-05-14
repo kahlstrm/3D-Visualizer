@@ -4,13 +4,13 @@ import scala.collection.mutable.Buffer
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 object FileLoader {
-  def loadFile(source: String): (Array[Shapes],Pos) = {
+  def loadFile(source: String): (Vector[Shapes],Pos) = {
     val fileReader = try {
       new FileReader(source)
     }catch{
       case e: FileNotFoundException=>{
         println("map File not found")
-        return (Array[Shapes](),Pos(0,0,0))
+        return (Vector[Shapes](),Pos(0,0,0))
       }
     }
     var playerPos=Pos(0,0,0)
@@ -32,7 +32,7 @@ object FileLoader {
       lineCounter+=1
     }
     fileReader.close()
-    return (walls.toArray,playerPos)
+    return (walls.toVector,playerPos)
   }
   def loadTexture(source:String):BufferedImage={
     val img = try {
@@ -54,7 +54,7 @@ def loadObject(source:String):(Vector[Pos],Vector[Triangle])={
       }
     }
 val poses = Buffer[Pos]()
-val tris = Buffer[Array[Int]]()
+val tris = Buffer[Vector[Int]]()
 val lineReader = new BufferedReader(fileReader)
 var line = ""
 while({line=lineReader.readLine();line!=null}){
@@ -71,7 +71,7 @@ while({line=lineReader.readLine();line!=null}){
       .strip
       .split(" ")
       if(indices.length==3){
-        val newTri = indices.map(_.toInt-1)
+        val newTri = indices.map(_.toInt-1).toVector
         tris+=newTri
       }
       else println("unsupported format")

@@ -233,15 +233,15 @@ class Pos(
   //fpsRotation matrix, took way too long to got this working
   // rotates the view by a specified angle, this is applied twice
   // first for the x-axis, then for the y-axis
+  // https://www.3dgep.com/understanding-the-view-matrix/
   def xyzAxes(pitch:Double,y:Double)={
     val yaw=y+Math.PI//get yaw range between 0-360
     val cosP=cos(pitch)
     val sinP=sin(pitch)
     val cosY=cos(yaw)
     val sinY=sin(yaw)
-    val xAxis = -Pos(cosY,0,-sinY)
+    val xAxis = -Pos(cosY,0,-sinY) //fix up angles
     val yAxis = Pos(sinY*sinP,cosP,cosY*sinP)
-    
     val zAxis= -Pos(sinY*cosP,-sinP,cosP*cosY)
     (xAxis,yAxis,zAxis)
   }

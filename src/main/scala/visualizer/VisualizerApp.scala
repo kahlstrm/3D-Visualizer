@@ -8,20 +8,38 @@ import java.awt.Robot
 import java.awt.TexturePaint
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
+import scala.concurrent.Promise
+import scala.concurrent.Future
+import scala.util.Success
+import scala.util.Failure
+import java.util.concurrent.Executors
+import scala.concurrent.ExecutionContext
 object VisualizerApp extends SimpleSwingApplication {
+  implicit val ec: scala.concurrent.ExecutionContext =
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
   val textureImg = FileLoader.loadTexture("minecraft.jpg")
-  val texture = new TexturePaint(textureImg,new Rectangle(new Dimension(100,100)))
-  var wireFrame=false
+  val texture =
+    new TexturePaint(textureImg, new Rectangle(new Dimension(100, 100)))
+  var wireFrame = false
   private val robot = new Robot()
   private val cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
   private val emptyCursor = Toolkit
     .getDefaultToolkit()
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
   val (walls, playerPos) = FileLoader.loadFile("hello.map")
-  val worldObjects =walls++Array[Shapes](
-  //new Object(FileLoader.loadObject("dragon_low_poly.obj"),Pos(0,0,0),Pos(0,0,0),100)
+  val worldObjects = walls ++ Vector[Shapes](
+    new Object(
+      FileLoader.loadObject("dragon_low_poly.obj"),
+      Pos(0, 0, 0),
+      Pos(0, 0, 0),
+      100
+    )
   )
-  var frametime=0.0
+  private var drawFrame = Vector[Triangle]()
+  private var renderComplete = true
+  var frametimeSingle = 0.0
+  var frametimeMulti = 0.0
+  var randTimer = 0.0
   val width = 1280
   val height = 800
   val fov = 90
@@ -34,28 +52,29 @@ object VisualizerApp extends SimpleSwingApplication {
     val area = new Panel {
       focusable = true
       override def paintComponent(g: Graphics2D) = {
-        
+        val start = System.currentTimeMillis()
+
         g.setColor(Color.BLACK)
         g.fillRect(0, 0, width, height)
         g.setColor(Color.WHITE)
         // Wall.draw(g)
         // Wall2.draw(g)
-        val worldSpaceTriangles =worldObjects.flatMap(_.worldSpaceTris)
-        renderer.draw(g,worldSpaceTriangles)
-        val (xAxis,yAxis,zAxis)=Player.pos.xyzAxes(Camera.y,Camera.x)
+
+        renderer.draw(g, drawFrame)
         g.setColor(Color.GRAY)
-        g.fillRect(40,30,300,110)
+        g.fillRect(40, 30, 300, 110)
         g.setColor(Color.WHITE)
         g.drawString("press ESCAPE to close", 50, 50)
         g.drawString(Player.pos.toString(), 50, 70)
         g.drawString(Player.camera.toString(), 50, 90)
-        g.drawString(s"frametime: ${frametime} s",50,110)
-        g.drawString("press R to toggle wireframe",50,130)
-        g.drawString(s"${xAxis.toString()}",50,150)
-        g.drawString(s"${yAxis.toString()}",50,170)
-        g.drawString(s"${zAxis.toString()}",50,190)
+        g.drawString(s"frametime ST: ${frametimeSingle} s", 50, 110)
+        g.drawString(s"frametime MT: ${frametimeMulti} s", 50, 130)
+        g.drawString("press R to toggle wireframe", 50, 150)
+        g.drawString(s"${randTimer}", 50, 170)
         g.drawLine(width / 2, height / 2 + 10, width / 2, height / 2 - 10)
         g.drawLine(width / 2 + 10, height / 2, width / 2 - 10, height / 2)
+        val end = System.currentTimeMillis()
+        VisualizerApp.frametimeSingle = (end - start) / 1000.0
       }
     }
     contents = area
@@ -63,7 +82,7 @@ object VisualizerApp extends SimpleSwingApplication {
     listenTo(area.mouse.clicks)
     listenTo(area.mouse.moves)
     listenTo(area.keys)
-    
+
     reactions += {
       case KeyPressed(_, key, _, _) => {
         key match {
@@ -74,7 +93,7 @@ object VisualizerApp extends SimpleSwingApplication {
           case Key.D      => Player.moveRight = true
           case Key.Space  => Player.moveUp = true
           case Key.Shift  => Player.moveDown = true
-          case Key.R => wireFrame= !wireFrame
+          case Key.R      => wireFrame = !wireFrame
           case a          => println(a)
         }
       }
@@ -90,7 +109,7 @@ object VisualizerApp extends SimpleSwingApplication {
         }
       }
       case MouseMoved(_, point, _) => {
-        if (previousMouse.isDefined &&this.area.peer.isFocusOwner()) {
+        if (previousMouse.isDefined && this.area.peer.isFocusOwner()) {
           val prev = previousMouse.get
           Player.camera.x = {
             val newVal =
@@ -101,13 +120,9 @@ object VisualizerApp extends SimpleSwingApplication {
               newVal + Math.PI * 2
             } else newVal
           }
-          Player.camera.y = 
-            -Math.PI / 2.0+0.001 max
+          Player.camera.y = -Math.PI / 2.0 max
             (Player.camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
-              Math.PI / 2.0-0.001
-          
-          
-
+            Math.PI / 2.0
           robot.mouseMove(width / 2, height / 2);
           previousMouse = None
         } else {
@@ -119,20 +134,45 @@ object VisualizerApp extends SimpleSwingApplication {
     val listener = new ActionListener() {
       def actionPerformed(e: java.awt.event.ActionEvent) = {
 
-        val oldPlayerPos=Player.move()
+        val oldPlayerPos = Player.move()
         walls.foreach(n => {
-          if(n.asInstanceOf[Wall].isInside(Pos(0,0,0))){
+          if (n.asInstanceOf[Wall].isInside(Pos(0, 0, 0))) {
             println("siel on ihminen sisällä!")
-        Player.updatePos(oldPlayerPos)
+            Player.updatePos(oldPlayerPos)
           }
         })
-        
+        val start = System.currentTimeMillis()
+        createFrames()
+        val end = System.currentTimeMillis()
+        VisualizerApp.frametimeMulti = (end - start) / 1000.0
         area.repaint()
-
       }
-      
+
     }
     val timer = new javax.swing.Timer(8, listener)
     timer.start()
+
   }
+
+    def createFrames()(implicit
+        ec: ExecutionContext
+    ): /*Future[Vector[Triangle]]*/ Unit = {
+        val repainter = Promise[Vector[Triangle]]
+        val worldSpaceTriangles = Future(worldObjects.flatMap(_.worldSpaceTris))
+        worldSpaceTriangles.onComplete {
+          case Success(value) =>
+            repainter.completeWith(
+              Future(renderer.generateViewTriangles(value))
+            )
+          case Failure(exception) => throw exception
+        }
+        val repaintF = repainter.future
+        val p = Promise[Vector[Triangle]]
+        repaintF.onComplete({
+          case Success(frame) => drawFrame=frame
+          case Failure(exception) => throw exception
+        })
+      
+
+    }
 }
