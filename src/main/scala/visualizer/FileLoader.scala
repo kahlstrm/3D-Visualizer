@@ -89,8 +89,9 @@ println(s"this took ${(end-start)/1000.0} seconds")
 }
 }
 
-object loadTest extends App{
-  val obj=FileLoader.loadObject("pallo.obj")
-  // obj._2.foreach(println)
-  // println(obj._2.length)
-}
+//test for .obj loading
+// object loadTest extends App{
+//   val obj=FileLoader.loadObject("pallo.obj")
+//   // obj._2.foreach(println)
+//   // println(obj._2.length)
+// }

@@ -376,10 +376,10 @@ object Pos {
 
 
 // A test for intersectPoint calculations
-object test extends App {
-  import GfxMath._
-  val a =Pos(0,2,0)
-  val b = Pos(0,0,3)
-  println(intersectPointWithZ(a,b))
-  println(intersectPointWithZ(b,a))
-}
+// object test extends App {
+//   import GfxMath._
+//   val a =Pos(0,2,0)
+//   val b = Pos(0,0,3)
+//   println(intersectPointWithZ(a,b))
+//   println(intersectPointWithZ(b,a))
+// }
