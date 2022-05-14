@@ -30,17 +30,31 @@ object VisualizerApp extends SimpleSwingApplication {
   private val emptyCursor = Toolkit
     .getDefaultToolkit()
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
-  val (walls, playerPos) = FileLoader.loadFile("hello.map")
+  val (walls, playerPos) = FileLoader.loadFile("test.map")
   val worldObjects = walls ++ Vector[Shapes](
     new Object(
       FileLoader.loadObject("dragon_low_poly.obj"),
-      Pos(0, 0, 0),
+      Pos(-600, 0, 600),
       Pos(0, 0, 0),
       100
+    ),
+    
+    new Object(
+      FileLoader.loadObject("REALpallo.obj"),
+      Pos(600, 0, 0),
+      Pos(0, 0, 0),
+      100
+    ),
+    
+    new Object(
+      FileLoader.loadObject("testiakselit.obj"),
+      playerPos,
+      Pos(0, 0, 0),
+      200
     )
   )
   private var frameIterator=Rendererer.createFrameIterator 
-  var frametimeSingle = 0.0
+  var frametime = 0.0
   var frametimeMulti = 0.0
   var randTimer = 0.0
   val width = 1600
@@ -61,24 +75,20 @@ object VisualizerApp extends SimpleSwingApplication {
         g.setColor(Color.WHITE)
         // Wall.draw(g)
         // Wall2.draw(g)
-        val randS=System.currentTimeMillis()
         Await.ready(drawFrames(frameIterator.next(), g, wireFrame), Duration.Inf)
-        val endS=System.currentTimeMillis()
-        VisualizerApp.randTimer=(endS-randS)/1000.0
         g.setColor(Color.GRAY)
-        g.fillRect(40, 30, 300, 110)
+        g.fillRect(40, 30, 300, 130)
         g.setColor(Color.WHITE)
-        g.drawString("press ESCAPE to close", 50, 50)
+        g.drawString("WASD to move, ESCAPE to close", 50, 50)
         g.drawString(Player.pos.toString(), 50, 70)
         g.drawString(Player.camera.toString(), 50, 90)
-        g.drawString(s"frametime ST: ${frametimeSingle} s", 50, 110)
+        g.drawString(s"frametime: ${frametime} s", 50, 110)
         g.drawString(s"frametime MT: ${frametimeMulti} s", 50, 130)
         g.drawString("press R to toggle wireframe", 50, 150)
-        g.drawString(s"${randTimer}", 50, 170)
         g.drawLine(width / 2, height / 2 + 10, width / 2, height / 2 - 10)
         g.drawLine(width / 2 + 10, height / 2, width / 2 - 10, height / 2)
         val end = System.currentTimeMillis()
-        VisualizerApp.frametimeSingle = (end - start) / 1000.0
+        VisualizerApp.frametime = (end - start) / 1000.0
       }
     }
     contents = area
