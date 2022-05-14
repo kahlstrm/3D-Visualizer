@@ -8,12 +8,16 @@ import java.awt.Robot
 import java.awt.TexturePaint
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
+import scala.collection.parallel.CollectionConverters._
 import scala.concurrent.Promise
 import scala.concurrent.Future
 import scala.util.Success
 import scala.util.Failure
 import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
+import Rendererer._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 object VisualizerApp extends SimpleSwingApplication {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
@@ -35,8 +39,7 @@ object VisualizerApp extends SimpleSwingApplication {
       100
     )
   )
-  private var drawFrame = Vector[Triangle]()
-  private var renderComplete = true
+  private var drawFrame: Vector[(Triangle, Color)] = Vector[(Triangle, Color)]()
   var frametimeSingle = 0.0
   var frametimeMulti = 0.0
   var randTimer = 0.0
@@ -53,14 +56,13 @@ object VisualizerApp extends SimpleSwingApplication {
       focusable = true
       override def paintComponent(g: Graphics2D) = {
         val start = System.currentTimeMillis()
-
         g.setColor(Color.BLACK)
         g.fillRect(0, 0, width, height)
         g.setColor(Color.WHITE)
         // Wall.draw(g)
         // Wall2.draw(g)
-
-        renderer.draw(g, drawFrame)
+        
+        Await.ready(drawFrames(createFrames(),g,wireFrame),Duration.Inf)
         g.setColor(Color.GRAY)
         g.fillRect(40, 30, 300, 110)
         g.setColor(Color.WHITE)
@@ -135,46 +137,19 @@ object VisualizerApp extends SimpleSwingApplication {
       def actionPerformed(e: java.awt.event.ActionEvent) = {
 
         val oldPlayerPos = Player.move()
-        walls.foreach(n => {
-          if (n.asInstanceOf[Wall].isInside(Pos(0, 0, 0))) {
-            println("siel on ihminen sisällä!")
-            Player.updatePos(oldPlayerPos)
-          }
-        })
-        createFrames()
+        val isInsideWall= !walls.par.forall(!_.asInstanceOf[Wall].isInside(Pos(0, 0, 0)))
+        if(isInsideWall){
+          println("siellä on ihminen sisällä!")
+          Player.updatePos(oldPlayerPos)
+        }
         area.repaint()
       }
 
     }
+
+
     val timer = new javax.swing.Timer(8, listener)
     timer.start()
 
   }
-
-    def createFrames()(implicit
-        ec: ExecutionContext
-    ): /*Future[Vector[Triangle]]*/ Unit = {
-        val start = System.currentTimeMillis()
-        val repainter = Promise[Vector[Triangle]]
-        val worldSpaceTriangles = Future(worldObjects.flatMap(_.worldSpaceTris))
-        worldSpaceTriangles.onComplete {
-          case Success(value) =>
-            repainter.completeWith(
-              Future(renderer.generateViewTriangles(value))
-            )
-          case Failure(exception) => throw exception
-        }
-        val repaintF = repainter.future
-        val p = Promise[Vector[Triangle]]
-        repaintF.onComplete({
-          case Success(frame) => {
-          drawFrame=frame
-        val end = System.currentTimeMillis()
-        VisualizerApp.frametimeMulti = (end - start) / 1000.0
-          }
-          case Failure(exception) => throw exception
-        })
-      
-
-    }
 }
