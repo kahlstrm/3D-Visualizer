@@ -20,7 +20,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 object VisualizerApp extends SimpleSwingApplication {
   implicit val ec: scala.concurrent.ExecutionContext =
-    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
+    ExecutionContext.global
   val textureImg = FileLoader.loadTexture("minecraft.jpg")
   val texture =
     new TexturePaint(textureImg, new Rectangle(new Dimension(100, 100)))
@@ -39,12 +39,12 @@ object VisualizerApp extends SimpleSwingApplication {
       100
     )
   )
-  private var drawFrame: Vector[(Triangle, Color)] = Vector[(Triangle, Color)]()
+  private var frameIterator=Rendererer.createFrameIterator 
   var frametimeSingle = 0.0
   var frametimeMulti = 0.0
   var randTimer = 0.0
-  val width = 1280
-  val height = 800
+  val width = 1600
+  val height = 900
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
@@ -61,8 +61,10 @@ object VisualizerApp extends SimpleSwingApplication {
         g.setColor(Color.WHITE)
         // Wall.draw(g)
         // Wall2.draw(g)
-
-        Await.ready(drawFrames(createFrames(), g, wireFrame), Duration.Inf)
+        val randS=System.currentTimeMillis()
+        Await.ready(drawFrames(frameIterator.next(), g, wireFrame), Duration.Inf)
+        val endS=System.currentTimeMillis()
+        VisualizerApp.randTimer=(endS-randS)/1000.0
         g.setColor(Color.GRAY)
         g.fillRect(40, 30, 300, 110)
         g.setColor(Color.WHITE)
@@ -151,7 +153,7 @@ object VisualizerApp extends SimpleSwingApplication {
 
     }
 
-    val timer = new javax.swing.Timer(8, listener)
+    val timer = new javax.swing.Timer(4, listener)
     timer.start()
 
   }

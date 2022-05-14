@@ -90,6 +90,18 @@ object Rendererer {
       })
     newTriangles.toVector
   }
+  def createFrameIterator: Iterator[Future[Vector[(Triangle, Color)]]] =
+    new Iterator[Future[Vector[(Triangle, Color)]]] {
+      private var current = createFrames()
+      private var current2 = Future{Thread.sleep(1);createFrames()}.flatten
+      def hasNext: Boolean = true
+      def next(): Future[Vector[(Triangle, Color)]] = {
+        val res = current
+        current=current2
+        current2=createFrames()
+        return res
+      }
+    }
   def createFrames()(implicit
       ec: ExecutionContext
   ): Future[Vector[(Triangle, Color)]] = {
@@ -128,13 +140,12 @@ object Rendererer {
     val p = Promise[Unit]()
     frames.onComplete {
       case Success(value) =>
-        p.completeWith(Future(value.foreach(n =>{
-        if(wireFrame){
-          n._1.draw(g)
-        }else n._1.draw(g, n._2)
-        
-        
-        } )))
+        p.completeWith(Future(value.foreach(n => {
+          if (wireFrame) {
+            n._1.draw(g)
+          } else n._1.draw(g, n._2)
+
+        })))
       case Failure(exception) => throw exception
     }
     p.future
