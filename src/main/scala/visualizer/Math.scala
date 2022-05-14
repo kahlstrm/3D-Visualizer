@@ -197,6 +197,12 @@ class Pos(
   def dotProduct(that: Pos): Double = {
     this.x * that.x + this.y * that.y + this.z * that.z
   }
+  def crossProduct(that:Pos):Pos={
+    Pos(
+    this.y * that.z - this.z * that.y,
+    this.z * that.x - this.x * that.z,
+    this.x * that.y - this.y * that.x)
+  }
   def cosBetween(that:Pos):Double={
     this.dotProduct(that)/(this.length*that.length)
   }
@@ -224,23 +230,24 @@ class Pos(
       this.z
     )
   }
-  // def cameraRotate():Pos = {
-  //   val forwardVec=Camera.forwardVector()
-  //   val rightVec=Camera.rightVector()
-  //   val upVec=Camera.upVector()
-  //   Pos(
-  //     this.x*rightVec.x+this.y*upVec.x+this.z*forwardVec.x,
-  //     this.x*rightVec.y+this.y*upVec.y+this.z*forwardVec.y,
-  //     this.x*rightVec.z+this.y*upVec.z+this.z*forwardVec.z
-  //   )
-  // }
-  def cameraRotate():Pos ={
-    this.rotate(Player.camera.cameraVector())
+  def cameraRotate(target:Pos,up:Pos):Pos = {
+    val forwardVec= target.unit
+    val right = Camera.rightVector()
+    val up= Camera.upVector()
+   
+    Pos(
+      this.x*right.x+this.y*up.x+this.z*forwardVec.x,
+      this.x*right.y+this.y*up.y+this.z*forwardVec.y,
+      this.x*right.z+this.y*up.z+this.z*forwardVec.z
+    )
   }
+  // def cameraRotate():Pos ={
+  //   this.rotate(Player.camera.cameraVector())
+  // }
   def dropX():Pos ={
     Pos(
       0,
-      this.x,
+      this.y,
       this.z
     )
   }
@@ -258,7 +265,7 @@ class Pos(
       0
     )
   }
-  def unit():Pos=this/this.length
+  def unit():Pos=if (this.length==0) this else this/this.length
   def rotate(rotation: Pos): Pos = {
     Pos(
       this.x * (cos(rotation.z) * cos(rotation.y)) +
@@ -281,36 +288,42 @@ class Pos(
     )
   }
 
-  override def toString(): String = s"x: ${x} y: ${y} z: ${z}"
+  override def toString(): String = f"x: $x%2.2f y: $y%2.2f z: $z%2.2f"
 }
 object Camera extends Pos(0, 0, 0) {
+  def test = {
+    Pos(
+      -cos(y)*sin(x),
+      sin(y),
+      cos(y)*cos(x)
+    ).unit()
+  }
   def cameraVector():Pos={
     Pos(
-      this.x,
       this.y,
+      this.x,
       0
     )
   }
   def rightVector():Pos={
-    Pos(cos(y),0,sin(y)).unit()
+    // Pos(cos(y),0,sin(y)).unit()
+    Pos(0,1,0).crossProduct(forwardVector())
   }
-  def forwardVector():Pos={
-    Pos(
-      -cos(x)*sin(y),
-      sin(x),
-      cos(x)*cos(y)
-    ).unit()
-  }
+  def forwardVector():Pos= Pos(0,0,1).rotate(Player.camera.cameraVector().dropX()).unit
   def upVector():Pos = {
-    Pos(
-    sin(x)*sin(y),
-    cos(x),
-    -sin(x)*cos(y)
-    )
+    forwardVector().crossProduct(rightVector())
+    // Pos(
+    // sin(x)*sin(y),
+    // cos(x),
+    // -sin(x)*cos(y)
+    // ).unit()
   }
   override def toString(): String ={
     val cam = this.cameraVector()
-  s"x: ${180 / Math.PI * cam.x} y: ${180 / Math.PI * cam.y} z: ${180 / Math.PI * cam.z}"
+    val x=180 / Math.PI * cam.x
+    val y = 180 / Math.PI * cam.y
+    val z = 180 / Math.PI * cam.z
+  f"x: $x%2.2f y: $y%2.2f z: $z%2.2f"
   }
     
 }

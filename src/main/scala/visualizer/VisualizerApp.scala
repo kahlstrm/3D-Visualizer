@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage
 object VisualizerApp extends SimpleSwingApplication {
   val textureImg = FileLoader.loadTexture("minecraft.jpg")
   val texture = new TexturePaint(textureImg,new Rectangle(new Dimension(100,100)))
+  var wireFrame=false
   private val robot = new Robot()
   private val cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
   private val emptyCursor = Toolkit
@@ -18,11 +19,11 @@ object VisualizerApp extends SimpleSwingApplication {
     .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
   val (walls, playerPos) = FileLoader.loadFile("hello.map")
   val worldObjects =walls++Array[Shapes](
-  new Object(FileLoader.loadObject("dragon_low_poly.obj"),Pos(0,0,300),Pos(0,0,0),300)
+  //new Object(FileLoader.loadObject("dragon_low_poly.obj"),Pos(0,0,600),Pos(0,0,0),100)
   )
   var frametime=0.0
-  val width = 1600
-  val height = 900
+  val width = 1280
+  val height = 800
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
@@ -40,13 +41,15 @@ object VisualizerApp extends SimpleSwingApplication {
         // Wall.draw(g)
         // Wall2.draw(g)
         val worldSpaceTriangles =worldObjects.flatMap(_.worldSpaceTris)
-        
         renderer.draw(g,worldSpaceTriangles)
+        g.setColor(Color.GRAY)
+        g.fillRect(40,30,300,110)
         g.setColor(Color.WHITE)
         g.drawString("press ESCAPE to close", 50, 50)
         g.drawString(Player.pos.toString(), 50, 70)
         g.drawString(Player.camera.toString(), 50, 90)
         g.drawString(s"frametime: ${frametime} s",50,110)
+        g.drawString("press R to toggle wireframe",50,130)
         g.drawLine(width / 2, height / 2 + 10, width / 2, height / 2 - 10)
         g.drawLine(width / 2 + 10, height / 2, width / 2 - 10, height / 2)
       }
@@ -58,9 +61,6 @@ object VisualizerApp extends SimpleSwingApplication {
     listenTo(area.keys)
     
     reactions += {
-      case e: MouseDragged => {
-        print(e.point)
-      }
       case KeyPressed(_, key, _, _) => {
         key match {
           case Key.Escape => println("bye"); scala.sys.exit()
@@ -70,6 +70,7 @@ object VisualizerApp extends SimpleSwingApplication {
           case Key.D      => Player.moveRight = true
           case Key.Space  => Player.moveUp = true
           case Key.Shift  => Player.moveDown = true
+          case Key.R => wireFrame= !wireFrame
           case a          => println(a)
         }
       }
@@ -87,19 +88,19 @@ object VisualizerApp extends SimpleSwingApplication {
       case MouseMoved(_, point, _) => {
         if (previousMouse.isDefined &&this.area.peer.isFocusOwner()) {
           val prev = previousMouse.get
-          Player.camera.y = {
+          Player.camera.x = {
             val newVal =
-              (Player.camera.y + (prev.x - point.x).toDouble / 500) % (2 * math.Pi)
+              (Player.camera.x + (prev.x - point.x).toDouble / 500) % (2 * math.Pi)
             if (newVal > Math.PI) {
               newVal - Math.PI * 2
             } else if (newVal < -Math.PI) {
               newVal + Math.PI * 2
             } else newVal
           }
-          Player.camera.x = 
-            -Math.PI / 2.0 max
-            (Player.camera.x + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
-              Math.PI / 2.0
+          // Player.camera.y = 
+          //   -Math.PI / 2.0 max
+          //   (Player.camera.y - (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
+          //     Math.PI / 2.0
           
           
 
