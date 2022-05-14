@@ -93,12 +93,12 @@ object Rendererer {
   def createFrameIterator: Iterator[Future[Vector[(Triangle, Color)]]] =
     new Iterator[Future[Vector[(Triangle, Color)]]] {
       private var current = createFrames()
-      private var current2 = Future{Thread.sleep(1);createFrames()}.flatten
+      //private var current2 = Future{Thread.sleep(1);createFrames()}.flatten
       def hasNext: Boolean = true
       def next(): Future[Vector[(Triangle, Color)]] = {
         val res = current
-        current=current2
-        current2=createFrames()
+        current=createFrames()
+        //current2=createFrames()
         return res
       }
     }
