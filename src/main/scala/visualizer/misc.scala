@@ -15,9 +15,9 @@ object misc {
 
   /** Class for measuring time Wall time
     */
-  def timeMillis()=System.currentTimeMillis()
+  def timeNanos()=System.nanoTime()
 
-  def timeBetween(start:Long,end:Long)=(end-start)/1000.0
+  def timeBetween(start:Long,end:Long)=(end-start)/1000000000.0
   
 
   def drawCrosshair(g: Graphics) = {

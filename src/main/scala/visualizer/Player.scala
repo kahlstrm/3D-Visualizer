@@ -7,10 +7,10 @@ object Player {
   def updatePos(pos: Pos) = {
     hiddenPos = pos
   }
-  private var time = misc.timeMillis()
+  private var time = misc.timeNanos()
   def move(): Pos = {
-    val movementSpeed = 1000 * misc.timeBetween(time, misc.timeMillis())
-    time = misc.timeMillis()
+    val movementSpeed = 1000 * misc.timeBetween(time, misc.timeNanos())
+    time = misc.timeNanos()
     val oldPos = pos
     var newPos = pos
     val forwardMove = Camera.forwardVector.unit()

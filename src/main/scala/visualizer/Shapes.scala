@@ -7,39 +7,39 @@ trait Shapes {
   val position: Pos
   val rotation: Pos
   val poses: Vector[Pos]
-  def worldSpacePos = {
+  def worldSpacePos(player:Pos) = {
     poses.par.map(pos =>
       pos
         .rotate(rotation)
         .translate(position)
-        .translate(-Player.pos)
+        .translate(-player)
     )
   }
-  def worldSpaceTris = {
+  def worldSpaceTris(player:Pos,camera:Pos) = {
     triangles.par.map(tri => {
       Triangle(
         tri.pos1
           .rotate(rotation)
           .translate(position)
-          .translate(-Player.pos)
-          .fpsRotate(0, Camera.x)
-          .fpsRotate(Camera.y, 0)
+          .translate(-player)
+          .fpsRotate(0, camera.x)
+          .fpsRotate(camera.y, 0)
         // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
         ,
         tri.pos2
           .rotate(rotation)
           .translate(position)
-          .translate(-Player.pos)
-          .fpsRotate(0, Camera.x)
-          .fpsRotate(Camera.y, 0)
+          .translate(-player)
+          .fpsRotate(0, camera.x)
+          .fpsRotate(camera.y, 0)
         // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
         ,
         tri.pos3
           .rotate(rotation)
           .translate(position)
-          .translate(-Player.pos)
-          .fpsRotate(0, Camera.x)
-          .fpsRotate(Camera.y, 0)
+          .translate(-player)
+          .fpsRotate(0, camera.x)
+          .fpsRotate(camera.y, 0)
         // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0))
       )
     })

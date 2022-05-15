@@ -10,13 +10,13 @@ import scala.util.Failure
 object Rendererer {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
-  def createFrames()(implicit
+  def createFrames(player:Pos,camera:Pos)(implicit
       ec: ExecutionContext
   ): Future[Vector[(Triangle, Color)]] = {
-    val start = misc.timeMillis()
+    val start = misc.timeNanos()
     val repainter = Promise[Vector[Triangle]]
     val worldSpaceTriangles = Future(
-      VisualizerApp.worldObjects.flatMap(_.worldSpaceTris)
+      VisualizerApp.worldObjects.flatMap(_.worldSpaceTris(player,camera))
     )
     worldSpaceTriangles.onComplete {
       case Success(value) =>
@@ -33,7 +33,7 @@ object Rendererer {
           Future(generateDrawableTriangles(frame))
         )
         VisualizerApp.frametimeMulti =
-          misc.timeBetween(start, misc.timeMillis())
+          misc.timeBetween(start, misc.timeNanos())
       }
       case Failure(exception) => throw exception
     })
@@ -42,13 +42,13 @@ object Rendererer {
   
   def createFrameIterator: Iterator[Future[Vector[(Triangle, Color)]]] =
     new Iterator[Future[Vector[(Triangle, Color)]]] {
-      private var current = createFrames()
-      // private var current2 = Future{Thread.sleep(1);createFrames()}.flatten
+      private var current = createFrames(Player.pos,Camera.pos)
+      private var current2 = Future{Thread.sleep(1);createFrames(Player.pos,Camera.pos)}.flatten
       def hasNext: Boolean = true
       def next(): Future[Vector[(Triangle, Color)]] = {
         val res = current
-        current = createFrames()
-        // current2=createFrames()
+        current = current2
+        current2=Future{Thread.sleep((VisualizerApp.frametimeMulti/1000).toLong);createFrames(Player.pos,Camera.pos)}.flatten
         return res
       }
     }

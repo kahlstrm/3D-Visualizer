@@ -314,7 +314,7 @@ class Pos(
   override def toString(): String = f"x: $x%2.2f y: $y%2.2f z: $z%2.2f"
 }
 object Camera extends Pos(0,0,0) {
-
+  def pos()=this+Pos(0,0,0)
   //forwardVector for camera movement
   def forwardVector = {
     Pos(

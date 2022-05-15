@@ -15,25 +15,26 @@ import misc._
 object VisualizerApp extends SimpleSwingApplication {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
-  var wireFrame = false
 
-  val (walls, playerPos) = FileLoader.loadFile("hello.map")
+  val (walls, playerPos) = FileLoader.loadFile("test.map")
   val worldObjects = walls ++ Vector[Shapes](
-    // new Object(
-    //   FileLoader.loadObject("dragon.obj"),
-    //   Pos(0, 0, 0),
-    //   Pos(0, 0, 0),
-    //   100
-    // )
+    new Object(
+      FileLoader.loadObject("dragon.obj"),
+      Pos(0, 0, 0),
+      Pos(0, 0, 0),
+      100
+    )
   )
+  var running =true
+  var wireFrame = false
   var collisionEnabled = true
   private var frameIterator = Rendererer.createFrameIterator
   var frametime = 0.0
   val frametimes = Queue[Double]()
   var frametimeMulti = 0.0
   var avgFrametime = 0.0
-  val width = 1600
-  val height = 900
+  val width = 1280
+  val height = 800
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
@@ -44,38 +45,7 @@ object VisualizerApp extends SimpleSwingApplication {
     val area = new Panel {
       focusable = true
       peer.setIgnoreRepaint(true)
-      // override def paintComponent(g: Graphics2D) = {
-      //   val start = timeMillis()
-      //   g.setColor(Color.BLACK)
-      //   g.fillRect(0, 0, width, height)
-      //   g.setColor(Color.WHITE)
-      //   Await.ready(
-      //     drawFrames(frameIterator.next(), g, wireFrame),
-      //     Duration.Inf
-      //   )
-      //   g.setColor(Color.GRAY)
-      //   g.fillRect(40, 30, 300, 130)
-      //   g.setColor(Color.WHITE)
-      //   g.drawString("WASD to move, ESCAPE to close", 50, 50)
-      //   g.drawString(Player.pos.toString(), 50, 70)
-      //   g.drawString(Player.camera.toString(), 50, 90)
-      //   g.drawString(
-      //     f"frametime: $frametime%.3f AVG: $avgFrametime%.3f s",50, 110)
-      //   g.drawString(f"frametime MT: $frametimeMulti%.3f s", 50, 130)
-      //   g.drawString(
-      //     "press R to toggle wireframe, C to toggle collision",
-      //     50,
-      //     150
-      //   )
-      //   drawCrosshair(g)
-      //   val time = timeBetween(start,timeMillis())
-      //   VisualizerApp.frametime = time
-      //   frametimes.enqueue(time)
-      //   while (frametimes.size > 50) {
-      //     frametimes.dequeue
-      //   }
-      //   avgFrametime = frametimes.sum / frametimes.length
-      // }
+
     }
 
     contents = area
@@ -86,7 +56,7 @@ object VisualizerApp extends SimpleSwingApplication {
     reactions += {
       case KeyPressed(_, key, _, _) => {
         key match {
-          case Key.Escape => println("bye"); scala.sys.exit()
+          case Key.Escape => println("bye");running=false;scala.sys.exit(0)
           case Key.W      => Player.moveForward = true
           case Key.S      => Player.moveBackward = true
           case Key.A      => Player.moveLeft = true
@@ -138,26 +108,31 @@ object VisualizerApp extends SimpleSwingApplication {
     peer.setIgnoreRepaint(true)
     peer.createBufferStrategy(3)
     val bs = peer.getBufferStrategy()
-
-      def update() = {
-        val oldPlayerPos = Player.move()
-        if (collisionEnabled) {
-          Future {
-            val isInsideWall =
-              !worldObjects.forall(!_.isInside(Player.pos))
-            if (isInsideWall) {
-              println("siellä on ihminen sisällä!")
-              Player.updatePos(oldPlayerPos)
-            }
+    def run()={
+      while(running){
+        update()
+        render()
+      }
+    }
+    def update() = {
+      val oldPlayerPos = Player.move()
+      if (collisionEnabled) {
+        Future {
+          val isInsideWall =
+            !worldObjects.forall(!_.isInside(Player.pos))
+          if (isInsideWall) {
+            println("siellä on ihminen sisällä!")
+            Player.updatePos(oldPlayerPos)
           }
         }
       }
+    }
 
-    def createRender() = {
+    def render() = {
       val g = bs.getDrawGraphics()
-      val start = timeMillis()
+      val start = timeNanos()
       g.setColor(Color.BLACK)
-      g.fillRect(0, 0, width+30, height+30)
+      g.fillRect(0, 0, width, windowHeight)
       g.setColor(Color.WHITE)
       Await.ready(
         drawFrames(frameIterator.next(), g, wireFrame),
@@ -181,7 +156,7 @@ object VisualizerApp extends SimpleSwingApplication {
         150
       )
       drawCrosshair(g)
-      val time = timeBetween(start, timeMillis())
+      val time = timeBetween(start, timeNanos())
       VisualizerApp.frametime = time
       frametimes.enqueue(time)
       while (frametimes.size > 50) {
@@ -192,11 +167,7 @@ object VisualizerApp extends SimpleSwingApplication {
       bs.show()
     }
     Future {
-      while (true) {
-        Thread.sleep(3)
-        update()
-        createRender()
-      }
+      run
     }
   }
 }
