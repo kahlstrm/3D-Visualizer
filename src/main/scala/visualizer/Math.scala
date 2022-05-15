@@ -35,7 +35,7 @@ object GfxMath {
     val mul = (u * factor)
     return  mul+pos1
   }
-  def calcClipping(tri: Triangle): Vector[Triangle] = {
+  def calcClipping(tri: Triangle,plane:Pos): Vector[Triangle] = {
     if (tri.pos1.z < zPlane.z && tri.pos2.z < zPlane.z && tri.pos3.z < zPlane.z) {
       return Vector[Triangle]()
     }
