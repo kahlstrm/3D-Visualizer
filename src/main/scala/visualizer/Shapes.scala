@@ -1,15 +1,8 @@
 package visualizer
 import java.awt.Graphics2D
-import java.awt.Color._
 import java.awt.TexturePaint
-import java.awt.image.BufferedImage
-import GfxMath._
 import java.awt.Color
-import scala.collection.mutable.Buffer
 import scala.collection.parallel.CollectionConverters._
-import java.awt.Rectangle
-import java.awt.Dimension
-import scala.collection.parallel.immutable.ParVector
 trait Shapes {
   val position: Pos
   val rotation: Pos
@@ -52,67 +45,22 @@ trait Shapes {
     })
   }
   val triangles: Vector[Triangle]
-  // def draw(g: Graphics2D) = {
-  //   val newTriangles = Buffer[Triangle]()
-  //   triangles
-  //     .foreach(tri => {
-  //       val worldSpaceTri = Triangle(
-  //         tri.pos1
-  //           .rotate(rotation)
-  //           .translate(position)
-  //           .translate(-Player.pos)
-  //           .rotate(-Player.camera.cameraVector()),
-  //         tri.pos2
-  //           .rotate(rotation)
-  //           .translate(position)
-  //           .translate(-Player.pos)
-  //           .rotate(-Player.camera.cameraVector()),
-  //         tri.pos3
-  //           .rotate(rotation)
-  //           .translate(position)
-  //           .translate(-Player.pos)
-  //           .rotate(-Player.camera.cameraVector())
-  //       )
+  val bottomCorner: Pos
+  val topCorner: Pos
 
-  //       val clippedTriangles = calcClipping(worldSpaceTri)
-  //       clippedTriangles.foreach(n => {
-  //         val newTri = Triangle(
-  //           n.pos1
-  //             .perspective()
-  //             .center(),
-  //           n.pos2
-  //             .perspective()
-  //             .center(),
-  //           n.pos3
-  //             .perspective()
-  //             .center()
-  //         )
-  //         if(getNormal(newTri).z<0) newTriangles+=newTri
-  //       })
-  //       // Triangle(
-  //       //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos1,rotation),position),-Player.pos),Player.camera))),
-  //       //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos2,rotation),position),-Player.pos),Player.camera))),
-  //       //   center(perspective(rotate(translatePos(translatePos(rotate(tri.pos3,rotation),position),-Player.pos),Player.camera)))
-  //       // )
-  //     })
-
-  //   newTriangles
-  //     .sortBy(tri => -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3)
-  //     .foreach(tri => {
-  //       val normal = getNormal(tri).unit()
-  //       val avgPos = (tri.pos1 + tri.pos2 + tri.pos3) / 3
-  //       val playerPos =
-  //         Pos(VisualizerApp.width / 2, VisualizerApp.height / 2, 0)
-  //       val r = (avgPos).distance(playerPos)//"flashlight"
-  //       val cosBetweenTriandZ =normal.dotProduct(Pos(0,0,-1))
-  //       val rSquaredAndConstant=(Math.pow(r, 2) / 10000 + 1)
-  //       val distanceFromZPlane=(avgPos).z/2000 + 1 //"ambient light"
-  //       val color = (((225/distanceFromZPlane).toInt+30)*Math.sqrt(cosBetweenTriandZ)).toInt
-  //       tri.draw(g, new Color(color, color, color))
-  //     })
-
-  // }
-
+  def isInside(pos: Pos) = {
+    val bottomCornerWorld = bottomCorner
+      .rotate(rotation)
+      .translate(position)
+    val topCornerWorld = topCorner
+      .rotate(rotation)
+      .translate(position)
+    def isBetween(a: Double, b: Double, c: Double) =
+      Math.min(a, b) - 20 < c && Math.max(a, b) + 20 > c
+    isBetween(bottomCornerWorld.x, topCornerWorld.x, pos.x) &&
+    isBetween(bottomCornerWorld.y, topCornerWorld.y, pos.y) &&
+    isBetween(bottomCornerWorld.z, topCornerWorld.z, pos.z)
+  }
 }
 
 class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) {
@@ -123,6 +71,14 @@ class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) {
   }
   def draw(g: Graphics2D, color: Color) = {
     g.setColor(color)
+    g.fillPolygon(
+      Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
+      Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
+      3
+    )
+  }
+  def draw(g: Graphics2D, color: Int) = {
+    g.setColor(new Color(color, color, color))
     g.fillPolygon(
       Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
       Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
@@ -159,6 +115,26 @@ class Object(
   val triangles: Vector[Triangle] = objInfo._2.map(tri =>
     new Triangle(tri.pos1 * scale, tri.pos2 * scale, tri.pos3 * scale)
   )
+  val (bottomCorner, topCorner): (Pos, Pos) = {
+    val firstPos = poses.headOption.getOrElse(Pos(0, 0, 0))
+    var minX = firstPos.x
+    var minY = firstPos.y
+    var minZ = firstPos.z
+
+    var maxX = firstPos.x
+    var maxY = firstPos.y
+    var maxZ = firstPos.z
+    poses.foreach(pos => {
+      minX = Math.min(pos.x,minX)
+      minY = Math.min(pos.y,minY)
+      minZ = Math.min(pos.z,minZ)
+      maxX = Math.max(pos.x,maxX)
+      maxY = Math.max(pos.y,maxY)
+      maxZ = Math.max(pos.z,maxZ)
+    })
+    (Pos(minX, minY, minZ), Pos(maxX, maxY, maxZ))
+  }
+
 }
 class Wall(val position: Pos, val rotation: Pos) extends Shapes {
   val poses = Vector[Pos](
@@ -185,17 +161,6 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
     Triangle(poses(6), poses(5), poses(0)),
     Triangle(poses(6), poses(0), poses(1))
   )
-
-  def isInside(pos: Pos) = {
-    val worldSpace = this.worldSpacePos
-    val bottomCorner = worldSpace(0)
-    val topCorner = worldSpace(3)
-    def isBetween(a: Double, b: Double, c: Double) =
-      Math.min(a, b) - 20 < c && Math.max(a, b) + 20 > c
-    isBetween(bottomCorner.x, topCorner.x, pos.x) &&
-    isBetween(bottomCorner.y, topCorner.y, pos.y) &&
-    isBetween(bottomCorner.z, topCorner.z, pos.z)
-  }
-
+  val bottomCorner = poses(0)
+  val topCorner = poses(3)
 }
-
