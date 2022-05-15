@@ -48,10 +48,10 @@ object FileLoader {
 def loadObject(source:String):(Vector[Pos],Vector[Triangle])={
   val start = System.currentTimeMillis()
       val fileReader = try {
-      new FileReader(source)
+      new FileReader(s"objects/${source}")
     }catch{
       case e: FileNotFoundException=>{
-        throw new Exception("Object File not found, check path or don't load")
+        throw new Exception("Object File not found, check path")
       }
     }
 val poses = Buffer[Pos]()
