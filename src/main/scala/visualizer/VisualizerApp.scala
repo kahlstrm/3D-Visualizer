@@ -1,62 +1,37 @@
 package visualizer
 import scala.swing._
 import scala.swing.event._
-import scala.collection.mutable.Buffer
-import java.awt.Color
-import java.awt.event.ActionListener
-import java.awt.Robot
-import java.awt.TexturePaint
-import java.awt.Toolkit
-import java.awt.image.BufferedImage
+import scala.collection.mutable.Queue
 import scala.collection.parallel.CollectionConverters._
-import scala.concurrent.Promise
-import scala.concurrent.Future
+import scala.concurrent._
+import scala.concurrent.duration.Duration
 import scala.util.Success
 import scala.util.Failure
-import java.util.concurrent.Executors
-import scala.concurrent.ExecutionContext
+import java.awt.Color
+import java.awt.event.ActionListener
+// import java.awt.TexturePaint
 import Rendererer._
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import misc._
 object VisualizerApp extends SimpleSwingApplication {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
-  val textureImg = FileLoader.loadTexture("minecraft.jpg")
-  val texture =
-    new TexturePaint(textureImg, new Rectangle(new Dimension(100, 100)))
   var wireFrame = false
-  private val robot = new Robot()
-  private val cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
-  private val emptyCursor = Toolkit
-    .getDefaultToolkit()
-    .createCustomCursor(cursorImg, new Point(0, 0), "empty cursor")
+
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val worldObjects = walls ++ Vector[Shapes](
     new Object(
-      FileLoader.loadObject("dragon_low_poly.obj"),
-      Pos(-600, 0, 600),
+      FileLoader.loadObject("dragon.obj"),
+      Pos(0, 0, 0),
       Pos(0, 0, 0),
       100
-    ),
-    
-    new Object(
-      FileLoader.loadObject("REALpallo.obj"),
-      Pos(600, 0, 0),
-      Pos(0, 0, 0),
-      100
-    ),
-    
-    new Object(
-      FileLoader.loadObject("testiakselit.obj"),
-      playerPos,
-      Pos(0, 0, 0),
-      200
     )
   )
-  private var frameIterator=Rendererer.createFrameIterator 
+  var collisionEnabled = true
+  private var frameIterator = Rendererer.createFrameIterator
   var frametime = 0.0
+  val frametimes = Queue[Double]()
   var frametimeMulti = 0.0
-  var randTimer = 0.0
+  var avgFrametime = 0.0
   val width = 1600
   val height = 900
   val fov = 90
@@ -69,34 +44,43 @@ object VisualizerApp extends SimpleSwingApplication {
     val area = new Panel {
       focusable = true
       override def paintComponent(g: Graphics2D) = {
-        val start = System.currentTimeMillis()
+        val start = timeMillis()
         g.setColor(Color.BLACK)
         g.fillRect(0, 0, width, height)
         g.setColor(Color.WHITE)
-        // Wall.draw(g)
-        // Wall2.draw(g)
-        Await.ready(drawFrames(frameIterator.next(), g, wireFrame), Duration.Inf)
+        Await.ready(
+          drawFrames(frameIterator.next(), g, wireFrame),
+          Duration.Inf
+        )
         g.setColor(Color.GRAY)
         g.fillRect(40, 30, 300, 130)
         g.setColor(Color.WHITE)
         g.drawString("WASD to move, ESCAPE to close", 50, 50)
         g.drawString(Player.pos.toString(), 50, 70)
         g.drawString(Player.camera.toString(), 50, 90)
-        g.drawString(s"frametime: ${frametime} s", 50, 110)
-        g.drawString(s"frametime MT: ${frametimeMulti} s", 50, 130)
-        g.drawString("press R to toggle wireframe", 50, 150)
-        g.drawLine(width / 2, height / 2 + 10, width / 2, height / 2 - 10)
-        g.drawLine(width / 2 + 10, height / 2, width / 2 - 10, height / 2)
-        val end = System.currentTimeMillis()
-        VisualizerApp.frametime = (end - start) / 1000.0
+        g.drawString(
+          f"frametime: $frametime%.3f AVG: $avgFrametime%.3f s",50, 110)
+        g.drawString(f"frametime MT: $frametimeMulti%.3f s", 50, 130)
+        g.drawString(
+          "press R to toggle wireframe, C to toggle collision",
+          50,
+          150
+        )
+        drawCrosshair(g)
+        val time = timeBetween(start,timeMillis())
+        VisualizerApp.frametime = time
+        frametimes.enqueue(time)
+        while (frametimes.size > 50) {
+          frametimes.dequeue
+        }
+        avgFrametime = frametimes.sum / frametimes.length
       }
     }
     contents = area
     area.cursor_=(emptyCursor)
-    listenTo(area.mouse.clicks)
     listenTo(area.mouse.moves)
     listenTo(area.keys)
-    
+
     reactions += {
       case KeyPressed(_, key, _, _) => {
         key match {
@@ -108,6 +92,7 @@ object VisualizerApp extends SimpleSwingApplication {
           case Key.Space  => Player.moveUp = true
           case Key.Shift  => Player.moveDown = true
           case Key.R      => wireFrame = !wireFrame
+          case Key.C      => collisionEnabled = !collisionEnabled
           case a          => println(a)
         }
       }
@@ -138,7 +123,10 @@ object VisualizerApp extends SimpleSwingApplication {
             (Player.camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
             Math.PI / 2.0
           val centerOfWindow = area.peer.getLocationOnScreen()
-          robot.mouseMove(centerOfWindow.x+width / 2, centerOfWindow.y+height / 2);
+          robot.mouseMove(
+            centerOfWindow.x + width / 2,
+            centerOfWindow.y + height / 2
+          );
           previousMouse = None
         } else {
           previousMouse = Some(point)
@@ -148,14 +136,15 @@ object VisualizerApp extends SimpleSwingApplication {
 
     val listener = new ActionListener() {
       def actionPerformed(e: java.awt.event.ActionEvent) = {
-
         val oldPlayerPos = Player.move()
-        Future {
-          val isInsideWall =
-            !walls.forall(!_.asInstanceOf[Wall].isInside(Pos(0, 0, 0)))
-          if (isInsideWall) {
-            println("siellä on ihminen sisällä!")
-            Player.updatePos(oldPlayerPos)
+        if (collisionEnabled) {
+          Future {
+            val isInsideWall =
+              !worldObjects.forall(!_.isInside(Player.pos))
+            if (isInsideWall) {
+              println("siellä on ihminen sisällä!")
+              Player.updatePos(oldPlayerPos)
+            }
           }
         }
         area.repaint()
