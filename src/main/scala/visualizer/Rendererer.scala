@@ -7,48 +7,30 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent._
 import scala.util.Success
 import scala.util.Failure
+import java.util.concurrent.Executors
 object Rendererer {
-  implicit val ec: ExecutionContext = ExecutionContext.global
+  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
 
-  def createFrames(player:Pos,camera:Pos)(implicit
+  def createFrames(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
-  ): Future[Vector[(Triangle, Color)]] = {
+  ): Vector[(Triangle, Color)]= { 
     val start = misc.timeNanos()
     val repainter = Promise[Vector[Triangle]]
-    val worldSpaceTriangles = Future(
-      VisualizerApp.worldObjects.flatMap(_.worldSpaceTris(player,camera))
-    )
-    worldSpaceTriangles.onComplete {
-      case Success(value) =>
-        repainter.completeWith(
-          Future(generateViewTriangles(value))
-        )
-      case Failure(exception) => throw exception
-    }
-    val repaintF = repainter.future
-    val p = Promise[Vector[(Triangle, Color)]]
-    repaintF.onComplete({
-      case Success(frame) => {
-        p.completeWith(
-          Future(generateDrawableTriangles(frame))
-        )
-        VisualizerApp.frametimeMulti =
-          misc.timeBetween(start, misc.timeNanos())
-      }
-      case Failure(exception) => throw exception
-    })
-    p.future
+    val worldSpaceTriangles = 
+      VisualizerApp.worldObjects.flatMap(_.worldSpaceTris(player, camera))
+   val viewTris= generateViewTriangles(worldSpaceTriangles)
+   generateDrawableTriangles(viewTris)
   }
-  
+
   def createFrameIterator: Iterator[Future[Vector[(Triangle, Color)]]] =
     new Iterator[Future[Vector[(Triangle, Color)]]] {
-      private var current = createFrames(Player.pos,Camera.pos)
-      private var current2 = Future{Thread.sleep(1);createFrames(Player.pos,Camera.pos)}.flatten
+      private var current = Future(createFrames(Player.pos, Camera.pos)(ec))
+      // private var current2 = Future{Thread.sleep(1);createFrames(Player.pos,Camera.pos)}.flatten
       def hasNext: Boolean = true
       def next(): Future[Vector[(Triangle, Color)]] = {
         val res = current
-        current = current2
-        current2=Future{Thread.sleep((VisualizerApp.frametimeMulti/1000).toLong);createFrames(Player.pos,Camera.pos)}.flatten
+        current = Future(createFrames(Player.pos,Camera.pos)(ec))
+        // current2=Future{Thread.sleep((VisualizerApp.frametimeMulti/1000).toLong);createFrames(Player.pos,Camera.pos)}.flatten
         return res
       }
     }
@@ -58,7 +40,7 @@ object Rendererer {
     val newTriangles = triangles.par
       .flatMap(tri => {
 
-        val clippedTriangles = calcClipping(tri,zPlane)
+        val clippedTriangles = calcClipping(tri, zPlane)
         clippedTriangles
           .map(n => {
             val newTri = Triangle(
