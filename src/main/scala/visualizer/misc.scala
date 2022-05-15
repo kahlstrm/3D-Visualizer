@@ -1,14 +1,11 @@
 package visualizer
 
 import java.awt.image.BufferedImage
-import java.awt.Toolkit
 import java.awt.Point
 import java.awt.Robot
-import java.awt.Graphics2D
-
+import java.awt.Graphics
 object misc {
-  val emptyCursor = Toolkit
-    .getDefaultToolkit()
+  val emptyCursor = VisualizerApp.top.toolkit
     .createCustomCursor(
       new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB),
       new Point(0, 0),
@@ -23,7 +20,7 @@ object misc {
   def timeBetween(start:Long,end:Long)=(end-start)/1000.0
   
 
-  def drawCrosshair(g: Graphics2D) = {
+  def drawCrosshair(g: Graphics) = {
     val w = VisualizerApp.width
     val h = VisualizerApp.height
     g.drawLine(w / 2, h / 2 + 10, w / 2, h / 2 - 10)

@@ -1,5 +1,5 @@
 package visualizer
-import java.awt.Graphics2D
+import java.awt.Graphics
 import scala.collection.parallel.CollectionConverters._
 import java.awt.Color
 import visualizer.GfxMath._
@@ -58,7 +58,7 @@ object Rendererer {
     val newTriangles = triangles.par
       .flatMap(tri => {
 
-        val clippedTriangles = calcClipping(tri)
+        val clippedTriangles = calcClipping(tri,zPlane)
         clippedTriangles
           .map(n => {
             val newTri = Triangle(
@@ -108,7 +108,7 @@ object Rendererer {
 
   def drawFrames(
       frames: Future[Vector[(Triangle, Color)]],
-      g: Graphics2D,
+      g: Graphics,
       wireFrame: Boolean
   ): Future[Unit] = {
     val p = Promise[Unit]()

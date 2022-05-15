@@ -17,14 +17,14 @@ object VisualizerApp extends SimpleSwingApplication {
     ExecutionContext.global
   var wireFrame = false
 
-  val (walls, playerPos) = FileLoader.loadFile("test.map")
+  val (walls, playerPos) = FileLoader.loadFile("hello.map")
   val worldObjects = walls ++ Vector[Shapes](
-    new Object(
-      FileLoader.loadObject("dragon.obj"),
-      Pos(0, 0, 0),
-      Pos(0, 0, 0),
-      100
-    )
+    // new Object(
+    //   FileLoader.loadObject("dragon.obj"),
+    //   Pos(0, 0, 0),
+    //   Pos(0, 0, 0),
+    //   100
+    // )
   )
   var collisionEnabled = true
   private var frameIterator = Rendererer.createFrameIterator
@@ -43,39 +43,41 @@ object VisualizerApp extends SimpleSwingApplication {
     resizable = false
     val area = new Panel {
       focusable = true
-      override def paintComponent(g: Graphics2D) = {
-        val start = timeMillis()
-        g.setColor(Color.BLACK)
-        g.fillRect(0, 0, width, height)
-        g.setColor(Color.WHITE)
-        Await.ready(
-          drawFrames(frameIterator.next(), g, wireFrame),
-          Duration.Inf
-        )
-        g.setColor(Color.GRAY)
-        g.fillRect(40, 30, 300, 130)
-        g.setColor(Color.WHITE)
-        g.drawString("WASD to move, ESCAPE to close", 50, 50)
-        g.drawString(Player.pos.toString(), 50, 70)
-        g.drawString(Player.camera.toString(), 50, 90)
-        g.drawString(
-          f"frametime: $frametime%.3f AVG: $avgFrametime%.3f s",50, 110)
-        g.drawString(f"frametime MT: $frametimeMulti%.3f s", 50, 130)
-        g.drawString(
-          "press R to toggle wireframe, C to toggle collision",
-          50,
-          150
-        )
-        drawCrosshair(g)
-        val time = timeBetween(start,timeMillis())
-        VisualizerApp.frametime = time
-        frametimes.enqueue(time)
-        while (frametimes.size > 50) {
-          frametimes.dequeue
-        }
-        avgFrametime = frametimes.sum / frametimes.length
-      }
+      peer.setIgnoreRepaint(true)
+      // override def paintComponent(g: Graphics2D) = {
+      //   val start = timeMillis()
+      //   g.setColor(Color.BLACK)
+      //   g.fillRect(0, 0, width, height)
+      //   g.setColor(Color.WHITE)
+      //   Await.ready(
+      //     drawFrames(frameIterator.next(), g, wireFrame),
+      //     Duration.Inf
+      //   )
+      //   g.setColor(Color.GRAY)
+      //   g.fillRect(40, 30, 300, 130)
+      //   g.setColor(Color.WHITE)
+      //   g.drawString("WASD to move, ESCAPE to close", 50, 50)
+      //   g.drawString(Player.pos.toString(), 50, 70)
+      //   g.drawString(Player.camera.toString(), 50, 90)
+      //   g.drawString(
+      //     f"frametime: $frametime%.3f AVG: $avgFrametime%.3f s",50, 110)
+      //   g.drawString(f"frametime MT: $frametimeMulti%.3f s", 50, 130)
+      //   g.drawString(
+      //     "press R to toggle wireframe, C to toggle collision",
+      //     50,
+      //     150
+      //   )
+      //   drawCrosshair(g)
+      //   val time = timeBetween(start,timeMillis())
+      //   VisualizerApp.frametime = time
+      //   frametimes.enqueue(time)
+      //   while (frametimes.size > 50) {
+      //     frametimes.dequeue
+      //   }
+      //   avgFrametime = frametimes.sum / frametimes.length
+      // }
     }
+
     contents = area
     area.cursor_=(emptyCursor)
     listenTo(area.mouse.moves)
@@ -133,9 +135,11 @@ object VisualizerApp extends SimpleSwingApplication {
         }
       }
     }
+    peer.setIgnoreRepaint(true)
+    peer.createBufferStrategy(3)
+    val bs = peer.getBufferStrategy()
 
-    val listener = new ActionListener() {
-      def actionPerformed(e: java.awt.event.ActionEvent) = {
+      def update() = {
         val oldPlayerPos = Player.move()
         if (collisionEnabled) {
           Future {
@@ -147,13 +151,52 @@ object VisualizerApp extends SimpleSwingApplication {
             }
           }
         }
-        area.repaint()
       }
 
+    def createRender() = {
+      val g = bs.getDrawGraphics()
+      val start = timeMillis()
+      g.setColor(Color.BLACK)
+      g.fillRect(0, 0, width+30, height+30)
+      g.setColor(Color.WHITE)
+      Await.ready(
+        drawFrames(frameIterator.next(), g, wireFrame),
+        Duration.Inf
+      )
+      g.setColor(Color.GRAY)
+      g.fillRect(40, 40, 300, 130)
+      g.setColor(Color.WHITE)
+      g.drawString("WASD to move, ESCAPE to close", 50, 50)
+      g.drawString(Player.pos.toString(), 50, 70)
+      g.drawString(Player.camera.toString(), 50, 90)
+      g.drawString(
+        f"frametime: $frametime%.3f AVG: $avgFrametime%.3f s",
+        50,
+        110
+      )
+      g.drawString(f"frametime MT: $frametimeMulti%.3f s", 50, 130)
+      g.drawString(
+        "press R to toggle wireframe, C to toggle collision",
+        50,
+        150
+      )
+      drawCrosshair(g)
+      val time = timeBetween(start, timeMillis())
+      VisualizerApp.frametime = time
+      frametimes.enqueue(time)
+      while (frametimes.size > 50) {
+        frametimes.dequeue
+      }
+      avgFrametime = frametimes.sum / frametimes.length
+      g.dispose()
+      bs.show()
     }
-
-    val timer = new javax.swing.Timer(4, listener)
-    timer.start()
-
+    Future {
+      while (true) {
+        Thread.sleep(3)
+        update()
+        createRender()
+      }
+    }
   }
 }

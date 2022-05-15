@@ -1,8 +1,8 @@
 package visualizer
-import java.awt.Graphics2D
 import java.awt.TexturePaint
 import java.awt.Color
 import scala.collection.parallel.CollectionConverters._
+import java.awt.Graphics
 trait Shapes {
   val position: Pos
   val rotation: Pos
@@ -64,12 +64,12 @@ trait Shapes {
 }
 
 class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) {
-  def draw(g: Graphics2D) = {
+  def draw(g: Graphics) = {
     g.drawLine(pos1.x.toInt, pos1.y.toInt, pos2.x.toInt, pos2.y.toInt)
     g.drawLine(pos2.x.toInt, pos2.y.toInt, pos3.x.toInt, pos3.y.toInt)
     g.drawLine(pos3.x.toInt, pos3.y.toInt, pos1.x.toInt, pos1.y.toInt)
   }
-  def draw(g: Graphics2D, color: Color) = {
+  def draw(g: Graphics, color: Color) = {
     g.setColor(color)
     g.fillPolygon(
       Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
@@ -77,16 +77,8 @@ class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) {
       3
     )
   }
-  def draw(g: Graphics2D, color: Int) = {
+  def draw(g: Graphics, color: Int) = {
     g.setColor(new Color(color, color, color))
-    g.fillPolygon(
-      Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
-      Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
-      3
-    )
-  }
-  def draw(g: Graphics2D, texture: TexturePaint) = {
-    g.setPaint(texture)
     g.fillPolygon(
       Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
       Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
@@ -105,7 +97,7 @@ object Triangle {
     new Triangle(tri.pos1, tri.pos2, tri.pos3)
   }
 }
-class Object(
+case class Object(
     objInfo: (Vector[Pos], Vector[Triangle]),
     val position: Pos,
     val rotation: Pos,
