@@ -7,7 +7,7 @@ trait Shapes {
   val position: Pos
   val rotation: Pos
   val poses: Vector[Pos]
-  def worldSpacePos(player:Pos) = {
+  def worldSpacePos(player: Pos) = {
     poses.par.map(pos =>
       pos
         .rotate(rotation)
@@ -15,7 +15,7 @@ trait Shapes {
         .translate(-player)
     )
   }
-  def worldSpaceTris(player:Pos,camera:Pos) = {
+  def worldSpaceTris(player: Pos, camera: Pos) = {
     triangles.par.map(tri => {
       Triangle(
         tri.pos1
@@ -85,6 +85,11 @@ class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) {
       3
     )
   }
+  def foreach[U](f: Pos => U): Unit = {
+    f(pos1)
+    f(pos2)
+    f(pos3)
+  }
   override def toString(): String =
     pos1.toString + pos2.toString + pos3.toString()
 }
@@ -117,12 +122,12 @@ case class Object(
     var maxY = firstPos.y
     var maxZ = firstPos.z
     poses.foreach(pos => {
-      minX = Math.min(pos.x,minX)
-      minY = Math.min(pos.y,minY)
-      minZ = Math.min(pos.z,minZ)
-      maxX = Math.max(pos.x,maxX)
-      maxY = Math.max(pos.y,maxY)
-      maxZ = Math.max(pos.z,maxZ)
+      minX = Math.min(pos.x, minX)
+      minY = Math.min(pos.y, minY)
+      minZ = Math.min(pos.z, minZ)
+      maxX = Math.max(pos.x, maxX)
+      maxY = Math.max(pos.y, maxY)
+      maxZ = Math.max(pos.z, maxZ)
     })
     (Pos(minX, minY, minZ), Pos(maxX, maxY, maxZ))
   }

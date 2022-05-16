@@ -7,20 +7,20 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent._
 import scala.util.Success
 import scala.util.Failure
-import java.util.concurrent.Executors
 import scala.concurrent.duration.Duration
 object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
-
   def createFrames(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
   ): Vector[(Triangle, Color)] = {
     val start = misc.timeNanos()
     val worldSpaceTriangles =
       VisualizerApp.worldObjects.flatMap(_.worldSpaceTris(player, camera))
-    val viewTris = generateViewTriangles(worldSpaceTriangles)
-    generateDrawableTriangles(viewTris)
+      val viewTris = generateViewTriangles(worldSpaceTriangles)
+      val res = generateDrawableTriangles(viewTris)
+      VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
+      res
   }
 
   val frameIterator: Iterator[Future[Vector[(Triangle, Color)]]] =
@@ -29,7 +29,7 @@ object Rendererer {
       def hasNext: Boolean = true
       def next(): Future[Vector[(Triangle, Color)]] = {
         val res = current
-        current=Future(createFrames(Player.pos,Camera.pos))
+        current = Future(createFrames(Player.pos, Camera.pos))
         return res
       }
     }
@@ -38,8 +38,7 @@ object Rendererer {
 
     val newTriangles = triangles.par
       .flatMap(tri => {
-
-        val clippedTriangles = calcClipping(tri, zPlane)
+        val clippedTriangles = calcClipping(tri, zPlane, zPlaneNormal)
         clippedTriangles
           .map(n => {
             val newTri = Triangle(
@@ -62,6 +61,7 @@ object Rendererer {
   def generateDrawableTriangles(
       triangles: Vector[Triangle]
   ): Vector[(Triangle, Color)] = {
+    VisualizerApp.triangleCount = triangles.size
     if (VisualizerApp.wireFrame) {
       triangles.map(tri => {
         (tri, Color.WHITE)
@@ -97,19 +97,20 @@ object Rendererer {
       triangles: Future[Vector[(Triangle, Color)]],
       g: Graphics,
       wireFrame: Boolean
-  ): Future[Unit] = {
+  ): Unit = {
     val p = Promise[Unit]()
     triangles.onComplete {
       case Success(drawFrame) =>
         p.completeWith(
-          Future(
+          Future {
             if (wireFrame) drawFrame.foreach(_._1.draw(g))
-            else drawFrame.foreach(n => n._1.draw(g, n._2))
-          )
+            else drawFrame.foreach { case (tri, col) => tri.draw(g, col) }
+          }
         )
       case Failure(exception) => throw exception
     }
-    Await.ready(p.future,Duration.Inf)
+    Await.ready(p.future, Duration.Inf)
+    return
   }
 
 }
