@@ -8,28 +8,29 @@ import scala.concurrent._
 import scala.util.Success
 import scala.util.Failure
 import java.util.concurrent.Executors
+import scala.concurrent.duration.Duration
 object Rendererer {
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
+  implicit val ec: ExecutionContext =
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
 
   def createFrames(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
-  ): Vector[(Triangle, Color)]= { 
+  ): Vector[(Triangle, Color)] = {
     val start = misc.timeNanos()
-    val repainter = Promise[Vector[Triangle]]
-    val worldSpaceTriangles = 
+    val worldSpaceTriangles =
       VisualizerApp.worldObjects.flatMap(_.worldSpaceTris(player, camera))
-   val viewTris= generateViewTriangles(worldSpaceTriangles)
-   generateDrawableTriangles(viewTris)
+    val viewTris = generateViewTriangles(worldSpaceTriangles)
+    generateDrawableTriangles(viewTris)
   }
 
-  def createFrameIterator: Iterator[Future[Vector[(Triangle, Color)]]] =
+  val frameIterator: Iterator[Future[Vector[(Triangle, Color)]]] =
     new Iterator[Future[Vector[(Triangle, Color)]]] {
       private var current = Future(createFrames(Player.pos, Camera.pos)(ec))
       // private var current2 = Future{Thread.sleep(1);createFrames(Player.pos,Camera.pos)}.flatten
       def hasNext: Boolean = true
       def next(): Future[Vector[(Triangle, Color)]] = {
         val res = current
-        current = Future(createFrames(Player.pos,Camera.pos)(ec))
+        current = Future(createFrames(Player.pos, Camera.pos)(ec))
         // current2=Future{Thread.sleep((VisualizerApp.frametimeMulti/1000).toLong);createFrames(Player.pos,Camera.pos)}.flatten
         return res
       }
@@ -84,17 +85,23 @@ object Rendererer {
           val color = (((225 / distanceFromZPlane).toInt + 30) * Math
             .sqrt(cosBetweenTriandZ)).toInt
           (tri, new Color(color, color, color))
-
         })
   }
-
-  def drawFrames(
-      frames: Future[Vector[(Triangle, Color)]],
+  def drawFrame(
+      triangles: Vector[(Triangle, Color)],
+      g: Graphics,
+      wireFrame: Boolean
+  ): Unit = {
+    if (wireFrame) triangles.foreach(_._1.draw(g))
+    else triangles.foreach(n => n._1.draw(g, n._2))
+  }
+  def drawFramesFuture(
+      triangles: Future[Vector[(Triangle, Color)]],
       g: Graphics,
       wireFrame: Boolean
   ): Future[Unit] = {
     val p = Promise[Unit]()
-    frames.onComplete {
+    triangles.onComplete {
       case Success(drawFrame) =>
         p.completeWith(
           Future(
@@ -104,7 +111,7 @@ object Rendererer {
         )
       case Failure(exception) => throw exception
     }
-    p.future
+    Await.ready(p.future,Duration.Inf)
   }
 
 }

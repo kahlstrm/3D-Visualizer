@@ -9,7 +9,7 @@ object Player {
   }
   private var time = misc.timeNanos()
   def move(): Pos = {
-    val movementSpeed = 1000 * misc.timeBetween(time, misc.timeNanos())
+    val movementSpeed = if(speedUp) 4000 * misc.timeBetween(time, misc.timeNanos()) else 1000 * misc.timeBetween(time, misc.timeNanos())
     time = misc.timeNanos()
     val oldPos = pos
     var newPos = pos
@@ -46,5 +46,6 @@ object Player {
   var moveRight = false
   var moveUp = false
   var moveDown = false
+  var speedUp=false
   override def toString(): String = s"Player is currently at ${pos}"
 }

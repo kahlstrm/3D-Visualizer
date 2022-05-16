@@ -19,7 +19,7 @@ object VisualizerApp extends SimpleSwingApplication {
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val worldObjects = walls ++ Vector[Shapes](
     new Object(
-      FileLoader.loadObject("homer.obj"),
+      FileLoader.loadObject("dragon.obj"),
       Pos(0, 0, 0),
       Pos(0, 0, 0),
       100
@@ -28,21 +28,18 @@ object VisualizerApp extends SimpleSwingApplication {
   var running = true
   var wireFrame = false
   var collisionEnabled = true
-  private var frameIterator = Rendererer.createFrameIterator
   var frametime = 0.0
-  val frametimes = Queue[Double]()
-  var frametimeMulti = 0.0
-  var avgFrametime = 0.0
+  var frames = 0
   val width = 1280
   val height = 800
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
-  def top = new MainFrame {
+  val top = new MainFrame {
     title = "3d-visualizer"
     minimumSize = new Dimension(width, windowHeight)
     resizable = false
-    def area = new Panel {
+    val area = new Panel {
       focusable = true
       peer.setIgnoreRepaint(true)
       cursor_=(emptyCursor)
@@ -53,7 +50,8 @@ object VisualizerApp extends SimpleSwingApplication {
       reactions += {
         case KeyPressed(_, key, _, _) => {
           key match {
-            case Key.Escape =>println("bye"); running = false;scala.sys.exit(0)
+            case Key.Escape =>
+              println("bye"); running = false; scala.sys.exit(0)
             case Key.W     => Player.moveForward = true
             case Key.S     => Player.moveBackward = true
             case Key.A     => Player.moveLeft = true
@@ -104,80 +102,72 @@ object VisualizerApp extends SimpleSwingApplication {
       }
     }
     contents = area
-    peer.setIgnoreRepaint(true)
-    peer.createBufferStrategy(3)
-    val bs = peer.getBufferStrategy()
-    def runGameNow() = {
-      while (running) {
-        update()
-        render()
-      }
-      thread.join()
+
+  }
+
+  top.peer.createBufferStrategy(3)
+  top.peer.setIgnoreRepaint(true)
+  val bs = top.peer.getBufferStrategy()
+
+  def runGameNow() = {
+    while (running) {
+      update()
+      render()
+      frames += 1;
     }
-    def update() = {
-      val oldPlayerPos = Player.move()
-      if (collisionEnabled) {
-        Future {
-          val isInsideWall =
-            !worldObjects.forall(!_.isInside(Player.pos))
-          if (isInsideWall) {
-            println("siellä on ihminen sisällä!")
-            Player.updatePos(oldPlayerPos)
-          }
+  }
+  def update() = {
+    val oldPlayerPos = Player.move()
+    if (collisionEnabled) {
+      Future {
+        val isInsideWall =
+          !worldObjects.forall(!_.isInside(Player.pos))
+        if (isInsideWall) {
+          println("siellä on ihminen sisällä!")
+          Player.updatePos(oldPlayerPos)
         }
       }
     }
-
-    def render() = {
-      val g = bs.getDrawGraphics()
-      val start = timeNanos()
-      g.setColor(Color.BLACK)
-      g.fillRect(0, 0, width, windowHeight)
-      g.setColor(Color.WHITE)
-      Await.ready(
-        drawFrames(frameIterator.next(), g, wireFrame),
-        Duration.Inf
-      )
-      g.setColor(Color.GRAY)
-      g.fillRect(40, 40, 300, 130)
-      g.setColor(Color.WHITE)
-      g.drawString("WASD to move, ESCAPE to close", 50, 60)
-      g.drawString(Player.pos.toString(), 50, 80)
-      g.drawString(Player.camera.toString(), 50, 100)
-      g.drawString(
-        f"frametime: $frametime%.3f AVG: $avgFrametime%.3f s",
-        50,
-        120
-      )
-      g.drawString(f"frametime MT: $frametimeMulti%.3f s", 50, 140)
-      g.drawString(
-        "press R to toggle wireframe, C to toggle collision",
-        50,
-        160
-      )
-      drawCrosshair(g)
-      val time = timeBetween(start, timeNanos())
-      VisualizerApp.frametime = time
-      frametimes.enqueue(time)
-      while (frametimes.size > 50) {
-        frametimes.dequeue
-      }
-      avgFrametime = frametimes.sum / frametimes.length
-      g.dispose()
-      bs.show()
+  }
+  def render() = {
+    val g = bs.getDrawGraphics()
+    val start = timeNanos()
+    g.setColor(Color.BLACK)
+    g.fillRect(0, 0, width, windowHeight)
+    g.setColor(Color.WHITE)
+    drawFrame(createFrames(Player.pos,Player.camera.pos),g,wireFrame)
+    g.setColor(Color.GRAY)
+    g.fillRect(40, 40, 300, 130)
+    g.setColor(Color.WHITE)
+    g.drawString("WASD to move, ESCAPE to close", 50, 60)
+    g.drawString(Player.pos.toString(), 50, 80)
+    g.drawString(Player.camera.toString(), 50, 100)
+    g.drawString(
+      f"frametime: $frametime%.3f s",
+      50,
+      120
+    )
+    g.drawString(f"frames: $frames", 50, 140)
+    g.drawString(
+      "press R to toggle wireframe, C to toggle collision",
+      50,
+      160
+    )
+    drawCrosshair(g)
+    val time = timeBetween(start, timeNanos())
+    VisualizerApp.frametime = time
+    g.dispose()
+    bs.show()
+  }
+  val gameThread = new Thread(Runnable)
+  gameThread.start()
+}
+object Runnable extends Runnable {
+  def run(): Unit = {
+    try {
+      VisualizerApp.runGameNow
+    } catch {
+      case e: InterruptedException =>
     }
-
-    object Runnable extends Runnable{
-    def run(): Unit ={
-      try{
-        runGameNow  
-      }catch{
-        case e:InterruptedException=>
-      }
-    } 
-    }
-    val thread = new Thread(Runnable)
-    thread.start()
-    
   }
 }
