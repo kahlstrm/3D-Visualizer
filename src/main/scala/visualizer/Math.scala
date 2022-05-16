@@ -6,10 +6,10 @@ object GfxMath {
   val height = VisualizerApp.height
   val fovinRadians = VisualizerApp.fov * math.Pi / 180.0
   val zNear = (width / 2.0) / tan(fovinRadians / 2.0)
-  val zPlane=Pos(0,0,1)
-  val zPlaneNormal=Pos(0,0,1)
+  val zPlane = Pos(0, 0, 1)
+  val zPlaneNormal = Pos(0, 0, 1)
 
-  //calculate surface Normal https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
+  // calculate surface Normal https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
   def getNormal(tri: Triangle): Pos = {
     val a = Pos(
       tri.pos2.x - tri.pos1.x,
@@ -30,126 +30,68 @@ object GfxMath {
   def intersectPointWithZ(pos1: Pos, pos2: Pos): Pos = {
     val u = pos2 + (-pos1)
     val dot = zPlaneNormal.dotProduct(u)
-    val w=pos1+(-zPlane)
+    val w = pos1 + (-zPlane)
     val factor = -((zPlaneNormal.dotProduct(w)) / dot)
     val mul = (u * factor)
-    return  mul+pos1
+    return mul + pos1
   }
-  def calcClipping(tri: Triangle,plane:Pos): Vector[Triangle] = {
-    if (tri.pos1.z < zPlane.z && tri.pos2.z < zPlane.z && tri.pos3.z < zPlane.z) {
-      return Vector[Triangle]()
-    }
-    if (tri.pos1.z > zPlane.z && tri.pos2.z > zPlane.z && tri.pos3.z > zPlane.z) {
+  // def intersectPointWithPlane(pos1: Pos, pos2: Pos): Pos = {
+  //   val u = pos2 + (-pos1)
+  //   val dot = zPlaneNormal.dotProduct(u)
+  //   val w = pos1 + (-zPlane)
+  //   val factor = -((zPlaneNormal.dotProduct(w)) / dot)
+  //   val mul = (u * factor)
+  //   return mul + pos1
+  // }
+  def calcClipping(
+      tri: Triangle,
+      plane: Pos,
+      planeNormal: Pos
+  ): Vector[Triangle] = {
+    var pointsOut = Vector[Pos]()
+    var pointsIn = Vector[Pos]()
+    tri.foreach(pos =>
+      if (pos.z < zPlane.z) {
+        pointsOut = pointsOut :+ pos
+      } else pointsIn = pointsIn :+ pos
+    )
+    if (pointsIn.size == 3) {
       return Vector[Triangle](tri)
     }
-    if (tri.pos1.z < zPlane.z && tri.pos2.z < zPlane.z) {
-      val newpos1 = intersectPointWithZ(tri.pos1, tri.pos3)
-      val newpos2 = intersectPointWithZ(tri.pos2, tri.pos3)
+    if (pointsIn.isEmpty) {
+      return Vector[Triangle]()
+    }
+    if (pointsIn.size == 2) {
+      val newpos1 = intersectPointWithZ(pointsOut(0), pointsIn(0))
+      val newpos2 = intersectPointWithZ(pointsOut(0), pointsIn(1))
       return Vector[Triangle](
         Triangle(
           newpos1,
           newpos2,
-          tri.pos3
-        )
-      )
-    }
-    if (tri.pos1.z < zPlane.z && tri.pos3.z < zPlane.z) {
-      val newpos1 = intersectPointWithZ(tri.pos1, tri.pos2)
-      val newpos3 = intersectPointWithZ(tri.pos3, tri.pos2)
-      return Vector[Triangle](
-        Triangle(
-          newpos1,
-          tri.pos2,
-          newpos3
-        )
-      )
-    }
-    if (tri.pos2.z < zPlane.z && tri.pos3.z < zPlane.z) {
-      val newpos2 = intersectPointWithZ(tri.pos2, tri.pos1)
-      val newpos3 = intersectPointWithZ(tri.pos3, tri.pos1)
-      return Vector[Triangle](
-        Triangle(
-          tri.pos1,
-          newpos2,
-          newpos3
-        )
-      )
-    }
-    if (tri.pos1.z < zPlane.z) {
-      val newpos1 = intersectPointWithZ(tri.pos1,tri.pos3)
-      val newpos2 = intersectPointWithZ(tri.pos1,tri.pos2)
-      return Vector[Triangle](
-        Triangle(
-          newpos1,
-          tri.pos2,
-          tri.pos3
+          pointsIn(0)
         ),
         Triangle(
-          newpos2,
-          tri.pos2,
-          tri.pos3
-        )
-      )
-    }
-    if (tri.pos2.z < zPlane.z) {
-      val newpos1 = intersectPointWithZ(tri.pos2,tri.pos1)
-      val newpos2 = intersectPointWithZ(tri.pos2,tri.pos3)
-      return Vector[Triangle](
-        Triangle(
-          tri.pos1,
           newpos1,
-          tri.pos3
-        ),
-        Triangle(
-          tri.pos1,
           newpos2,
-          tri.pos3
+          pointsIn(1)
         )
       )
     }
-    if (tri.pos3.z < zPlane.z) {
-      val newpos1 = intersectPointWithZ(tri.pos3,tri.pos1)
-      val newpos2 = intersectPointWithZ(tri.pos3,tri.pos2)
+    if (pointsIn.size == 1) {
+      val newpos1 = intersectPointWithZ(pointsOut(0), pointsIn(0))
+      val newpos2 = intersectPointWithZ(pointsOut(1), pointsIn(0))
       return Vector[Triangle](
         Triangle(
-          tri.pos1,
-          tri.pos2,
-          newpos1
-        ),
-        Triangle(
-          tri.pos1,
-          tri.pos2,
-          newpos2
+          newpos1,
+          newpos2,
+          pointsIn(0)
         )
       )
     }
+
     Vector[Triangle](tri)
   }
-  // val proj = Array.ofDim[Double](4, 4)
-  // proj(0)(0) = aspectRatio * fovMultiplier
-  // proj(1)(1) = fovMultiplier
-  // proj(2)(2) = zMultiplier
-  // proj(3)(2) = -zNear * zMultiplier
-  // proj(2)(3) = 1.0
 
-  // println(proj(2)(2))
-  // println(proj(3)(3))
-  // def multiplyPos(pos: Pos, m: Array[Array[Double]]): Pos = {
-
-  //   var newX = pos.x * m(0)(0) + pos.y * m(1)(0) + pos.z * m(2)(0) + m(3)(0)
-  //   var newY = pos.x * m(0)(1) + pos.y * m(1)(1) + pos.z * m(2)(1) + m(3)(1)
-  //   var newZ = pos.x * m(0)(2) + pos.y * m(1)(2) + pos.z * m(2)(2) + m(3)(2)
-  //   val w = pos.x * m(0)(3) + pos.y * m(1)(3) + pos.z * m(2)(3) + m(3)(3)
-  //   println(newY)
-  //   println(w)
-  //   if (w != 0) {
-  //     newX /= w
-  //     newY /= w
-  //     newZ /= w
-  //   }
-  //   println(newY)
-  //   Pos(newX, newZ, newY)
-  // }
 }
 
 class Pos(
@@ -187,7 +129,7 @@ class Pos(
       this.z * mul
     )
   }
-  def /(div:Double):Pos={
+  def /(div: Double): Pos = {
     Pos(
       this.x / div,
       this.y / div,
@@ -197,14 +139,15 @@ class Pos(
   def dotProduct(that: Pos): Double = {
     this.x * that.x + this.y * that.y + this.z * that.z
   }
-  def crossProduct(that:Pos):Pos={
+  def crossProduct(that: Pos): Pos = {
     Pos(
-    this.y * that.z - this.z * that.y,
-    this.z * that.x - this.x * that.z,
-    this.x * that.y - this.y * that.x)
+      this.y * that.z - this.z * that.y,
+      this.z * that.x - this.x * that.z,
+      this.x * that.y - this.y * that.x
+    )
   }
-  def cosBetween(that:Pos):Double={
-    this.dotProduct(that)/(this.length*that.length)
+  def cosBetween(that: Pos): Double = {
+    this.dotProduct(that) / (this.length * that.length)
   }
 
   def +(pos: Pos) = translate(pos)
@@ -230,34 +173,34 @@ class Pos(
       this.z
     )
   }
-  //fpsRotation matrix, took way too long to got this working
+  // fpsRotation matrix, took way too long to got this working
   // rotates the view by a specified angle, this is applied twice
   // first for the x-axis, then for the y-axis
   // https://www.3dgep.com/understanding-the-view-matrix/
-  def xyzAxes(pitch:Double,y:Double)={
-    val yaw=y+Math.PI//get yaw range between 0-360
-    val cosP=cos(pitch)
-    val sinP=sin(pitch)
-    val cosY=cos(yaw)
-    val sinY=sin(yaw)
-    val xAxis = -Pos(cosY,0,-sinY) //fix up angles
-    val yAxis = Pos(sinY*sinP,cosP,cosY*sinP)
-    val zAxis= -Pos(sinY*cosP,-sinP,cosP*cosY)
-    (xAxis,yAxis,zAxis)
+  def xyzAxes(pitch: Double, y: Double) = {
+    val yaw = y + Math.PI // get yaw range between 0-360
+    val cosP = cos(pitch)
+    val sinP = sin(pitch)
+    val cosY = cos(yaw)
+    val sinY = sin(yaw)
+    val xAxis = -Pos(cosY, 0, -sinY) // fix up angles
+    val yAxis = Pos(sinY * sinP, cosP, cosY * sinP)
+    val zAxis = -Pos(sinY * cosP, -sinP, cosP * cosY)
+    (xAxis, yAxis, zAxis)
   }
-  def fpsRotate(pitch:Double,y:Double):Pos={
-    val (xAxis,yAxis,zAxis)=xyzAxes(pitch,y)
+  def fpsRotate(pitch: Double, y: Double): Pos = {
+    val (xAxis, yAxis, zAxis) = xyzAxes(pitch, y)
     Pos(
-      this.x*xAxis.x+this.y*yAxis.x+this.z*zAxis.x ,
-      this.x*xAxis.y+this.y*yAxis.y+this.z*zAxis.y,
-      this.x*xAxis.z+this.y*yAxis.z+this.z*zAxis.z
+      this.x * xAxis.x + this.y * yAxis.x + this.z * zAxis.x,
+      this.x * xAxis.y + this.y * yAxis.y + this.z * zAxis.y,
+      this.x * xAxis.z + this.y * yAxis.z + this.z * zAxis.z
     )
   }
   // def cameraRotate(target:Pos,upVec:Pos):Pos = {
   //   val forwardVec= target.unit
   //   val right = upVec.unit.crossProduct(forwardVec)
   //   val up = forwardVec.crossProduct(right)
-   
+
   //   Pos(
   //     this.x*right.x+this.y*up.x+this.z*forwardVec.x,
   //     this.x*right.y+this.y*up.y+this.z*forwardVec.y,
@@ -267,28 +210,28 @@ class Pos(
   // def cameraRotate():Pos ={
   //   this.rotate(Player.camera.cameraVector())
   // }
-  def dropX():Pos ={
+  def dropX(): Pos = {
     Pos(
       0,
       this.y,
       this.z
     )
   }
-  def dropY():Pos ={
+  def dropY(): Pos = {
     Pos(
       this.x,
       0,
       this.z
     )
   }
-  def dropZ():Pos ={
+  def dropZ(): Pos = {
     Pos(
       this.x,
       this.y,
       0
     )
   }
-  def unit():Pos=if (this.length==0) this else this/this.length
+  def unit(): Pos = if (this.length == 0) this else this / this.length
   def rotate(rotation: Pos): Pos = {
     Pos(
       this.x * (cos(rotation.z) * cos(rotation.y)) +
@@ -313,29 +256,29 @@ class Pos(
 
   override def toString(): String = f"x: $x%2.2f y: $y%2.2f z: $z%2.2f"
 }
-object Camera extends Pos(0,0,0) {
-  def pos()=this+Pos(0,0,0)
-  //forwardVector for camera movement
+object Camera extends Pos(0, 0, 0) {
+  def pos() = this + Pos(0, 0, 0)
+  // forwardVector for camera movement
   def forwardVector = {
     Pos(
-      -cos(y)*sin(x),
+      -cos(y) * sin(x),
       -sin(y),
-      cos(y)*cos(x)
+      cos(y) * cos(x)
     ).unit()
   }
-  //rightVector for camera movement
-  def rightVector={
+  // rightVector for camera movement
+  def rightVector = {
     Pos(
-      -sin(x-Math.PI/2),
+      -sin(x - Math.PI / 2),
       0,
-      cos(x-Math.PI/2)
+      cos(x - Math.PI / 2)
     ).unit()
   }
-  //upvector, always orthogonal from forwad and right
-  def testUp={
+  // upvector, always orthogonal from forwad and right
+  def testUp = {
     forwardVector.crossProduct(rightVector)
   }
-  def cameraVector():Pos={
+  def cameraVector(): Pos = {
     Pos(
       this.y,
       this.x,
@@ -355,14 +298,13 @@ object Camera extends Pos(0,0,0) {
   //   // -sin(x)*cos(y)
   //   // ).unit()
   // }
-  override def toString(): String ={
+  override def toString(): String = {
     val cam = this.cameraVector()
-    val x=180 / Math.PI * cam.x
+    val x = 180 / Math.PI * cam.x
     val y = 180 / Math.PI * cam.y
     val z = 180 / Math.PI * cam.z
-  f"x: $x%2.2f y: $y%2.2f z: $z%2.2f"
+    f"x: $x%2.2f y: $y%2.2f z: $z%2.2f"
   }
-    
 }
 
 object Pos {
@@ -373,7 +315,6 @@ object Pos {
     new Pos(pos.x, pos.y, pos.z)
   }
 }
-
 
 // A test for intersectPoint calculations
 // object test extends App {
