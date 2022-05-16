@@ -135,7 +135,8 @@ object VisualizerApp extends SimpleSwingApplication {
     g.setColor(Color.BLACK)
     g.fillRect(0, 0, width, windowHeight)
     g.setColor(Color.WHITE)
-    drawFrame(createFrames(Player.pos,Player.camera.pos),g,wireFrame)
+    Await.ready(drawFramesFuture(frameIterator.next(),g,wireFrame),Duration.Inf)
+    // drawFrame(createFrames(Player.pos,Player.camera.pos),g,wireFrame)
     g.setColor(Color.GRAY)
     g.fillRect(40, 40, 300, 130)
     g.setColor(Color.WHITE)
@@ -159,10 +160,10 @@ object VisualizerApp extends SimpleSwingApplication {
     g.dispose()
     bs.show()
   }
-  val gameThread = new Thread(Runnable)
+  val gameThread = new Thread(Runner)
   gameThread.start()
 }
-object Runnable extends Runnable {
+object Runner extends Runnable {
   def run(): Unit = {
     try {
       VisualizerApp.runGameNow

@@ -11,7 +11,7 @@ import java.util.concurrent.Executors
 import scala.concurrent.duration.Duration
 object Rendererer {
   implicit val ec: ExecutionContext =
-    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(4))
+    ExecutionContext.global
 
   def createFrames(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
@@ -26,12 +26,10 @@ object Rendererer {
   val frameIterator: Iterator[Future[Vector[(Triangle, Color)]]] =
     new Iterator[Future[Vector[(Triangle, Color)]]] {
       private var current = Future(createFrames(Player.pos, Camera.pos)(ec))
-      // private var current2 = Future{Thread.sleep(1);createFrames(Player.pos,Camera.pos)}.flatten
       def hasNext: Boolean = true
       def next(): Future[Vector[(Triangle, Color)]] = {
         val res = current
-        current = Future(createFrames(Player.pos, Camera.pos)(ec))
-        // current2=Future{Thread.sleep((VisualizerApp.frametimeMulti/1000).toLong);createFrames(Player.pos,Camera.pos)}.flatten
+        current=Future(createFrames(Player.pos,Camera.pos))
         return res
       }
     }
