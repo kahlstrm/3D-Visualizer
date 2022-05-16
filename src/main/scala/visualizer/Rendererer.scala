@@ -13,21 +13,21 @@ object Rendererer {
     ExecutionContext.global
   def createFrames(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
-  ): Vector[(Triangle, Color)] = {
+  ): Vector[Triangle] = {
     val start = misc.timeNanos()
     val worldSpaceTriangles =
       VisualizerApp.worldObjects.flatMap(_.worldSpaceTris(player, camera))
-      val viewTris = generateViewTriangles(worldSpaceTriangles)
-      val res = generateDrawableTriangles(viewTris)
-      VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
-      res
+    val viewTris = generateViewTriangles(worldSpaceTriangles)
+    val res = generateDrawableTriangles(viewTris)
+    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
+    res
   }
 
-  val frameIterator: Iterator[Future[Vector[(Triangle, Color)]]] =
-    new Iterator[Future[Vector[(Triangle, Color)]]] {
+  val frameIterator: Iterator[Future[Vector[Triangle]]] =
+    new Iterator[Future[Vector[Triangle]]] {
       private var current = Future(createFrames(Player.pos, Camera.pos)(ec))
       def hasNext: Boolean = true
-      def next(): Future[Vector[(Triangle, Color)]] = {
+      def next(): Future[Vector[Triangle]] = {
         val res = current
         current = Future(createFrames(Player.pos, Camera.pos))
         return res
@@ -38,6 +38,7 @@ object Rendererer {
 
     val newTriangles = triangles.par
       .flatMap(tri => {
+        val col = getColor(tri)
         val clippedTriangles = calcClipping(tri, zPlane, zPlaneNormal)
         clippedTriangles
           .map(n => {
@@ -60,41 +61,32 @@ object Rendererer {
   }
   def generateDrawableTriangles(
       triangles: Vector[Triangle]
-  ): Vector[(Triangle, Color)] = {
+  ): Vector[Triangle] = {
     VisualizerApp.triangleCount = triangles.size
     if (VisualizerApp.wireFrame) {
-      triangles.map(tri => {
-        (tri, Color.WHITE)
-      })
-    } else
       triangles
+    } else {
+      val sorted = triangles
         .sortBy(tri => {
           -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3
         })
-        .map(tri => {
-          val normal = getNormal(tri).unit()
-          val avgPos = (tri.pos1 + tri.pos2 + tri.pos3) / 3
-          // val playerPos =
-          // Pos(VisualizerApp.width / 2, VisualizerApp.height / 2, 0)
-          // val r = (avgPos).distance(playerPos) // "flashlight"
-          val cosBetweenTriandZ = normal.dotProduct(Pos(0, 0, -1))
-          // val rSquaredAndConstant = (Math.pow(r, 2) / 10000 + 1)
-          val distanceFromZPlane = (avgPos).z / 2000 + 1 // "ambient light"
-          val color = (((225 / distanceFromZPlane).toInt + 30) * Math
-            .sqrt(cosBetweenTriandZ)).toInt
-          (tri, new Color(color, color, color))
-        })
+      sorted.foreach(tri => {
+        val color = getColor(tri)
+        tri.color = new Color(color, color, color)
+      })
+      sorted
+    }
   }
   def drawFrame(
-      triangles: Vector[(Triangle, Color)],
+      triangles: Vector[Triangle],
       g: Graphics,
       wireFrame: Boolean
   ): Unit = {
-    if (wireFrame) triangles.foreach(_._1.draw(g))
-    else triangles.foreach(n => n._1.draw(g, n._2))
+    if (wireFrame) triangles.foreach(_.draw(g))
+    else triangles.foreach(tri => tri.draw(g, tri.color))
   }
   def drawFramesFuture(
-      triangles: Future[Vector[(Triangle, Color)]],
+      triangles: Future[Vector[Triangle]],
       g: Graphics,
       wireFrame: Boolean
   ): Unit = {
@@ -103,8 +95,8 @@ object Rendererer {
       case Success(drawFrame) =>
         p.completeWith(
           Future {
-            if (wireFrame) drawFrame.foreach(_._1.draw(g))
-            else drawFrame.foreach { case (tri, col) => tri.draw(g, col) }
+            if (wireFrame) drawFrame.foreach(_.draw(g))
+            else drawFrame.foreach { case tri => tri.draw(g, tri.color) }
           }
         )
       case Failure(exception) => throw exception
