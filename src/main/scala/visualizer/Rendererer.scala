@@ -38,8 +38,7 @@ object Rendererer {
 
     val newTriangles = triangles.par
       .flatMap(tri => {
-        val col = getColor(tri)
-        val clippedTriangles = calcClipping(tri, zPlane, zPlaneNormal)
+        val clippedTriangles = calcClipping(tri, Pos(0,0,0), zPlaneNormal)
         clippedTriangles
           .map(n => {
             val newTri = Triangle(
@@ -51,8 +50,13 @@ object Rendererer {
                 .center(),
               n.pos3
                 .perspective()
-                .center()
+                .center(),
+              n.color
             )
+            if (newTri.color == null) newTri.color = {
+              val col = getColor(newTri)
+              new Color(col, col, col)
+            }
             newTri
           })
           .filter(getNormal(_).z < 0)
@@ -71,8 +75,11 @@ object Rendererer {
           -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3
         })
       sorted.foreach(tri => {
-        val color = getColor(tri)
-        tri.color = new Color(color, color, color)
+        if (tri.color == null) {
+
+          // val color = getColor(tri)
+          // tri.color = new Color(color, color, color)
+        }
       })
       sorted
     }

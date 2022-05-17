@@ -68,60 +68,110 @@ object GfxMath {
       plane: Pos,
       planeNormal: Pos
   ): Vector[Triangle] = {
-    var pointsOut = Vector[Pos]()
-    var pointsIn = Vector[Pos]()
-
-    tri.foreach(pos => {
-      val unitPos = pos.unit()
-      val planeNormalUnit = planeNormal.unit()
-      val distanceFromPlane =
-        (planeNormalUnit.x * pos.x + planeNormalUnit.y * pos.y + planeNormalUnit.z * pos.z - planeNormalUnit
-          .dotProduct(plane));
-      if (distanceFromPlane < 0) {
-        pointsOut = pointsOut :+ pos
-      } else pointsIn = pointsIn :+ pos
-    })
-    if (pointsIn.size == 3) {
-      return Vector[Triangle](tri)
+    val planeNormalUnit = planeNormal.unit()
+    def distanceFromPlane(pos: Pos) = {
+      (planeNormalUnit.x * pos.x + planeNormalUnit.y * pos.y + planeNormalUnit.z * pos.z - planeNormalUnit
+        .dotProduct(plane));
     }
-    if (pointsIn.isEmpty) {
+    val dist1 = distanceFromPlane(tri.pos1)
+    val dist2 = distanceFromPlane(tri.pos2)
+    val dist3 = distanceFromPlane(tri.pos3)
+    if (dist1 < 0 && dist2 < 0 && dist3 < 0) {
       return Vector[Triangle]()
     }
-    if (pointsIn.size == 2) {
-      val newpos1 =
-        intersectPointWithPlane(pointsOut(0), pointsIn(0), plane, planeNormal)
-      val newpos2 =
-        intersectPointWithPlane(pointsOut(0), pointsIn(1), plane, planeNormal)
+    if (dist1 > 0 && dist2 > 0 && dist3 > 0) {
+      return Vector[Triangle](tri)
+    }
+    if (dist1 < 0 && dist2 < 0) {
+      val newpos1 = intersectPointWithZ(tri.pos1, tri.pos3)
+      val newpos2 = intersectPointWithZ(tri.pos2, tri.pos3)
       return Vector[Triangle](
         Triangle(
-          pointsIn(0),
-          pointsIn(1),
           newpos1,
-          tri.color
+          newpos2,
+          tri.pos3,
+          Color.BLUE
+        )
+      )
+    }
+    if (dist1 < 0 && dist3 < 0) {
+      val newpos1 = intersectPointWithZ(tri.pos1, tri.pos2)
+      val newpos3 = intersectPointWithZ(tri.pos3, tri.pos2)
+      return Vector[Triangle](
+        Triangle(
+          newpos1,
+          tri.pos2,
+          newpos3,
+          Color.BLUE
+        )
+      )
+    }
+    if (dist2 < 0 && dist3 < 0) {
+      val newpos2 = intersectPointWithZ(tri.pos2, tri.pos1)
+      val newpos3 = intersectPointWithZ(tri.pos3, tri.pos1)
+      return Vector[Triangle](
+        Triangle(
+          tri.pos1,
+          newpos2,
+          newpos3,
+          Color.BLUE
+        )
+      )
+    }
+    if (dist1 < 0) {
+      val newpos1 = intersectPointWithZ(tri.pos1, tri.pos2)
+      val newpos2 = intersectPointWithZ(tri.pos1, tri.pos3)
+      return Vector[Triangle](
+        Triangle(
+          tri.pos2,
+          tri.pos3,
+          newpos1,
+          Color.GREEN
         ),
         Triangle(
-          pointsIn(0),
-          pointsIn(1),
+          tri.pos3,
           newpos2,
-          tri.color
+          newpos1,
+          Color.RED
         )
       )
     }
-    if (pointsIn.size == 1) {
-      val newpos1 =
-        intersectPointWithPlane(pointsOut(0), pointsIn(0), plane, planeNormal)
-      val newpos2 =
-        intersectPointWithPlane(pointsOut(1), pointsIn(0), plane, planeNormal)
+    if (dist2 < 0) {
+      val newpos1 = intersectPointWithZ(tri.pos2, tri.pos1)
+      val newpos2 = intersectPointWithZ(tri.pos2, tri.pos3)
       return Vector[Triangle](
         Triangle(
-          pointsIn(0),
+          tri.pos3,
+          tri.pos1,
+          newpos2,
+          Color.GREEN
+        ),
+        Triangle(
+          tri.pos1,
           newpos1,
           newpos2,
-          tri.color
+          Color.RED
         )
       )
     }
-
+    if (dist3 < 0) {
+      val newpos1 = intersectPointWithZ(tri.pos3, tri.pos1)
+      val newpos2 = intersectPointWithZ(tri.pos3, tri.pos2)
+      return Vector[Triangle](
+        Triangle(
+          tri.pos1,
+          tri.pos2,
+          newpos1,
+          Color.GREEN
+        ),
+        Triangle(
+          tri.pos2,
+          newpos2,
+          newpos1,
+          Color.RED
+        )
+      )
+    }
     Vector[Triangle](tri)
   }
 
@@ -350,11 +400,12 @@ object Pos {
 }
 
 // A test for intersectPoint calculations
+
 // object test extends App {
 //   import GfxMath._
-//   val a = Pos(0, 2, 0)
-//   val b = Pos(5, 0, 3)
-//   println(intersectPointWithPlane(a, b,Pos(0,5,1),Pos(1,2,6)))
-//   println(intersectPointWithPlane(b, a,Pos(2,5,1),Pos(1,2,6)))
+//   val a = Pos(4, -2, 3)
+//   val b = Pos(-5, 6, 3)
+//   println(intersectPointWithPlane(a, b,Pos(6,-5,1),Pos(646,2,-6)))
+//   println(intersectPointWithPlane(b, a,Pos(6,-5,1),Pos(646,2,-6)))
 //   VisualizerApp.running=false
 // }
