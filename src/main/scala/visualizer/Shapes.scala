@@ -15,7 +15,7 @@ trait Shapes {
         .translate(-player)
     )
   }
-  def worldSpaceTris(player: Pos, camera: Pos) = {
+  def worldSpaceTris(player: Pos, camera: Pos2D) = {
     triangles.par.map(tri => {
       Triangle(
         tri.pos1
@@ -170,17 +170,34 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
   val topCorner = poses(3)
 }
 
-object SingleTri extends Shapes {
+object Cube extends Shapes {
   val position: Pos = Pos(0,0,0)
   val rotation: Pos = Pos(0,0,0)
   val poses = Vector[Pos](
-    Pos(-300, -200, -100),
-    Pos(-300, 200, -100),
-    Pos(300, 200, -100)
+    Pos(-100, -100, -100),
+    Pos(100, -100, -100),
+    Pos(100,100, -100),
+    Pos(100,100, 100),
+    Pos(-100, 100, 100),
+    Pos(-100, -100, 100),
+    Pos(100, -100, 100),
+    Pos(-100, 100, -100)
   )
   val triangles = Vector[Triangle](
-    Triangle(poses(0), poses(1), poses(2))
+    Triangle(poses(0), poses(7), poses(2)),
+    Triangle(poses(0), poses(2), poses(1)),
+    Triangle(poses(1), poses(2), poses(3)),
+    Triangle(poses(1), poses(3), poses(6)),
+    Triangle(poses(6), poses(3), poses(4)),
+    Triangle(poses(6), poses(4), poses(5)),
+    Triangle(poses(5), poses(4), poses(7)),
+    Triangle(poses(5), poses(7), poses(0)),
+    Triangle(poses(7), poses(4), poses(3)),
+    Triangle(poses(7), poses(3), poses(2)),
+    Triangle(poses(6), poses(5), poses(0)),
+    Triangle(poses(6), poses(0), poses(1))
   )
+
   val bottomCorner = poses(0)
-  val topCorner = poses(2)
+  val topCorner = poses(3)
 }

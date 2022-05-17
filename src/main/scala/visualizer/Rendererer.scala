@@ -11,14 +11,20 @@ import scala.concurrent.duration.Duration
 object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
-  def createFrames(player: Pos, camera: Pos)(implicit
+  def createFrames(player: Pos, camera: Pos2D)(implicit
       ec: ExecutionContext
   ): Vector[Triangle] = {
-    val worldSpaceTriangles =
-      VisualizerApp.worldObjects.flatMap(_.worldSpaceTris(player, camera))
     val start = misc.timeNanos()
-    val viewTris = generateViewTriangles(worldSpaceTriangles)
+    val worldSpaceTriangles =
+      VisualizerApp.worldObjects.flatMap(
+        _.worldSpaceTris(player, camera)
+          .filter(tri => {
+            val avgPos = ((tri.pos1 + tri.pos2 + tri.pos3) / 3).length
+            avgPos < VisualizerApp.renderDistance
+          })
+      )
     VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
+    val viewTris = generateViewTriangles(worldSpaceTriangles)
     val res = generateDrawableTriangles(viewTris)
     res
   }
@@ -60,10 +66,12 @@ object Rendererer {
             newTri
           })
           .filter(getNormal(_).z < 0)
-        .flatMap(tri => calcClipping(tri, Pos(0, 0, 0), Pos(1, 0, 0)))
-        .flatMap(tri => calcClipping(tri, Pos(screenWidth, 0, 0), Pos(-1, 0, 0)))
-        .flatMap(tri => calcClipping(tri, Pos(0, 0, 0), Pos(0, 1, 0)))
-        .flatMap(tri => calcClipping(tri, Pos(0, screenHeight, 0), Pos(0, -1, 0)))
+          // calculate clippings for the sides of the screen, which is represented by a plane with point on the plane,
+          // and with the normal pointing towards the screen
+          .flatMap(calcClipping(_, Pos(0, 0, 0), Pos(1, 0, 0)))
+          .flatMap(calcClipping(_, Pos(screenWidth, 0, 0), Pos(-1, 0, 0)))
+          .flatMap(calcClipping(_, Pos(0, 0, 0), Pos(0, 1, 0)))
+          .flatMap(calcClipping(_, Pos(0, screenHeight, 0), Pos(0, -1, 0)))
       })
     newTriangles.toVector
   }
@@ -73,7 +81,6 @@ object Rendererer {
     VisualizerApp.triangleCount = triangles.size
     if (VisualizerApp.wireFrame) {
       triangles
-      // .flatMap(tri => calcClipping(tri, Pos(0, 0, 0), Pos(1, 0, 0)))
     } else {
       val sorted = triangles
         .sortBy(tri => {

@@ -18,10 +18,11 @@ object VisualizerApp extends SimpleSwingApplication {
     //   Pos(0, 0, 0),
     //   100
     // )
-    
+    // Cube
   )
   var running = true
   var preRendering = false
+  val renderDistance = 10000
   var triangleCount = 0
   var wireFrame = false
   var collisionEnabled = true
@@ -33,7 +34,7 @@ object VisualizerApp extends SimpleSwingApplication {
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
-  val top = new MainFrame {
+  val top: MainFrame = new MainFrame {
     title = "3d-visualizer"
     resizable = false
     val area = new Panel {
@@ -71,7 +72,7 @@ object VisualizerApp extends SimpleSwingApplication {
             case Key.D       => Player.moveRight = false
             case Key.Space   => Player.moveUp = false
             case Key.Shift   => Player.moveDown = false
-            case Key.Control => Player.speedUp=false
+            case Key.Control => Player.speedUp = false
             case _           =>
           }
         }
@@ -179,6 +180,5 @@ object VisualizerApp extends SimpleSwingApplication {
       }
     }
   })
-  println(top.peer.getHeight())
   gameThread.start()
 }

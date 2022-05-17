@@ -55,7 +55,10 @@ object GfxMath {
     val mul = (u * factor)
     return mul + pos1
   }
-
+  def distanceFromPlane(pos: Pos, plane: Pos, planeNormalUnit: Pos) = {
+    (planeNormalUnit.x * pos.x + planeNormalUnit.y * pos.y + planeNormalUnit.z * pos.z - planeNormalUnit
+      .dotProduct(plane));
+  }
   // heavy spaghetti code to clip triangles so only triangles on screen show
   def calcClipping(
       tri: Triangle,
@@ -63,13 +66,10 @@ object GfxMath {
       planeNormal: Pos
   ): Vector[Triangle] = {
     val planeNormalUnit = planeNormal.unit()
-    def distanceFromPlane(pos: Pos) = {
-      (planeNormalUnit.x * pos.x + planeNormalUnit.y * pos.y + planeNormalUnit.z * pos.z - planeNormalUnit
-        .dotProduct(plane));
-    }
-    val dist1 = distanceFromPlane(tri.pos1)
-    val dist2 = distanceFromPlane(tri.pos2)
-    val dist3 = distanceFromPlane(tri.pos3)
+
+    val dist1 = distanceFromPlane(tri.pos1, plane, planeNormalUnit)
+    val dist2 = distanceFromPlane(tri.pos2, plane, planeNormalUnit)
+    val dist3 = distanceFromPlane(tri.pos3, plane, planeNormalUnit)
     if (dist1 < 0 && dist2 < 0 && dist3 < 0) {
       return Vector[Triangle]()
     }
@@ -86,7 +86,7 @@ object GfxMath {
           newpos1,
           newpos2,
           tri.pos3,
-          Color.BLUE
+          tri.color
         )
       )
     }
@@ -100,7 +100,7 @@ object GfxMath {
           newpos1,
           tri.pos2,
           newpos3,
-          Color.BLUE
+          tri.color
         )
       )
     }
@@ -114,7 +114,7 @@ object GfxMath {
           tri.pos1,
           newpos2,
           newpos3,
-          Color.BLUE
+          tri.color
         )
       )
     }
@@ -128,13 +128,13 @@ object GfxMath {
           tri.pos2,
           tri.pos3,
           newpos1,
-          Color.GREEN
+          tri.color
         ),
         Triangle(
           tri.pos3,
           newpos2,
           newpos1,
-          Color.RED
+          tri.color
         )
       )
     }
@@ -148,13 +148,13 @@ object GfxMath {
           tri.pos3,
           tri.pos1,
           newpos2,
-          Color.GREEN
+          tri.color
         ),
         Triangle(
           tri.pos1,
           newpos1,
           newpos2,
-          Color.RED
+          tri.color
         )
       )
     }
@@ -168,13 +168,13 @@ object GfxMath {
           tri.pos1,
           tri.pos2,
           newpos1,
-          Color.GREEN
+          tri.color
         ),
         Triangle(
           tri.pos2,
           newpos2,
           newpos1,
-          Color.RED
+          tri.color
         )
       )
     }
@@ -345,8 +345,48 @@ class Pos(
 
   override def toString(): String = f"x: $x%2.2f y: $y%2.2f z: $z%2.2f"
 }
-object Camera extends Pos(0, 0, 0) {
-  def pos() = this + Pos(0, 0, 0)
+
+case class Pos2D(var x: Double, var y: Double) {
+  def +(pos: Pos2D) = translate(pos)
+  def distance(that: Pos) = {
+    math.sqrt(
+      math.pow(that.x - this.x, 2) + math.pow(that.y - this.y, 2)
+    )
+  }
+  def length = this.distance(Pos(0, 0, 0))
+
+  def update(that: Pos): Unit = {
+    this.x = that.x
+    this.y = that.y
+  }
+  def unary_-(): Pos2D = {
+    Pos2D(
+      -this.x,
+      -this.y
+    )
+  }
+  def *(mul: Double): Pos2D = {
+    Pos2D(
+      this.x * mul,
+      this.y * mul
+    )
+  }
+  def /(div: Double): Pos2D = {
+    Pos2D(
+      this.x / div,
+      this.y / div
+    )
+  }
+  def translate(transpos: Pos2D): Pos2D = {
+    Pos2D(
+      this.x + transpos.x,
+      this.y + transpos.y
+    )
+  }
+  def unit(): Pos2D = if (this.length == 0) this else this / this.length
+}
+object Camera extends Pos2D(0, 0) {
+  def pos() = this + Pos2D(0, 0)
   // forwardVector for camera movement
   def forwardVector = {
     Pos(
@@ -367,11 +407,10 @@ object Camera extends Pos(0, 0, 0) {
   def testUp = {
     forwardVector.crossProduct(rightVector)
   }
-  def cameraVector(): Pos = {
-    Pos(
+  def cameraVector(): Pos2D = {
+    Pos2D(
       this.y,
-      this.x,
-      0
+      this.x
     )
   }
   // def rightVector():Pos={
@@ -391,8 +430,7 @@ object Camera extends Pos(0, 0, 0) {
     val cam = this.cameraVector()
     val x = 180 / Math.PI * cam.x
     val y = 180 / Math.PI * cam.y
-    val z = 180 / Math.PI * cam.z
-    f"x: $x%2.2f y: $y%2.2f z: $z%2.2f"
+    f"x: $x%2.2f y: $y%2.2f"
   }
 }
 
