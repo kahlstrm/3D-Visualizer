@@ -10,7 +10,7 @@ object VisualizerApp extends SimpleSwingApplication {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
 
-  val (walls, playerPos) = FileLoader.loadFile("hello.map")
+  val (walls, playerPos) = FileLoader.loadFile("test.map")
   val worldObjects = walls ++ Vector[Shapes](
     // new Object(
     //   FileLoader.loadObject("dragon.obj"),
@@ -18,6 +18,7 @@ object VisualizerApp extends SimpleSwingApplication {
     //   Pos(0, 0, 0),
     //   100
     // )
+    
   )
   var running = true
   var preRendering = false
@@ -178,5 +179,6 @@ object VisualizerApp extends SimpleSwingApplication {
       }
     }
   })
+  println(top.peer.getHeight())
   gameThread.start()
 }

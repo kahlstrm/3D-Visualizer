@@ -3,10 +3,10 @@ import scala.math._
 import java.awt.Color
 
 object GfxMath {
-  val width = VisualizerApp.width
-  val height = VisualizerApp.height
+  val screenWidth = VisualizerApp.top.peer.getWidth()
+  val screenHeight = VisualizerApp.top.peer.getHeight()
   val fovinRadians = VisualizerApp.fov * math.Pi / 180.0
-  val zNear = (width / 2.0) / tan(fovinRadians / 2.0)
+  val zNear = (screenWidth / 2.0) / tan(fovinRadians / 2.0)
   val zPlane = Pos(0, 0, 1)
   val zPlaneNormal = Pos(0, 0, 1)
 
@@ -39,16 +39,8 @@ object GfxMath {
     (((225 / distanceFromZPlane).toInt + 30) * Math
       .sqrt(cosBetweenTriandZ)).toInt
   }
-  // point intersecting the zPlane and the line between pos1 and pos2
-  def intersectPointWithZ(pos1: Pos, pos2: Pos): Pos = {
-    val u = pos2 + (-pos1)
-    val dot = zPlaneNormal.dotProduct(u)
-    val w = pos1 + (-zPlane)
-    val factor = -((zPlaneNormal.dotProduct(w)) / dot)
-    val mul = (u * factor)
-    return mul + pos1
-  }
 
+  // point intersecting the a plane and the line between pos1 and pos2
   def intersectPointWithPlane(
       pos1: Pos,
       pos2: Pos,
@@ -63,6 +55,8 @@ object GfxMath {
     val mul = (u * factor)
     return mul + pos1
   }
+
+  // heavy spaghetti code to clip triangles so only triangles on screen show
   def calcClipping(
       tri: Triangle,
       plane: Pos,
@@ -83,8 +77,10 @@ object GfxMath {
       return Vector[Triangle](tri)
     }
     if (dist1 < 0 && dist2 < 0) {
-      val newpos1 = intersectPointWithZ(tri.pos1, tri.pos3)
-      val newpos2 = intersectPointWithZ(tri.pos2, tri.pos3)
+      val newpos1 =
+        intersectPointWithPlane(tri.pos1, tri.pos3, plane, planeNormalUnit)
+      val newpos2 =
+        intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
           newpos1,
@@ -95,8 +91,10 @@ object GfxMath {
       )
     }
     if (dist1 < 0 && dist3 < 0) {
-      val newpos1 = intersectPointWithZ(tri.pos1, tri.pos2)
-      val newpos3 = intersectPointWithZ(tri.pos3, tri.pos2)
+      val newpos1 =
+        intersectPointWithPlane(tri.pos1, tri.pos2, plane, planeNormalUnit)
+      val newpos3 =
+        intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
           newpos1,
@@ -107,8 +105,10 @@ object GfxMath {
       )
     }
     if (dist2 < 0 && dist3 < 0) {
-      val newpos2 = intersectPointWithZ(tri.pos2, tri.pos1)
-      val newpos3 = intersectPointWithZ(tri.pos3, tri.pos1)
+      val newpos2 =
+        intersectPointWithPlane(tri.pos2, tri.pos1, plane, planeNormalUnit)
+      val newpos3 =
+        intersectPointWithPlane(tri.pos3, tri.pos1, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
           tri.pos1,
@@ -119,8 +119,10 @@ object GfxMath {
       )
     }
     if (dist1 < 0) {
-      val newpos1 = intersectPointWithZ(tri.pos1, tri.pos2)
-      val newpos2 = intersectPointWithZ(tri.pos1, tri.pos3)
+      val newpos1 =
+        intersectPointWithPlane(tri.pos1, tri.pos2, plane, planeNormalUnit)
+      val newpos2 =
+        intersectPointWithPlane(tri.pos1, tri.pos3, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
           tri.pos2,
@@ -137,8 +139,10 @@ object GfxMath {
       )
     }
     if (dist2 < 0) {
-      val newpos1 = intersectPointWithZ(tri.pos2, tri.pos1)
-      val newpos2 = intersectPointWithZ(tri.pos2, tri.pos3)
+      val newpos1 =
+        intersectPointWithPlane(tri.pos2, tri.pos1, plane, planeNormalUnit)
+      val newpos2 =
+        intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
           tri.pos3,
@@ -155,8 +159,10 @@ object GfxMath {
       )
     }
     if (dist3 < 0) {
-      val newpos1 = intersectPointWithZ(tri.pos3, tri.pos1)
-      val newpos2 = intersectPointWithZ(tri.pos3, tri.pos2)
+      val newpos1 =
+        intersectPointWithPlane(tri.pos3, tri.pos1, plane, planeNormalUnit)
+      val newpos2 =
+        intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
           tri.pos1,
@@ -244,8 +250,8 @@ class Pos(
   }
   def center(): Pos = {
     Pos(
-      this.x + GfxMath.width / 2,
-      this.y + GfxMath.height / 2,
+      this.x + VisualizerApp.width / 2,
+      this.y + VisualizerApp.height / 2,
       this.z
     )
   }
@@ -253,7 +259,7 @@ class Pos(
     Pos(
       this.x * GfxMath.zNear / z,
       this.y * GfxMath.zNear / z,
-      this.z
+      z
     )
   }
   // fpsRotation matrix, took way too long to got this working

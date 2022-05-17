@@ -14,12 +14,12 @@ object Rendererer {
   def createFrames(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
   ): Vector[Triangle] = {
-    val start = misc.timeNanos()
     val worldSpaceTriangles =
       VisualizerApp.worldObjects.flatMap(_.worldSpaceTris(player, camera))
+    val start = misc.timeNanos()
     val viewTris = generateViewTriangles(worldSpaceTriangles)
-    val res = generateDrawableTriangles(viewTris)
     VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
+    val res = generateDrawableTriangles(viewTris)
     res
   }
 
@@ -38,8 +38,8 @@ object Rendererer {
 
     val newTriangles = triangles.par
       .flatMap(tri => {
-        val clippedTriangles = calcClipping(tri, Pos(0,0,0), zPlaneNormal)
-        clippedTriangles
+        val clippedTrianglesWithZ = calcClipping(tri, zPlane, zPlaneNormal)
+        clippedTrianglesWithZ
           .map(n => {
             val newTri = Triangle(
               n.pos1
@@ -60,6 +60,10 @@ object Rendererer {
             newTri
           })
           .filter(getNormal(_).z < 0)
+        .flatMap(tri => calcClipping(tri, Pos(0, 0, 0), Pos(1, 0, 0)))
+        .flatMap(tri => calcClipping(tri, Pos(screenWidth, 0, 0), Pos(-1, 0, 0)))
+        .flatMap(tri => calcClipping(tri, Pos(0, 0, 0), Pos(0, 1, 0)))
+        .flatMap(tri => calcClipping(tri, Pos(0, screenHeight, 0), Pos(0, -1, 0)))
       })
     newTriangles.toVector
   }
@@ -69,18 +73,12 @@ object Rendererer {
     VisualizerApp.triangleCount = triangles.size
     if (VisualizerApp.wireFrame) {
       triangles
+      // .flatMap(tri => calcClipping(tri, Pos(0, 0, 0), Pos(1, 0, 0)))
     } else {
       val sorted = triangles
         .sortBy(tri => {
           -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3
         })
-      sorted.foreach(tri => {
-        if (tri.color == null) {
-
-          // val color = getColor(tri)
-          // tri.color = new Color(color, color, color)
-        }
-      })
       sorted
     }
   }

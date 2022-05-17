@@ -169,3 +169,18 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
   val bottomCorner = poses(0)
   val topCorner = poses(3)
 }
+
+object SingleTri extends Shapes {
+  val position: Pos = Pos(0,0,0)
+  val rotation: Pos = Pos(0,0,0)
+  val poses = Vector[Pos](
+    Pos(-300, -200, -100),
+    Pos(-300, 200, -100),
+    Pos(300, 200, -100)
+  )
+  val triangles = Vector[Triangle](
+    Triangle(poses(0), poses(1), poses(2))
+  )
+  val bottomCorner = poses(0)
+  val topCorner = poses(2)
+}
