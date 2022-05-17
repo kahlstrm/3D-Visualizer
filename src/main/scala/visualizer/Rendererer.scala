@@ -92,7 +92,11 @@ object Rendererer {
       wireFrame: Boolean
   ): Unit = {
     if (wireFrame) triangles.foreach(_.draw(g))
-    else triangles.foreach(tri => tri.draw(g, tri.color))
+    else
+      triangles.foreach(tri => {
+        if (tri.texPoses != null) println(tri.texPoses.mkString)
+        tri.draw(g, tri.color)
+      })
   }
   def drawFramesFuture(
       triangles: Future[Vector[Triangle]],
@@ -101,11 +105,11 @@ object Rendererer {
   ): Unit = {
     val p = Promise[Unit]()
     triangles.onComplete {
-      case Success(drawFrame) =>
+      case Success(triangles) =>
         p.completeWith(
           Future {
-            if (wireFrame) drawFrame.foreach(_.draw(g))
-            else drawFrame.foreach { case tri => tri.draw(g, tri.color) }
+
+            drawFrame(triangles, g, wireFrame)
           }
         )
       case Failure(exception) => throw exception

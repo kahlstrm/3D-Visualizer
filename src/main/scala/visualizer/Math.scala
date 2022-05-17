@@ -46,14 +46,14 @@ object GfxMath {
       pos2: Pos,
       plane: Pos,
       planeNormal: Pos
-  ): Pos = {
+  ): (Pos,Double) = {
     val planeNormalized = planeNormal.unit()
     val u = pos2 + (-pos1)
     val dot = planeNormalized.dotProduct(u)
     val w = pos1 + (-plane)
     val factor = -((planeNormalized.dotProduct(w)) / dot)
     val mul = (u * factor)
-    return mul + pos1
+    return (mul + pos1,factor)
   }
   def distanceFromPlane(pos: Pos, plane: Pos, planeNormalUnit: Pos) = {
     (planeNormalUnit.x * pos.x + planeNormalUnit.y * pos.y + planeNormalUnit.z * pos.z - planeNormalUnit
@@ -77,9 +77,9 @@ object GfxMath {
       return Vector[Triangle](tri)
     }
     if (dist1 < 0 && dist2 < 0) {
-      val newpos1 =
+      val (newpos1,fac1) =
         intersectPointWithPlane(tri.pos1, tri.pos3, plane, planeNormalUnit)
-      val newpos2 =
+      val (newpos2,fac2) =
         intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -92,9 +92,9 @@ object GfxMath {
       )
     }
     if (dist1 < 0 && dist3 < 0) {
-      val newpos1 =
+      val (newpos1,fac1) =
         intersectPointWithPlane(tri.pos1, tri.pos2, plane, planeNormalUnit)
-      val newpos3 =
+      val (newpos3,fac3) =
         intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -107,9 +107,9 @@ object GfxMath {
       )
     }
     if (dist2 < 0 && dist3 < 0) {
-      val newpos2 =
+      val (newpos2,fac2) =
         intersectPointWithPlane(tri.pos2, tri.pos1, plane, planeNormalUnit)
-      val newpos3 =
+      val (newpos3,fac3) =
         intersectPointWithPlane(tri.pos3, tri.pos1, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -122,9 +122,9 @@ object GfxMath {
       )
     }
     if (dist1 < 0) {
-      val newpos1 =
+      val (newpos1,fac1) =
         intersectPointWithPlane(tri.pos1, tri.pos2, plane, planeNormalUnit)
-      val newpos2 =
+      val (newpos2,fac2) =
         intersectPointWithPlane(tri.pos1, tri.pos3, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -144,9 +144,9 @@ object GfxMath {
       )
     }
     if (dist2 < 0) {
-      val newpos1 =
+      val (newpos1,fac1) =
         intersectPointWithPlane(tri.pos2, tri.pos1, plane, planeNormalUnit)
-      val newpos2 =
+      val (newpos2,fac2) =
         intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -166,9 +166,9 @@ object GfxMath {
       )
     }
     if (dist3 < 0) {
-      val newpos1 =
+      val (newpos1,fac1) =
         intersectPointWithPlane(tri.pos3, tri.pos1, plane, planeNormalUnit)
-      val newpos2 =
+      val (newpos2,fac2) =
         intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(

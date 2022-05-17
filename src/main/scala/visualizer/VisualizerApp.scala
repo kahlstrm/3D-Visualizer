@@ -177,6 +177,7 @@ object VisualizerApp extends SimpleSwingApplication {
         VisualizerApp.runGameNow
       } catch {
         case e: InterruptedException =>
+        case a: Exception            => Future { top.closeOperation() }; throw a
       }
     }
   })
