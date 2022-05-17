@@ -10,14 +10,14 @@ object VisualizerApp extends SimpleSwingApplication {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
 
-  val (walls, playerPos) = FileLoader.loadFile("test.map")
+  val (walls, playerPos) = FileLoader.loadFile("hello.map")
   val worldObjects = walls ++ Vector[Shapes](
-    new Object(
-      FileLoader.loadObject("dragon.obj"),
-      Pos(0, 0, 300),
-      Pos(0, 0, 0),
-      100
-    )
+    // new Object(
+    //   FileLoader.loadObject("dragon.obj"),
+    //   Pos(0, 0, 300),
+    //   Pos(0, 0, 0),
+    //   100
+    // )
   )
   var running = true
   var preRendering = false
@@ -48,8 +48,7 @@ object VisualizerApp extends SimpleSwingApplication {
         case KeyPressed(_, key, _, _) => {
           key match {
             case Key.Escape =>
-              println("bye"); running = false; gameThread.join();
-              closeOperation()
+              println("bye"); running = false; gameThread.join()
             case Key.W       => Player.moveForward = true
             case Key.S       => Player.moveBackward = true
             case Key.A       => Player.moveLeft = true
@@ -117,6 +116,7 @@ object VisualizerApp extends SimpleSwingApplication {
       render()
       frames += 1;
     }
+    top.closeOperation()
   }
   def update() = {
     val oldPlayerPos = Player.move()

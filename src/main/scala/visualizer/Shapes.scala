@@ -63,8 +63,12 @@ trait Shapes {
   }
 }
 
-class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) {
-  var color:Color=null
+class Triangle(
+    val pos1: Pos,
+    val pos2: Pos,
+    val pos3: Pos,
+    var color: Color = null
+) {
   def draw(g: Graphics) = {
     g.drawLine(pos1.x.toInt, pos1.y.toInt, pos2.x.toInt, pos2.y.toInt)
     g.drawLine(pos2.x.toInt, pos2.y.toInt, pos3.x.toInt, pos3.y.toInt)
@@ -98,6 +102,9 @@ class Triangle(val pos1: Pos, val pos2: Pos, val pos3: Pos) {
 object Triangle {
   def apply(pos1: Pos, pos2: Pos, pos3: Pos) = {
     new Triangle(pos1, pos2, pos3)
+  }
+  def apply(pos1: Pos, pos2: Pos, pos3: Pos, col: Color) = {
+    new Triangle(pos1, pos2, pos3, col)
   }
   def apply(tri: Triangle) = {
     new Triangle(tri.pos1, tri.pos2, tri.pos3)
