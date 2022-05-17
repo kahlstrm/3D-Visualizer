@@ -46,14 +46,14 @@ object GfxMath {
       pos2: Pos,
       plane: Pos,
       planeNormal: Pos
-  ): (Pos,Double) = {
+  ): (Pos, Double) = {
     val planeNormalized = planeNormal.unit()
     val u = pos2 + (-pos1)
     val dot = planeNormalized.dotProduct(u)
     val w = pos1 + (-plane)
     val factor = -((planeNormalized.dotProduct(w)) / dot)
     val mul = (u * factor)
-    return (mul + pos1,factor)
+    return (mul + pos1, factor)
   }
   def distanceFromPlane(pos: Pos, plane: Pos, planeNormalUnit: Pos) = {
     (planeNormalUnit.x * pos.x + planeNormalUnit.y * pos.y + planeNormalUnit.z * pos.z - planeNormalUnit
@@ -70,16 +70,21 @@ object GfxMath {
     val dist1 = distanceFromPlane(tri.pos1, plane, planeNormalUnit)
     val dist2 = distanceFromPlane(tri.pos2, plane, planeNormalUnit)
     val dist3 = distanceFromPlane(tri.pos3, plane, planeNormalUnit)
+
+    // all points are outside the plane, no need to draw anything
     if (dist1 < 0 && dist2 < 0 && dist3 < 0) {
       return Vector[Triangle]()
     }
+    // all points are inside the plane, just return current triangle
     if (dist1 > 0 && dist2 > 0 && dist3 > 0) {
       return Vector[Triangle](tri)
     }
+
+    // points 1 and two 2 are outside the plane, return 1 clipped triangle
     if (dist1 < 0 && dist2 < 0) {
-      val (newpos1,fac1) =
+      val (newpos1, fac1) =
         intersectPointWithPlane(tri.pos1, tri.pos3, plane, planeNormalUnit)
-      val (newpos2,fac2) =
+      val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -91,10 +96,12 @@ object GfxMath {
         )
       )
     }
+
+    // points 1 and two 3 are outside the plane, return 1 clipped triangle
     if (dist1 < 0 && dist3 < 0) {
-      val (newpos1,fac1) =
+      val (newpos1, fac1) =
         intersectPointWithPlane(tri.pos1, tri.pos2, plane, planeNormalUnit)
-      val (newpos3,fac3) =
+      val (newpos3, fac3) =
         intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -106,10 +113,12 @@ object GfxMath {
         )
       )
     }
+
+    // points 2 and two 3 are outside the plane, return 1 clipped triangle
     if (dist2 < 0 && dist3 < 0) {
-      val (newpos2,fac2) =
+      val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos2, tri.pos1, plane, planeNormalUnit)
-      val (newpos3,fac3) =
+      val (newpos3, fac3) =
         intersectPointWithPlane(tri.pos3, tri.pos1, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -121,10 +130,12 @@ object GfxMath {
         )
       )
     }
+
+    // points 1 is outside the plane, return 2 clipped triangles
     if (dist1 < 0) {
-      val (newpos1,fac1) =
+      val (newpos1, fac1) =
         intersectPointWithPlane(tri.pos1, tri.pos2, plane, planeNormalUnit)
-      val (newpos2,fac2) =
+      val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos1, tri.pos3, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -143,10 +154,12 @@ object GfxMath {
         )
       )
     }
+
+    // points 2 is outside the plane, return 2 clipped triangles
     if (dist2 < 0) {
-      val (newpos1,fac1) =
+      val (newpos1, fac1) =
         intersectPointWithPlane(tri.pos2, tri.pos1, plane, planeNormalUnit)
-      val (newpos2,fac2) =
+      val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -165,10 +178,13 @@ object GfxMath {
         )
       )
     }
+
+    
+    // points 2 is outside the plane, return 2 clipped triangles
     if (dist3 < 0) {
-      val (newpos1,fac1) =
+      val (newpos1, fac1) =
         intersectPointWithPlane(tri.pos3, tri.pos1, plane, planeNormalUnit)
-      val (newpos2,fac2) =
+      val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
       return Vector[Triangle](
         Triangle(
@@ -176,7 +192,7 @@ object GfxMath {
           tri.pos2,
           newpos1,
           tri.texPoses,
-          tri.color,
+          tri.color
         ),
         Triangle(
           tri.pos2,
