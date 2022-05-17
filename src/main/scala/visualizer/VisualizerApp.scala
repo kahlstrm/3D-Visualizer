@@ -9,7 +9,6 @@ import misc._
 object VisualizerApp extends SimpleSwingApplication {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
-
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val worldObjects = walls ++ Vector[Shapes](
     // new Object(
@@ -20,6 +19,7 @@ object VisualizerApp extends SimpleSwingApplication {
     // )
     Cube
   )
+  val brickTexture = FileLoader.loadTexture("brick.png")
   var running = true
   var preRendering = false
   val renderDistance = 10000
@@ -136,12 +136,15 @@ object VisualizerApp extends SimpleSwingApplication {
   def render() = {
     val g = bs.getDrawGraphics()
     val start = timeNanos()
+    val windowWidth=top.peer.getWidth()
+    val windowHeight=top.peer.getHeight()
     g.setColor(Color.BLACK)
-    g.fillRect(0, 0, top.peer.getWidth(), top.peer.getHeight())
+    g.fillRect(0,0,windowWidth,windowHeight)
     g.setColor(Color.WHITE)
     if (preRendering) {
       drawFramesFuture(frameIterator.next(), g, wireFrame)
     } else drawFrame(createFrames(Player.pos, Player.camera.pos), g, wireFrame)
+    // g.drawImage(generateFrameImage(createFrames(Player.pos,Camera.pos)),0,0,windowWidth,windowHeight,null)
     g.setColor(Color.GRAY)
     g.fillRect(40, 40, 300, 150)
     g.setColor(Color.WHITE)

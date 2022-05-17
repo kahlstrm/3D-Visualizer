@@ -2,19 +2,21 @@ package visualizer
 import java.awt.Graphics
 import scala.collection.parallel.CollectionConverters._
 import java.awt.Color
+import java.awt.image.BufferedImage
 import visualizer.GfxMath._
 import scala.concurrent.ExecutionContext
 import scala.concurrent._
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.duration.Duration
+
 object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
+
   def createFrames(player: Pos, camera: Pos2D)(implicit
       ec: ExecutionContext
   ): Vector[Triangle] = {
-    val start = misc.timeNanos()
     val worldSpaceTriangles =
       VisualizerApp.worldObjects.flatMap(
         _.worldSpaceTris(player, camera)
@@ -23,7 +25,6 @@ object Rendererer {
             avgPos < VisualizerApp.renderDistance
           })
       )
-    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
     val viewTris = generateViewTriangles(worldSpaceTriangles)
     val res = generateDrawableTriangles(viewTris)
     res
@@ -108,7 +109,6 @@ object Rendererer {
       case Success(triangles) =>
         p.completeWith(
           Future {
-
             drawFrame(triangles, g, wireFrame)
           }
         )
@@ -116,6 +116,19 @@ object Rendererer {
     }
     Await.ready(p.future, Duration.Inf)
     return
+  }
+  def generateFrameImage(triangles: Vector[Triangle]): BufferedImage = {
+    val textureImg = VisualizerApp.brickTexture
+    val start = misc.timeNanos()
+    val img =
+      new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_ARGB)
+    
+    for (i <- 0 until screenHeight; j <- 0 until (screenWidth)) {
+      // val col = textureImg.getRGB(j % 159, i % 159)
+      img.setRGB(j, i, new Color(j * i).getRGB())
+    }
+    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
+    img
   }
 
 }

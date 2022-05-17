@@ -59,6 +59,12 @@ object GfxMath {
     (planeNormalUnit.x * pos.x + planeNormalUnit.y * pos.y + planeNormalUnit.z * pos.z - planeNormalUnit
       .dotProduct(plane));
   }
+  def newTexPos(texPosOut: Pos2D, texPosIn: Pos2D, fac: Double): Pos2D = {
+    Pos2D(
+      fac * (texPosOut.x - texPosIn.x) + texPosIn.x,
+      fac * (texPosOut.y - texPosIn.y) + texPosIn.y
+    )
+  }
   // heavy spaghetti code to clip triangles so only triangles on screen show
   def calcClipping(
       tri: Triangle,
@@ -86,12 +92,19 @@ object GfxMath {
         intersectPointWithPlane(tri.pos1, tri.pos3, plane, planeNormalUnit)
       val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
+      var newTexPoses = tri.texPoses
+      if (newTexPoses != null) {
+        newTexPoses =
+          newTexPoses.updated(0, newTexPos(tri.texPos1, tri.texPos3, fac1))
+        newTexPoses(1) = newTexPos(tri.texPos2, tri.texPos3, fac2)
+      }
       return Vector[Triangle](
         Triangle(
-          newpos1,
-          newpos2,
-          tri.pos3,
-          tri.texPoses,
+          // newpos1,
+          // newpos2,
+          // tri.pos3,
+          tri.poses.updated(0,newpos1).updated(1,newpos2),
+          newTexPoses,
           tri.color
         )
       )
@@ -101,14 +114,22 @@ object GfxMath {
     if (dist1 < 0 && dist3 < 0) {
       val (newpos1, fac1) =
         intersectPointWithPlane(tri.pos1, tri.pos2, plane, planeNormalUnit)
+
       val (newpos3, fac3) =
         intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
+      var newTexPoses = tri.texPoses
+      if (newTexPoses != null) {
+        newTexPoses =
+          newTexPoses.updated(0, newTexPos(tri.texPos1, tri.texPos2, fac1))
+        newTexPoses(2) = newTexPos(tri.texPos3, tri.texPos2, fac3)
+      }
       return Vector[Triangle](
         Triangle(
-          newpos1,
-          tri.pos2,
-          newpos3,
-          tri.texPoses,
+          // newpos1,
+          // tri.pos2,
+          // newpos3,
+          tri.poses.updated(0,newpos1).updated(2,newpos3),
+          newTexPoses,
           tri.color
         )
       )
@@ -118,14 +139,22 @@ object GfxMath {
     if (dist2 < 0 && dist3 < 0) {
       val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos2, tri.pos1, plane, planeNormalUnit)
+
       val (newpos3, fac3) =
         intersectPointWithPlane(tri.pos3, tri.pos1, plane, planeNormalUnit)
+      var newTexPoses = tri.texPoses
+      if (newTexPoses != null) {
+        newTexPoses =
+          newTexPoses.updated(1, newTexPos(tri.texPos2, tri.texPos1, fac2))
+        newTexPoses(2) = newTexPos(tri.texPos3, tri.texPos1, fac3)
+      }
       return Vector[Triangle](
         Triangle(
-          tri.pos1,
-          newpos2,
-          newpos3,
-          tri.texPoses,
+          // tri.pos1,
+          // newpos2,
+          // newpos3,
+          tri.poses.updated(1,newpos2).updated(2,newpos3),
+          newTexPoses,
           tri.color
         )
       )
@@ -135,21 +164,33 @@ object GfxMath {
     if (dist1 < 0) {
       val (newpos1, fac1) =
         intersectPointWithPlane(tri.pos1, tri.pos2, plane, planeNormalUnit)
+
       val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos1, tri.pos3, plane, planeNormalUnit)
+      var newTexPoses = tri.texPoses
+      var newTexPoses2 = tri.texPoses
+      if (newTexPoses != null) {
+        val newTexPos1 = newTexPos(tri.texPos1, tri.texPos2, fac1)
+        val newTexPos2 = newTexPos(tri.texPos1, tri.texPos3, fac2)
+        newTexPoses = newTexPoses.updated(0, newTexPos1)
+        newTexPoses2 = newTexPoses2.updated(0, newTexPos2)
+        newTexPoses2(1) = newTexPos1
+      }
       return Vector[Triangle](
         Triangle(
-          tri.pos2,
-          tri.pos3,
-          newpos1,
-          tri.texPoses,
+          // newpos1,
+          // tri.pos2,
+          // tri.pos3,
+          tri.poses.updated(0,newpos1),
+          newTexPoses,
           tri.color
         ),
         Triangle(
-          tri.pos3,
-          newpos2,
-          newpos1,
-          tri.texPoses,
+          // newpos2,
+          // newpos1,
+          // tri.pos3,
+          tri.poses.updated(0,newpos2).updated(1,newpos1),
+          newTexPoses2,
           tri.color
         )
       )
@@ -161,44 +202,65 @@ object GfxMath {
         intersectPointWithPlane(tri.pos2, tri.pos1, plane, planeNormalUnit)
       val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
+      var newTexPoses = tri.texPoses
+      var newTexPoses2 = tri.texPoses
+      if (newTexPoses != null) {
+        val newTexPos1 = newTexPos(tri.texPos2, tri.texPos1, fac1)
+        val newTexPos2 = newTexPos(tri.texPos2, tri.texPos3, fac2)
+        newTexPoses = newTexPoses.updated(1, newTexPos2)
+        newTexPoses2 = newTexPoses2.updated(1, newTexPos1)
+        newTexPoses2(2) = newTexPos2
+      }
       return Vector[Triangle](
         Triangle(
-          tri.pos3,
-          tri.pos1,
-          newpos2,
-          tri.texPoses,
+          // tri.pos1,
+          // newpos2,
+          // tri.pos3,
+          tri.poses.updated(1,newpos2),
+          newTexPoses,
           tri.color
         ),
         Triangle(
-          tri.pos1,
-          newpos1,
-          newpos2,
-          tri.texPoses,
+          // tri.pos1,
+          // newpos1,
+          // newpos2,
+          tri.poses.updated(1,newpos1).updated(2,newpos2),
+          newTexPoses2,
           tri.color
         )
       )
     }
 
-    
-    // points 2 is outside the plane, return 2 clipped triangles
+    // points 3 is outside the plane, return 2 clipped triangles
     if (dist3 < 0) {
       val (newpos1, fac1) =
         intersectPointWithPlane(tri.pos3, tri.pos1, plane, planeNormalUnit)
       val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
+      var newTexPoses = tri.texPoses
+      var newTexPoses2 = tri.texPoses
+      if (newTexPoses != null) {
+        val newTexPos1 = newTexPos(tri.texPos3, tri.texPos1, fac1)
+        val newTexPos2 = newTexPos(tri.texPos3, tri.texPos2, fac2)
+        newTexPoses = newTexPoses.updated(2, newTexPos1)
+        newTexPoses2 = newTexPoses2.updated(0, newTexPos1)
+        newTexPoses2(2) = newTexPos2
+      }
       return Vector[Triangle](
         Triangle(
-          tri.pos1,
-          tri.pos2,
-          newpos1,
-          tri.texPoses,
+          // tri.pos1,
+          // tri.pos2,
+          // newpos1,
+          tri.poses.updated(2,newpos1),
+          newTexPoses,
           tri.color
         ),
         Triangle(
-          tri.pos2,
-          newpos2,
-          newpos1,
-          tri.texPoses,
+          // newpos1,
+          // tri.pos2,
+          // newpos2,
+          tri.poses.updated(0,newpos1).updated(2,newpos2),
+          newTexPoses2,
           tri.color
         )
       )

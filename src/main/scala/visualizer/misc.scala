@@ -22,8 +22,8 @@ object misc {
   
 
   def drawCrosshair(g: Graphics) = {
-    val w = VisualizerApp.width
-    val h = VisualizerApp.height
+    val w = GfxMath.screenWidth
+    val h = GfxMath.screenHeight
     g.drawLine(w / 2, h / 2 + 10, w / 2, h / 2 - 10)
     g.drawLine(w / 2 + 10, h / 2, w / 2 - 10, h / 2)
   }

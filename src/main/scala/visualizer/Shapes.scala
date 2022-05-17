@@ -3,6 +3,7 @@ import java.awt.TexturePaint
 import java.awt.Color
 import scala.collection.parallel.CollectionConverters._
 import java.awt.Graphics
+import java.awt.image.BufferedImage
 trait Shapes {
   val position: Pos
   val rotation: Pos
@@ -39,6 +40,7 @@ trait Shapes {
     isBetween(bottomCornerWorld.y, topCornerWorld.y, pos.y) &&
     isBetween(bottomCornerWorld.z, topCornerWorld.z, pos.z)
   }
+  val texture:BufferedImage
 }
 
 class Triangle(
@@ -166,7 +168,7 @@ case class Object(
         .translate(position)
     )
   }
-
+  val texture: BufferedImage = null
 }
 class Wall(val position: Pos, val rotation: Pos) extends Shapes {
   val poses = Vector[Pos](
@@ -203,6 +205,7 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
   val topCornerWorld = poses(3)
     .rotate(rotation)
     .translate(position)
+  val texture: BufferedImage = null
 }
 
 object Cube extends Shapes {
@@ -225,11 +228,11 @@ object Cube extends Shapes {
   val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
-      (Pos2D(0, 0), Pos2D(0, 160), Pos2D(160, 160))
+      (Pos2D(0, 0), Pos2D(0, 159), Pos2D(159, 159))
     ),
     Triangle(
       (poses(0), poses(2), poses(1)),
-      (Pos2D(0, 0), Pos2D(160, 160), Pos2D(160, 0))
+      (Pos2D(0, 0), Pos2D(159, 159), Pos2D(159, 0))
     ),
     Triangle(poses(1), poses(2), poses(3)),
     Triangle(poses(1), poses(3), poses(6)),
@@ -249,4 +252,5 @@ object Cube extends Shapes {
   val topCornerWorld = poses(3)
     .rotate(rotation)
     .translate(position)
+  val texture: BufferedImage = VisualizerApp.brickTexture
 }
