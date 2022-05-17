@@ -18,7 +18,7 @@ object VisualizerApp extends SimpleSwingApplication {
     //   Pos(0, 0, 0),
     //   100
     // )
-    // Cube
+    Cube
   )
   var running = true
   var preRendering = false

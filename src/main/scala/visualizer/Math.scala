@@ -86,6 +86,7 @@ object GfxMath {
           newpos1,
           newpos2,
           tri.pos3,
+          tri.texPoses,
           tri.color
         )
       )
@@ -100,6 +101,7 @@ object GfxMath {
           newpos1,
           tri.pos2,
           newpos3,
+          tri.texPoses,
           tri.color
         )
       )
@@ -114,6 +116,7 @@ object GfxMath {
           tri.pos1,
           newpos2,
           newpos3,
+          tri.texPoses,
           tri.color
         )
       )
@@ -128,12 +131,14 @@ object GfxMath {
           tri.pos2,
           tri.pos3,
           newpos1,
+          tri.texPoses,
           tri.color
         ),
         Triangle(
           tri.pos3,
           newpos2,
           newpos1,
+          tri.texPoses,
           tri.color
         )
       )
@@ -148,12 +153,14 @@ object GfxMath {
           tri.pos3,
           tri.pos1,
           newpos2,
+          tri.texPoses,
           tri.color
         ),
         Triangle(
           tri.pos1,
           newpos1,
           newpos2,
+          tri.texPoses,
           tri.color
         )
       )
@@ -168,12 +175,14 @@ object GfxMath {
           tri.pos1,
           tri.pos2,
           newpos1,
-          tri.color
+          tri.texPoses,
+          tri.color,
         ),
         Triangle(
           tri.pos2,
           newpos2,
           newpos1,
+          tri.texPoses,
           tri.color
         )
       )

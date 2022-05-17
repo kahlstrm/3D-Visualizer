@@ -48,15 +48,12 @@ object Rendererer {
         clippedTrianglesWithZ
           .map(n => {
             val newTri = Triangle(
-              n.pos1
-                .perspective()
-                .center(),
-              n.pos2
-                .perspective()
-                .center(),
-              n.pos3
-                .perspective()
-                .center(),
+              n.poses.map(pos =>
+                pos
+                  .perspective()
+                  .center()
+              ),
+              n.texPoses,
               n.color
             )
             if (newTri.color == null) newTri.color = {

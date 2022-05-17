@@ -81,7 +81,7 @@ while({line=lineReader.readLine();line!=null}){
   }
 }
 fileReader.close()
-val Triangles=tris.map(n=>new Triangle(poses(n(0)),poses(n(1)),poses(n(2)))).toVector
+val Triangles=tris.map(n=>Triangle(poses(n(0)),poses(n(1)),poses(n(2)))).toVector
 val end = System.currentTimeMillis()
 println(s"${source} ${poses.length} vertices and ${Triangles.length} Triangles")
 println(s"this took ${(end-start)/1000.0} seconds")
