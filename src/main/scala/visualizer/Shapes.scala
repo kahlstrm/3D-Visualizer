@@ -40,7 +40,7 @@ trait Shapes {
     isBetween(bottomCornerWorld.y, topCornerWorld.y, pos.y) &&
     isBetween(bottomCornerWorld.z, topCornerWorld.z, pos.z)
   }
-  val texture:BufferedImage
+  val texture: BufferedImage
 }
 
 class Triangle(
@@ -160,12 +160,8 @@ case class Object(
       maxZ = Math.max(pos.z, maxZ)
     })
     (
-      Pos(minX, minY, minZ)
-        .rotate(rotation)
-        .translate(position),
+      Pos(minX, minY, minZ),
       Pos(maxX, maxY, maxZ)
-        .rotate(rotation)
-        .translate(position)
     )
   }
   val texture: BufferedImage = null
@@ -200,11 +196,7 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
     Triangle(poses(6), poses(0), poses(1))
   )
   val bottomCornerWorld = poses(0)
-    .rotate(rotation)
-    .translate(position)
   val topCornerWorld = poses(3)
-    .rotate(rotation)
-    .translate(position)
   val texture: BufferedImage = null
 }
 
@@ -247,10 +239,6 @@ object Cube extends Shapes {
   )
 
   val bottomCornerWorld = poses(0)
-    .rotate(rotation)
-    .translate(position)
   val topCornerWorld = poses(3)
-    .rotate(rotation)
-    .translate(position)
   val texture: BufferedImage = VisualizerApp.brickTexture
 }

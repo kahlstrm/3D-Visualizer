@@ -9,7 +9,6 @@ import scala.concurrent._
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.duration.Duration
-
 object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
@@ -69,7 +68,7 @@ object Rendererer {
           .flatMap(calcClipping(_, Pos(0, 0, 0), Pos(1, 0, 0)))
           .flatMap(calcClipping(_, Pos(screenWidth, 0, 0), Pos(-1, 0, 0)))
           .flatMap(calcClipping(_, Pos(0, 0, 0), Pos(0, 1, 0)))
-          .flatMap(calcClipping(_, Pos(0, screenHeight, 0), Pos(0, -1, 0)))
+          .flatMap(calcClipping(_, Pos(0, screenHeight - 1, 0), Pos(0, -1, 0)))
       })
     newTriangles.toVector
   }
@@ -95,7 +94,7 @@ object Rendererer {
     if (wireFrame) triangles.foreach(_.draw(g))
     else
       triangles.foreach(tri => {
-        if (tri.texPoses != null) println(tri.texPoses.mkString)
+        // if (tri.texPoses != null) println(tri.texPoses.mkString)
         tri.draw(g, tri.color)
       })
   }
@@ -119,16 +118,24 @@ object Rendererer {
   }
   def generateFrameImage(triangles: Vector[Triangle]): BufferedImage = {
     val textureImg = VisualizerApp.brickTexture
+    val textureDataBuffer = textureImg.getData().getDataBuffer()
+    val texSize = textureDataBuffer.getSize()
     val start = misc.timeNanos()
-    val img =
-      new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_ARGB)
-    
-    for (i <- 0 until screenHeight; j <- 0 until (screenWidth)) {
-      // val col = textureImg.getRGB(j % 159, i % 159)
-      img.setRGB(j, i, new Color(j * i).getRGB())
-    }
+    val image = VisualizerApp.frame
+      .getGraphicsConfiguration()
+      .createCompatibleImage(screenWidth, screenHeight)
+    val imagePixels = image.getRaster().getDataBuffer()
     VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
-    img
+    
+    triangles.foreach(n =>
+      n.poses.foreach(pos => {
+        imagePixels.setElem(
+          (Math.max(0, pos.x.toInt + pos.y.toInt * screenWidth - 1)),
+          0xffffff
+        )
+      })
+    )
+    image
   }
 
 }

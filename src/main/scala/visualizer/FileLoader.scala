@@ -3,6 +3,8 @@ import java.io._
 import scala.collection.mutable.Buffer
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
+import java.awt.GraphicsEnvironment
+import VisualizerApp._
 object FileLoader {
   def loadFile(source: String): (Vector[Shapes],Pos) = {
     val fileReader = try {
@@ -43,7 +45,13 @@ object FileLoader {
         throw e
       }
   }
-  img
+  val gc=GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration()
+  val optimizedImg=gc.createCompatibleImage(img.getWidth(),img.getHeight())
+  val g2d= optimizedImg.createGraphics()
+  g2d.drawImage(img,0,0,null)
+  g2d.dispose()
+  println(optimizedImg.getColorModel().equals(gc.getColorModel())+"hei moi")
+  optimizedImg
 }
 def loadObject(source:String):(Vector[Pos],Vector[Triangle])={
   val start = System.currentTimeMillis()

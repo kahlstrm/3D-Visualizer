@@ -1,14 +1,20 @@
 package visualizer
 import scala.swing._
 import scala.swing.event._
+import java.awt.event._
 import scala.concurrent._
 import scala.concurrent.duration.Duration
 import java.awt.Color
+import java.awt
 import Rendererer._
 import misc._
-object VisualizerApp extends SimpleSwingApplication {
+import javax.swing.JFrame
+import javax.swing.JPanel
+import javax.swing.WindowConstants
+object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
+  System.setProperty("sun.java2d.opengl", "True");
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val worldObjects = walls ++ Vector[Shapes](
     // new Object(
@@ -20,6 +26,7 @@ object VisualizerApp extends SimpleSwingApplication {
     Cube
   )
   val brickTexture = FileLoader.loadTexture("brick.png")
+  val frame: JFrame = new JFrame("3d-visualizer")
   var running = true
   var preRendering = false
   val renderDistance = 10000
@@ -29,96 +36,36 @@ object VisualizerApp extends SimpleSwingApplication {
   var frametime = 0.0
   var othertime = 0.0
   var frames = 0
-  val width = 1280
-  val height = 800
+  val width = 1920
+  val height = 1080
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
-  val top: MainFrame = new MainFrame {
-    title = "3d-visualizer"
-    resizable = false
-    val area = new Panel {
-      preferredSize = new Dimension(width, height)
-      focusable = true
-      peer.setIgnoreRepaint(true)
-      cursor_=(emptyCursor)
-
-      listenTo(mouse.moves)
-      listenTo(keys)
-
-      reactions += {
-        case KeyPressed(_, key, _, _) => {
-          key match {
-            case Key.Escape =>
-              println("bye"); running = false; gameThread.join()
-            case Key.W       => Player.moveForward = true
-            case Key.S       => Player.moveBackward = true
-            case Key.A       => Player.moveLeft = true
-            case Key.D       => Player.moveRight = true
-            case Key.Space   => Player.moveUp = true
-            case Key.Shift   => Player.moveDown = true
-            case Key.Control => Player.speedUp = true
-            case Key.R       => wireFrame = !wireFrame
-            case Key.C       => collisionEnabled = !collisionEnabled
-            case Key.M       => preRendering = !preRendering
-            case a           => println(a)
-          }
-        }
-        case KeyReleased(_, key, _, _) => {
-          key match {
-            case Key.W       => Player.moveForward = false
-            case Key.S       => Player.moveBackward = false
-            case Key.A       => Player.moveLeft = false
-            case Key.D       => Player.moveRight = false
-            case Key.Space   => Player.moveUp = false
-            case Key.Shift   => Player.moveDown = false
-            case Key.Control => Player.speedUp = false
-            case _           =>
-          }
-        }
-        case MouseMoved(_, point, _) => {
-          if (previousMouse.isDefined && this.peer.isFocusOwner()) {
-            val prev = previousMouse.get
-            Player.camera.x = {
-              val newVal =
-                (Player.camera.x + (prev.x - point.x).toDouble / 500) % (2 * math.Pi)
-              if (newVal > Math.PI) {
-                newVal - Math.PI * 2
-              } else if (newVal < -Math.PI) {
-                newVal + Math.PI * 2
-              } else newVal
-            }
-            Player.camera.y = -Math.PI / 2.0 max
-              (Player.camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
-              Math.PI / 2.0
-            val centerOfWindow = peer.getLocationOnScreen()
-            robot.mouseMove(
-              centerOfWindow.x + width / 2,
-              centerOfWindow.y + height / 2
-            );
-            previousMouse = None
-          } else {
-            previousMouse = Some(point)
-          }
-        }
-      }
-    }
-    contents = area
-
+  frame.setResizable(false)
+  val area = new JPanel {
+    setPreferredSize(new Dimension(width, height))
+    setFocusable(true)
+    setIgnoreRepaint(true)
+    setCursor(emptyCursor)
+    addKeyListener(Input.keyListener)
+    addMouseMotionListener(Input.mouseListener)
   }
-  top.pack()
-  top.peer.setLocationRelativeTo(null)
-  top.peer.createBufferStrategy(3)
-  top.peer.setIgnoreRepaint(true)
-  val bs = top.peer.getBufferStrategy()
-
+  frame.add(area)
+  frame.pack()
+  frame.setLocationRelativeTo(null)
+  frame.setVisible(true)
+  frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+  frame.createBufferStrategy(3)
+  frame.setIgnoreRepaint(true)
+  val bs = frame.getBufferStrategy()
+  val gc = area.getGraphicsConfiguration()
+  println(gc)
   def runGameNow() = {
     while (running) {
       update()
       render()
       frames += 1;
     }
-    top.closeOperation()
   }
   def update() = {
     val oldPlayerPos = Player.move()
@@ -136,15 +83,20 @@ object VisualizerApp extends SimpleSwingApplication {
   def render() = {
     val g = bs.getDrawGraphics()
     val start = timeNanos()
-    val windowWidth=top.peer.getWidth()
-    val windowHeight=top.peer.getHeight()
     g.setColor(Color.BLACK)
-    g.fillRect(0,0,windowWidth,windowHeight)
+    g.fillRect(0, 0, frame.getWidth(), frame.getHeight())
     g.setColor(Color.WHITE)
-    if (preRendering) {
-      drawFramesFuture(frameIterator.next(), g, wireFrame)
-    } else drawFrame(createFrames(Player.pos, Player.camera.pos), g, wireFrame)
-    // g.drawImage(generateFrameImage(createFrames(Player.pos,Camera.pos)),0,0,windowWidth,windowHeight,null)
+    // if (preRendering) {
+    //   drawFramesFuture(frameIterator.next(), g, wireFrame)
+    // } else drawFrame(createFrames(Player.pos, Player.camera.pos), g, wireFrame)
+    g.drawImage(
+      generateFrameImage(createFrames(Player.pos, Camera.pos)),
+      0,
+      0,
+      frame.getWidth(),
+      frame.getHeight(),
+      null
+    )
     g.setColor(Color.GRAY)
     g.fillRect(40, 40, 300, 150)
     g.setColor(Color.WHITE)
@@ -180,7 +132,7 @@ object VisualizerApp extends SimpleSwingApplication {
         VisualizerApp.runGameNow
       } catch {
         case e: InterruptedException =>
-        case a: Exception            => Future { top.closeOperation() }; throw a
+        case a: Exception            => throw a
       }
     }
   })
