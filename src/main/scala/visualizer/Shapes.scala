@@ -23,9 +23,9 @@ trait Shapes {
             .translate(-player)
             .fpsRotate(0, camera.x)
             .fpsRotate(camera.y, 0)
+            // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0)),
         ),
         tri.texPoses,
-        // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0)),
         tri.color,
         tri.texture
       )
@@ -78,50 +78,7 @@ class Triangle(
       3
     )
   }
-  def sortbyYAscNoTexture: Triangle = {
-    // y1<y2
-    if (pos1.y < pos2.y) {
-      // y1<y2 & y1<y3
-      if (pos1.y < pos3.y) {
-        // y1<y2 & y1<y3 & y3<y2
-        if (pos3.y < pos2.y) {
-          return Triangle(
-            (pos1, pos3, pos2),
-            color
-          )
-        }
-        // y1<y2 & y1<y3 & y3>y2
-        return this
-      }
-      // y1<y2 & y3<y1
-      return Triangle(
-        (pos3, pos1, pos2),
-        color
-      )
-    } else // y2<y1
-      {
-        if (pos3.y < pos2.y) {
-          // y3<y2<y1
-          return Triangle(
-            (pos3, pos2, pos1),
-            color
-          )
-        }
-        // y2<y3 & y2<1
-        if (pos3.y < pos1.y) {
-          // y2<y3 & y2<1 & y3<y1
-          return Triangle(
-            (pos2, pos3, pos1),
-            color
-          )
-        }
 
-      }
-    Triangle(
-      (pos2, pos1, pos3),
-      color
-    )
-  }
   // flip the triangles so that the the points are ordered by descending Y-value
   def sortbyYAsc: Triangle = {
     // y1<y2
@@ -177,18 +134,6 @@ class Triangle(
 }
 
 object Triangle {
-
-  def apply(poses: Array[Pos]) = {
-    new Triangle(poses)
-  }
-  def apply(poses: Array[Pos], col: Color) = {
-    new Triangle(poses, color = col)
-  }
-
-  def apply(poses: (Pos, Pos, Pos), col: Color) = {
-    new Triangle(Array(poses._1, poses._2, poses._3), color = col)
-  }
-
   def apply(
       poses: (Pos, Pos, Pos),
       texPoses: (Pos, Pos, Pos),

@@ -26,7 +26,6 @@ object Input {
         case Key.Control => Player.speedUp = true
         case Key.R       => wireFrame = !wireFrame
         case Key.C       => collisionEnabled = !collisionEnabled
-        case Key.M       => preRendering = !preRendering
         case a           => println(a)
       }
     }

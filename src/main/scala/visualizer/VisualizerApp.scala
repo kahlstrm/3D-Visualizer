@@ -15,7 +15,7 @@ import java.awt.image.BufferedImage
 object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
-  // System.setProperty("sun.java2d.opengl", "true");
+  System.setProperty("sun.java2d.opengl", "true");
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val textures: Map[String, Texture] = Map(
     "stonebrick" ->
@@ -33,10 +33,8 @@ object VisualizerApp extends App {
     Cube(Pos(100, 0, 0), Pos(0, 0, 0), "stonebrick")
   )
 
-  val frame: JFrame = new JFrame("3d-visualizer")
-  val futureFrameIterator = frameIterator
+  val frame: JFrame = new JFrame("3d-visualizer") 
   var running = true
-  var preRendering = false
   val renderDistance = 10000
   var triangleCount = 0
   var wireFrame = false
@@ -79,7 +77,7 @@ object VisualizerApp extends App {
       // clear Buffers
       for (i <- 0 until zBuffer.getSize()) {
         zBuffer.setElemDouble(i, 0.0)
-        imagePixels.setElem(i,0)
+        imagePixels.setElem(i, 0)
       }
       render()
       frames += 1;
@@ -104,11 +102,8 @@ object VisualizerApp extends App {
     g.setColor(Color.BLACK)
     g.fillRect(0, 0, frame.getWidth(), frame.getHeight())
     g.setColor(Color.WHITE)
-    // if (preRendering) {
-    //   drawFramesFuture(futureframeIterator.next(), g, wireFrame)
-    // } else drawFrame(createFrames(Player.pos, Player.camera.pos), g, wireFrame)
     if (wireFrame) {
-      drawFrame(createFrames(Player.pos, Player.camera.pos), g, wireFrame)
+      drawFrame(createFrames(Player.pos, Player.camera.pos), g)
     } else
       g.drawImage(
         generateFrameImage(
@@ -138,11 +133,6 @@ object VisualizerApp extends App {
       "press R to toggle wireframe, C to toggle collision",
       50,
       160
-    )
-    g.drawString(
-      s"rendering mode: ${if (preRendering) "multi" else "single"}, toggle M",
-      50,
-      180
     )
     drawCrosshair(g)
     val time = timeBetween(start, timeNanos())
