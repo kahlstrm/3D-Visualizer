@@ -12,7 +12,7 @@ object Rendererer {
 
   def createFrames(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
-  ): Array[Triangle] = {
+  ): Vector[Triangle] = {
     val worldSpaceTriangles =
       VisualizerApp.worldObjects.flatMap(
         _.worldSpaceTris(player, camera)
@@ -27,7 +27,7 @@ object Rendererer {
     triangles
   }
 
-  def generateViewTriangles(triangles: Array[Triangle]) = {
+  def generateViewTriangles(triangles: Vector[Triangle]) = {
 
     val newTriangles = triangles.par
       .flatMap(tri => {
@@ -63,7 +63,7 @@ object Rendererer {
           .flatMap(calcClipping(_, Pos(0, 9, 0), Pos(0, 1, 0)))
           .flatMap(calcClipping(_, Pos(0, screenHeight - 9, 0), Pos(0, -1, 0)))
       })
-    newTriangles.toArray
+    newTriangles.toVector
   }
 
 // draw
@@ -252,7 +252,7 @@ object Rendererer {
 
   // draws the image to be put to the framebuffer
   def generateFrameImage(
-      triangles: Array[Triangle],
+      triangles: Vector[Triangle],
       zBuffer: DataBuffer,
       image: BufferedImage
   ): BufferedImage = {
@@ -266,7 +266,7 @@ object Rendererer {
   }
   // old method which is still used for drawing wireframes which slight remodeling
   def drawFrame(
-      triangles: Array[Triangle],
+      triangles: Vector[Triangle],
       g: Graphics
       // wireFrame: Boolean
   ): Unit = {

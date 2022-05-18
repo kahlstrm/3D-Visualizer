@@ -23,7 +23,7 @@ object VisualizerApp extends App {
     "dirt" -> Texture(FileLoader.loadTexture("minecraft.jpg")),
     "brick"->Texture(FileLoader.loadTexture("brick.png"))
   )
-  val worldObjects = walls ++ Array[Shapes](
+  val worldObjects = walls ++ Vector[Shapes](
     Object(
       FileLoader.loadObject("dragon.obj"),
       Pos(0, 0, 300),

@@ -6,14 +6,14 @@ import java.awt.image.BufferedImage
 import java.awt.GraphicsEnvironment
 import VisualizerApp._
 object FileLoader {
-  def loadFile(source: String): (Array[Shapes], Pos) = {
+  def loadFile(source: String): (Vector[Shapes], Pos) = {
     val fileReader =
       try {
         new FileReader(source)
       } catch {
         case e: FileNotFoundException => {
           println("map File not found")
-          return (Array[Shapes](), Pos(0, 0, 0))
+          return (Vector[Shapes](), Pos(0, 0, 0))
         }
       }
     var playerPos = Pos(0, 0, 0)
@@ -49,7 +49,7 @@ object FileLoader {
       lineCounter += 1
     }
     fileReader.close()
-    return (walls.toArray, playerPos)
+    return (walls.toVector, playerPos)
   }
   def loadTexture(source: String): BufferedImage = {
     val img =
@@ -71,7 +71,7 @@ object FileLoader {
     g2d.dispose()
     optimizedImg
   }
-  def loadObject(source: String): (Array[Pos], Array[Triangle]) = {
+  def loadObject(source: String): (Vector[Pos], Vector[Triangle]) = {
     val start = System.currentTimeMillis()
     val fileReader =
       try {
@@ -115,7 +115,7 @@ object FileLoader {
       s"${source} ${poses.length} vertices and ${triangles.length} Triangles"
     )
     println(s"this took ${(end - start) / 1000.0} seconds")
-    (poses.toArray, triangles.toArray)
+    (poses.toVector, triangles.toVector)
   }
 }
 

@@ -8,7 +8,7 @@ import java.awt.image.DataBuffer
 trait Shapes {
   val position: Pos
   val rotation: Pos
-  val poses: Array[Pos]
+  val poses: Vector[Pos]
   // def worldSpacePos(player: Pos) = {
   //   poses.par.map(pos =>
   //     pos
@@ -31,7 +31,7 @@ trait Shapes {
       )
     })
   }
-  val triangles: Array[Triangle]
+  val triangles: Vector[Triangle]
   val bottomCornerWorld: Pos
   val topCornerWorld: Pos
 
@@ -183,7 +183,7 @@ def apply(
   }
 }
 class Object(
-    objInfo: (Array[Pos], Array[Triangle]),
+    objInfo: (Vector[Pos], Vector[Triangle]),
     val position: Pos,
     val rotation: Pos,
     scale: Double
@@ -193,7 +193,7 @@ class Object(
       .rotate(rotation)
       .translate(position)
   )
-  val triangles: Array[Triangle] = objInfo._2.map(tri =>
+  val triangles: Vector[Triangle] = objInfo._2.map(tri =>
     Triangle(
       tri.poses.map(pos =>
         (pos * scale)
@@ -230,7 +230,7 @@ class Object(
 }
 object Object {
   def apply(
-      objInfo: (Array[Pos], Array[Triangle]),
+      objInfo: (Vector[Pos], Vector[Triangle]),
       position: Pos,
       rotation: Pos,
       scale: Double
@@ -238,7 +238,7 @@ object Object {
 }
 class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
     extends Shapes {
-  val poses = Array[Pos](
+  val poses = Vector[Pos](
     Pos(-300, -200, -100),
     Pos(300, -200, -100),
     Pos(300, 200, -100),
@@ -263,7 +263,7 @@ class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
           ); null
       }
     else null
-  val triangles = Array[Triangle](
+  val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
       (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
@@ -332,7 +332,7 @@ class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
 class Cube(val position: Pos, val rotation: Pos, textureString: String)
     extends Shapes {
 
-  val poses = Array[Pos](
+  val poses = Vector[Pos](
     Pos(-100, -100, -100),
     Pos(100, -100, -100),
     Pos(100, 100, -100),
@@ -357,7 +357,7 @@ class Cube(val position: Pos, val rotation: Pos, textureString: String)
           ); null
       }
     else null
-  val triangles = Array[Triangle](
+  val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
       (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
