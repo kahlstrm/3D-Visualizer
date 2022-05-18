@@ -177,27 +177,14 @@ class Triangle(
 }
 
 object Triangle {
-  // def apply(poses: (Pos, Pos, Pos)) = {
-  //   new Triangle(Array(poses._1, poses._2, poses._3))
-  // }
+
   def apply(poses: Array[Pos]) = {
     new Triangle(poses)
   }
   def apply(poses: Array[Pos], col: Color) = {
     new Triangle(poses, color = col)
   }
-  // def apply(pos1: Pos, pos2: Pos, pos3: Pos, texPoses: Array[Pos]) = {
-  //   new Triangle(Array(pos1, pos2, pos3), texPoses)
-  // }
-  // def apply(
-  //     pos1: Pos,
-  //     pos2: Pos,
-  //     pos3: Pos,
-  //     texPoses: Array[Pos],
-  //     col: Color
-  // ) = {
-  //   new Triangle(Array(pos1, pos2, pos3), texPoses, col)
-  // }
+
   def apply(poses: (Pos, Pos, Pos), col: Color) = {
     new Triangle(Array(poses._1, poses._2, poses._3), color = col)
   }
@@ -221,7 +208,8 @@ object Triangle {
   }
   def apply(pos1: Pos, pos2: Pos, pos3: Pos) = {
     new Triangle(
-      Array(pos1, pos2, pos3)
+      Array(pos1, pos2, pos3),
+      Array(Pos(1, 1), Pos(1, 0), Pos(0, 0))
     )
   }
   def apply(
@@ -237,7 +225,17 @@ object Triangle {
       texture
     )
   }
-
+def apply(
+      positions: Array[Pos],
+      texPositions: Array[Pos],
+      texture: Texture
+  ) = {
+    new Triangle(
+      positions,
+      texPositions,
+      texture=texture
+    )
+  }
 }
 class Object(
     objInfo: (Vector[Pos], Vector[Triangle]),
@@ -256,7 +254,9 @@ class Object(
         (pos * scale)
           .rotate(rotation)
           .translate(position)
-      )
+      ),
+      tri.texPoses,
+      tri.texture
     )
   )
   val (bottomCornerWorld, topCornerWorld): (Pos, Pos) = {
@@ -291,7 +291,8 @@ object Object {
       scale: Double
   ) = new Object(objInfo, position, rotation, scale)
 }
-class Wall(val position: Pos, val rotation: Pos,textureString:String=null) extends Shapes {
+class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
+    extends Shapes {
   val poses = Vector[Pos](
     Pos(-300, -200, -100),
     Pos(300, -200, -100),

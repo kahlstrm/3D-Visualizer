@@ -11,25 +11,26 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants
 import java.awt.image.DataBufferDouble
+import java.awt.image.BufferedImage
 object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
-  System.setProperty("sun.java2d.opengl", "true");
-  val (walls, playerPos) = FileLoader.loadFile("hello.map")
+  // System.setProperty("sun.java2d.opengl", "true");
+  val (walls, playerPos) = FileLoader.loadFile("test.map")
   val textures: Map[String, Texture] = Map(
     "stonebrick" ->
       Texture(FileLoader.loadTexture("stonebrick.png")),
     "dirt" -> Texture(FileLoader.loadTexture("minecraft.jpg"))
   )
   val worldObjects = walls ++ Vector[Shapes](
-    // Object(
-    //   FileLoader.loadObject("dragon.obj"),
-    //   Pos(0, 0, 300),
-    //   Pos(0, 0, 0),
-    //   100
-    // ),
-    Cube(Pos(-100,0,0),Pos(0,0,0),"dirt"),
-    Cube(Pos(100,0,0),Pos(0,0,0),"stonebrick")
+    Object(
+      FileLoader.loadObject("dragon.obj"),
+      Pos(0, 0, 300),
+      Pos(0, 0, 0),
+      100
+    ),
+    Cube(Pos(-100, 0, 0), Pos(0, 0, 0), "dirt"),
+    Cube(Pos(100, 0, 0), Pos(0, 0, 0), "stonebrick")
   )
 
   val frame: JFrame = new JFrame("3d-visualizer")
@@ -66,14 +67,19 @@ object VisualizerApp extends App {
   frame.setIgnoreRepaint(true)
   val bs = frame.getBufferStrategy()
   val gc = area.getGraphicsConfiguration()
-  val zBuffer= new DataBufferDouble(frame.getWidth*frame.getHeight())
+  val image = VisualizerApp.frame
+    .getGraphicsConfiguration()
+    .createCompatibleImage(frame.getWidth, frame.getHeight)
+  val imagePixels = image.getRaster().getDataBuffer()
+  val zBuffer = new DataBufferDouble(frame.getWidth * frame.getHeight())
   println(gc)
   def runGameNow() = {
     while (running) {
       update()
-      //clear zBuffer
-      for(i<- 0 until zBuffer.getSize()){
-        zBuffer.setElemDouble(i,0.0)
+      // clear Buffers
+      for (i <- 0 until zBuffer.getSize()) {
+        zBuffer.setElemDouble(i, 0.0)
+        imagePixels.setElem(i,0)
       }
       render()
       frames += 1;
@@ -105,7 +111,11 @@ object VisualizerApp extends App {
       drawFrame(createFrames(Player.pos, Player.camera.pos), g, wireFrame)
     } else
       g.drawImage(
-        generateFrameImage(createFrames(Player.pos, Camera.pos),zBuffer),
+        generateFrameImage(
+          createFrames(Player.pos, Camera.pos),
+          zBuffer,
+          image
+        ),
         0,
         0,
         frame.getWidth(),

@@ -25,9 +25,10 @@ object Rendererer {
             avgPos < VisualizerApp.renderDistance
           })
       )
-    generateViewTriangles(worldSpaceTriangles)
+    val triangles = generateViewTriangles(worldSpaceTriangles)
+    VisualizerApp.triangleCount = triangles.size
     // val res = generateDrawableTriangles(viewTris)
-    // res
+    triangles
   }
 
   def frameIterator: Iterator[Future[Vector[Triangle]]] =
@@ -405,11 +406,9 @@ object Rendererer {
   }
   def generateFrameImage(
       triangles: Vector[Triangle],
-      zBuffer: DataBuffer
+      zBuffer: DataBuffer,
+      image: BufferedImage
   ): BufferedImage = {
-    val image = VisualizerApp.frame
-      .getGraphicsConfiguration()
-      .createCompatibleImage(screenWidth, screenHeight)
     val imagePixels = image.getRaster().getDataBuffer()
     val start = misc.timeNanos()
     triangles.foreach(tri => {
