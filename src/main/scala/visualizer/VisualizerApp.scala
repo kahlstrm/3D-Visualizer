@@ -20,20 +20,21 @@ object VisualizerApp extends App {
   val textures: Map[String, Texture] = Map(
     "stonebrick" ->
       Texture(FileLoader.loadTexture("stonebrick.png")),
-    "dirt" -> Texture(FileLoader.loadTexture("minecraft.jpg"))
+    "dirt" -> Texture(FileLoader.loadTexture("minecraft.jpg")),
+    "brick"->Texture(FileLoader.loadTexture("brick.png"))
   )
-  val worldObjects = walls ++ Vector[Shapes](
+  val worldObjects = walls ++ Array[Shapes](
     Object(
       FileLoader.loadObject("dragon.obj"),
       Pos(0, 0, 300),
       Pos(0, 0, 0),
       100
-    ),
-    Cube(Pos(-100, 0, 0), Pos(0, 0, 0), "dirt"),
-    Cube(Pos(100, 0, 0), Pos(0, 0, 0), "stonebrick")
+    )
+    // Cube(Pos(-100, 0, 0), Pos(0, 0, 0), "dirt"),
+    // Cube(Pos(100, 0, 0), Pos(0, 0, 0), "stonebrick")
   )
 
-  val frame: JFrame = new JFrame("3d-visualizer") 
+  val frame: JFrame = new JFrame("3d-visualizer")
   var running = true
   val renderDistance = 10000
   var triangleCount = 0
@@ -61,17 +62,18 @@ object VisualizerApp extends App {
   frame.setLocationRelativeTo(null)
   frame.setVisible(true)
   frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
-  frame.createBufferStrategy(3)
+  frame.createBufferStrategy(2)
   frame.setIgnoreRepaint(true)
   val bs = frame.getBufferStrategy()
-  val gc = area.getGraphicsConfiguration()
-  val image = VisualizerApp.frame
-    .getGraphicsConfiguration()
-    .createCompatibleImage(frame.getWidth, frame.getHeight)
-  val imagePixels = image.getRaster().getDataBuffer()
-  val zBuffer = new DataBufferDouble(frame.getWidth * frame.getHeight())
+  val gc = frame.getGraphicsConfiguration()
+  val realWidth=frame.getWidth()
+  val readHeight=frame.getHeight()
+  private val image = gc
+    .createCompatibleImage(realWidth, frame.getHeight)
+  private val imagePixels = image.getRaster().getDataBuffer()
+  private val zBuffer = new DataBufferDouble(realWidth * readHeight)
   println(gc)
-  def runGameNow() = {
+  private def runGameNow() = {
     while (running) {
       update()
       // clear Buffers
@@ -83,7 +85,7 @@ object VisualizerApp extends App {
       frames += 1;
     }
   }
-  def update() = {
+  private def update() = {
     val oldPlayerPos = Player.move()
     if (collisionEnabled) {
       Future {
@@ -96,11 +98,11 @@ object VisualizerApp extends App {
       }
     }
   }
-  def render() = {
+  private def render() = {
     val g = bs.getDrawGraphics()
     val start = timeNanos()
     g.setColor(Color.BLACK)
-    g.fillRect(0, 0, frame.getWidth(), frame.getHeight())
+    g.fillRect(0, 0, realWidth, readHeight)
     g.setColor(Color.WHITE)
     if (wireFrame) {
       drawFrame(createFrames(Player.pos, Player.camera.pos), g)
@@ -113,8 +115,8 @@ object VisualizerApp extends App {
         ),
         0,
         0,
-        frame.getWidth(),
-        frame.getHeight(),
+        realWidth,
+        readHeight,
         null
       )
     g.setColor(Color.GRAY)
@@ -146,7 +148,6 @@ object VisualizerApp extends App {
         println("game is now running")
         VisualizerApp.runGameNow
       } catch {
-        case e: InterruptedException =>
         case a: Exception            => throw a
       }
     }

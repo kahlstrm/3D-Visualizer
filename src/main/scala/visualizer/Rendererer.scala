@@ -4,37 +4,30 @@ import scala.collection.parallel.CollectionConverters._
 import java.awt.Color
 import java.awt.image.BufferedImage
 import visualizer.GfxMath._
-import scala.concurrent.ExecutionContext
-import scala.concurrent._
-import scala.util.Success
-import scala.util.Failure
-import scala.concurrent.duration.Duration
 import java.awt.image.DataBuffer
-import scala.collection.parallel.immutable.ParVector
+import scala.concurrent.ExecutionContext
 object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
 
   def createFrames(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
-  ): Vector[Triangle] = {
-    val start = misc.timeNanos()
+  ): Array[Triangle] = {
     val worldSpaceTriangles =
       VisualizerApp.worldObjects.flatMap(
-        _.worldSpaceTris(player, camera).par
+        _.worldSpaceTris(player, camera)
           .filter(tri => {
             val avgPos = ((tri.pos1 + tri.pos2 + tri.pos3) / 3).length
             avgPos < VisualizerApp.renderDistance
           })
       )
-    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
     val triangles = generateViewTriangles(worldSpaceTriangles)
     VisualizerApp.triangleCount = triangles.size
     // val res = generateDrawableTriangles(viewTris)
     triangles
   }
 
-  def generateViewTriangles(triangles: Vector[Triangle]) = {
+  def generateViewTriangles(triangles: Array[Triangle]) = {
 
     val newTriangles = triangles.par
       .flatMap(tri => {
@@ -70,7 +63,7 @@ object Rendererer {
           .flatMap(calcClipping(_, Pos(0, 9, 0), Pos(0, 1, 0)))
           .flatMap(calcClipping(_, Pos(0, screenHeight - 9, 0), Pos(0, -1, 0)))
       })
-    newTriangles.toVector
+    newTriangles.toArray
   }
 
 // draw
@@ -259,19 +252,21 @@ object Rendererer {
 
   // draws the image to be put to the framebuffer
   def generateFrameImage(
-      triangles: Vector[Triangle],
+      triangles: Array[Triangle],
       zBuffer: DataBuffer,
       image: BufferedImage
   ): BufferedImage = {
     val imagePixels = image.getRaster().getDataBuffer()
+    val start = misc.timeNanos()
     triangles.foreach(tri => {
       triangleTextureDraw(tri, imagePixels, zBuffer)
     })
+    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
     image
   }
   // old method which is still used for drawing wireframes which slight remodeling
   def drawFrame(
-      triangles: Vector[Triangle],
+      triangles: Array[Triangle],
       g: Graphics
       // wireFrame: Boolean
   ): Unit = {

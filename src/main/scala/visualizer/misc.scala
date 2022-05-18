@@ -4,11 +4,14 @@ import java.awt.image.BufferedImage
 import java.awt.Point
 import java.awt.Robot
 import java.awt.Graphics
-import java.awt.Toolkit
 object misc {
-  val emptyCursor = Toolkit.getDefaultToolkit()
+  private def frame = VisualizerApp.frame
+  val emptyCursor = frame
+    .getToolkit()
     .createCustomCursor(
-      new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB),
+      frame
+        .getGraphicsConfiguration()
+        .createCompatibleImage(16, 16, BufferedImage.TYPE_INT_ARGB),
       new Point(0, 0),
       "empty cursor"
     )
@@ -16,10 +19,9 @@ object misc {
 
   /** Class for measuring time Wall time
     */
-  def timeNanos()=System.nanoTime()
+  def timeNanos() = System.nanoTime()
 
-  def timeBetween(start:Long,end:Long)=(end-start)/1000000000.0
-  
+  def timeBetween(start: Long, end: Long) = (end - start) / 1000000000.0
 
   def drawCrosshair(g: Graphics) = {
     val w = GfxMath.screenWidth
