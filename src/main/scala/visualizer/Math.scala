@@ -59,10 +59,11 @@ object GfxMath {
     (planeNormalUnit.x * pos.x + planeNormalUnit.y * pos.y + planeNormalUnit.z * pos.z - planeNormalUnit
       .dotProduct(plane));
   }
-  def newTexPos(texPosOut: Pos2D, texPosIn: Pos2D, fac: Double): Pos2D = {
-    Pos2D(
+  def newTexPos(texPosOut: Pos, texPosIn: Pos, fac: Double): Pos = {
+    Pos(
       fac * (texPosOut.x - texPosIn.x) + texPosIn.x,
-      fac * (texPosOut.y - texPosIn.y) + texPosIn.y
+      fac * (texPosOut.y - texPosIn.y) + texPosIn.y,
+      1
     )
   }
   // heavy spaghetti code to clip triangles so only triangles on screen show
@@ -103,9 +104,10 @@ object GfxMath {
           // newpos1,
           // newpos2,
           // tri.pos3,
-          tri.poses.updated(0,newpos1).updated(1,newpos2),
+          tri.poses.updated(0, newpos1).updated(1, newpos2),
           newTexPoses,
-          tri.color
+         // tri.color
+         Color.BLUE
         )
       )
     }
@@ -128,9 +130,10 @@ object GfxMath {
           // newpos1,
           // tri.pos2,
           // newpos3,
-          tri.poses.updated(0,newpos1).updated(2,newpos3),
+          tri.poses.updated(0, newpos1).updated(2, newpos3),
           newTexPoses,
-          tri.color
+          // tri.color
+          Color.BLUE
         )
       )
     }
@@ -153,9 +156,10 @@ object GfxMath {
           // tri.pos1,
           // newpos2,
           // newpos3,
-          tri.poses.updated(1,newpos2).updated(2,newpos3),
+          tri.poses.updated(1, newpos2).updated(2, newpos3),
           newTexPoses,
-          tri.color
+          // tri.color
+          Color.BLUE
         )
       )
     }
@@ -181,17 +185,19 @@ object GfxMath {
           // newpos1,
           // tri.pos2,
           // tri.pos3,
-          tri.poses.updated(0,newpos1),
+          tri.poses.updated(0, newpos1),
           newTexPoses,
-          tri.color
+          // tri.color
+          Color.GREEN
         ),
         Triangle(
           // newpos2,
           // newpos1,
           // tri.pos3,
-          tri.poses.updated(0,newpos2).updated(1,newpos1),
+          tri.poses.updated(0, newpos2).updated(1, newpos1),
           newTexPoses2,
-          tri.color
+          // tri.color
+          Color.RED
         )
       )
     }
@@ -216,17 +222,19 @@ object GfxMath {
           // tri.pos1,
           // newpos2,
           // tri.pos3,
-          tri.poses.updated(1,newpos2),
+          tri.poses.updated(1, newpos2),
           newTexPoses,
-          tri.color
+          // tri.color
+          Color.GREEN
         ),
         Triangle(
           // tri.pos1,
           // newpos1,
           // newpos2,
-          tri.poses.updated(1,newpos1).updated(2,newpos2),
+          tri.poses.updated(1, newpos1).updated(2, newpos2),
           newTexPoses2,
-          tri.color
+          // tri.color
+          Color.RED
         )
       )
     }
@@ -251,17 +259,19 @@ object GfxMath {
           // tri.pos1,
           // tri.pos2,
           // newpos1,
-          tri.poses.updated(2,newpos1),
+          tri.poses.updated(2, newpos1),
           newTexPoses,
-          tri.color
+          // tri.color
+          Color.GREEN
         ),
         Triangle(
           // newpos1,
           // tri.pos2,
           // newpos2,
-          tri.poses.updated(0,newpos1).updated(2,newpos2),
+          tri.poses.updated(0, newpos1).updated(2, newpos2),
           newTexPoses2,
-          tri.color
+          // tri.color
+          Color.PINK
         )
       )
     }
@@ -433,47 +443,8 @@ class Pos(
   override def toString(): String = f"x: $x%2.2f y: $y%2.2f z: $z%2.2f"
 }
 
-case class Pos2D(var x: Double, var y: Double) {
-  def +(pos: Pos2D) = translate(pos)
-  def distance(that: Pos) = {
-    math.sqrt(
-      math.pow(that.x - this.x, 2) + math.pow(that.y - this.y, 2)
-    )
-  }
-  def length = this.distance(Pos(0, 0, 0))
-
-  def update(that: Pos): Unit = {
-    this.x = that.x
-    this.y = that.y
-  }
-  def unary_-(): Pos2D = {
-    Pos2D(
-      -this.x,
-      -this.y
-    )
-  }
-  def *(mul: Double): Pos2D = {
-    Pos2D(
-      this.x * mul,
-      this.y * mul
-    )
-  }
-  def /(div: Double): Pos2D = {
-    Pos2D(
-      this.x / div,
-      this.y / div
-    )
-  }
-  def translate(transpos: Pos2D): Pos2D = {
-    Pos2D(
-      this.x + transpos.x,
-      this.y + transpos.y
-    )
-  }
-  def unit(): Pos2D = if (this.length == 0) this else this / this.length
-}
-object Camera extends Pos2D(0, 0) {
-  def pos() = this + Pos2D(0, 0)
+object Camera extends Pos(0, 0, 0) {
+  def pos() = this + Pos(0, 0, 0)
   // forwardVector for camera movement
   def forwardVector = {
     Pos(
@@ -494,10 +465,11 @@ object Camera extends Pos2D(0, 0) {
   def testUp = {
     forwardVector.crossProduct(rightVector)
   }
-  def cameraVector(): Pos2D = {
-    Pos2D(
+  def cameraVector(): Pos = {
+    Pos(
       this.y,
-      this.x
+      this.x,
+      0
     )
   }
   // def rightVector():Pos={
@@ -527,6 +499,9 @@ object Pos {
   }
   def apply(pos: Pos): Pos = {
     new Pos(pos.x, pos.y, pos.z)
+  }
+  def apply(x:Double,y:Double):Pos={
+    new Pos(x,y,1)
   }
 }
 

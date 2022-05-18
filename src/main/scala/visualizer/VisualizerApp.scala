@@ -17,13 +17,13 @@ object VisualizerApp extends App {
   System.setProperty("sun.java2d.opengl", "True");
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val worldObjects = walls ++ Vector[Shapes](
-    // new Object(
-    //   FileLoader.loadObject("dragon.obj"),
-    //   Pos(0, 0, 300),
-    //   Pos(0, 0, 0),
-    //   100
-    // )
-    Cube
+    new Object(
+      FileLoader.loadObject("dragon_low_poly.obj"),
+      Pos(0, 0, 300),
+      Pos(0, 0, 0),
+      100
+    )
+    // Cube
   )
   val brickTexture = FileLoader.loadTexture("brick.png")
   val frame: JFrame = new JFrame("3d-visualizer")
@@ -36,13 +36,13 @@ object VisualizerApp extends App {
   var frametime = 0.0
   var othertime = 0.0
   var frames = 0
-  val width = 1920
-  val height = 1080
+  val width = 1280
+  val height = 800
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
   frame.setResizable(false)
-  val area = new JPanel {
+  val area: JPanel = new JPanel {
     setPreferredSize(new Dimension(width, height))
     setFocusable(true)
     setIgnoreRepaint(true)
@@ -89,14 +89,7 @@ object VisualizerApp extends App {
     // if (preRendering) {
     //   drawFramesFuture(frameIterator.next(), g, wireFrame)
     // } else drawFrame(createFrames(Player.pos, Player.camera.pos), g, wireFrame)
-    g.drawImage(
-      generateFrameImage(createFrames(Player.pos, Camera.pos)),
-      0,
-      0,
-      frame.getWidth(),
-      frame.getHeight(),
-      null
-    )
+    g.drawImage(generateFrameImage(createFrames(Player.pos, Camera.pos)),0,0,frame.getWidth(),frame.getHeight(),null)
     g.setColor(Color.GRAY)
     g.fillRect(40, 40, 300, 150)
     g.setColor(Color.WHITE)

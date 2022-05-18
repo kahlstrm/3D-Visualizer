@@ -9,11 +9,12 @@ import scala.concurrent._
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.duration.Duration
+import java.awt.image.DataBuffer
 object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
 
-  def createFrames(player: Pos, camera: Pos2D)(implicit
+  def createFrames(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
   ): Vector[Triangle] = {
     val worldSpaceTriangles =
@@ -65,10 +66,10 @@ object Rendererer {
           .filter(getNormal(_).z < 0)
           // calculate clippings for the sides of the screen, which is represented by a plane with point on the plane,
           // and with the normal pointing towards the screen
-          .flatMap(calcClipping(_, Pos(0, 0, 0), Pos(1, 0, 0)))
-          .flatMap(calcClipping(_, Pos(screenWidth, 0, 0), Pos(-1, 0, 0)))
-          .flatMap(calcClipping(_, Pos(0, 0, 0), Pos(0, 1, 0)))
-          .flatMap(calcClipping(_, Pos(0, screenHeight - 1, 0), Pos(0, -1, 0)))
+          .flatMap(calcClipping(_, Pos(20, 0, 0), Pos(1, 0, 0)))
+          .flatMap(calcClipping(_, Pos(screenWidth - 20, 0, 0), Pos(-1, 0, 0)))
+          .flatMap(calcClipping(_, Pos(0, 50, 0), Pos(0, 1, 0)))
+          .flatMap(calcClipping(_, Pos(0, screenHeight - 20, 0), Pos(0, -1, 0)))
       })
     newTriangles.toVector
   }
@@ -94,8 +95,7 @@ object Rendererer {
     if (wireFrame) triangles.foreach(_.draw(g))
     else
       triangles.foreach(tri => {
-        // if (tri.texPoses != null) println(tri.texPoses.mkString)
-        tri.draw(g, tri.color)
+        if (tri.color != null) tri.draw(g, tri.color)
       })
   }
   def drawFramesFuture(
@@ -116,6 +116,241 @@ object Rendererer {
     Await.ready(p.future, Duration.Inf)
     return
   }
+
+  def triangleDraw(
+    tri:Triangle,
+    pixels:DataBuffer
+  ):Unit={
+        val maxSize = pixels.getSize()
+    val yDescTri = tri.sortbyYAscNoTexture
+    val (x1, y1, x2, y2, x3, y3) = (
+      yDescTri.pos1.x.toInt,
+      yDescTri.pos1.y.toInt,
+      yDescTri.pos2.x.toInt,
+      yDescTri.pos2.y.toInt,
+      yDescTri.pos3.x.toInt,
+      yDescTri.pos3.y.toInt
+    )
+    var dy1 = y2 - y1
+    var dx1 = x2 - x1
+
+
+    val dy2 = y3 - y1
+    val dx2 = x3 - x1
+
+    var xLeft = 0.0
+    var xRight = 0.0
+    if (dy1 != 0) {
+      xLeft = dx1 / Math.abs(dy1).toDouble
+    }
+    if (dy2 != 0) {
+      xRight = dx2 / Math.abs(dy2).toDouble
+    }
+    if (dy1 != 0) {
+      var j = y1
+      while (j <= y2) {
+        var xL = (x1 + (j - y1) * xLeft).toInt
+        var xR = (x1 + (j - y1) * xRight).toInt
+
+        if (xR != xL) {
+          if (xL > xR) {
+            val temp1= xL
+            xL = xR
+            xR = temp1
+          }
+
+          val texStep = 1.0 / (xR - xL)
+          var t = 0.0
+          var i = xL
+          while (i < xR) {
+            // val col = texture.getElem({
+            //   Math.max(Math.ceil(tLocU * 160).toInt - 1, 0) +
+            //     Math.max(Math.ceil(tLocV * 160).toInt - 1, 0) * 160
+            // })
+            pixels.setElem(i + j * screenWidth, tri.color.getRGB())
+            t += texStep
+            i += 1
+          }
+        }
+        j += 1
+      }
+    }
+    dy1 = y3 - y2
+    dx1 = x3 - x2
+    if (dy1 != 0) {
+      xLeft = dx1 / Math.abs(dy1).toDouble
+    }
+    if (dy2 != 0) {
+      xRight = dx2 / Math.abs(dy2).toDouble
+    }
+    if (dy2 != 0) {
+      var j = y2
+      while (j <= y3) {
+        var xL = (x2 + (j - y2) * xLeft).toInt
+        var xR = (x1 + (j - y1) * xRight).toInt
+
+
+        if (xR != xL) {
+          if (xL > xR) {
+            val temp1= xL
+            xL = xR
+            xR = temp1
+          }
+
+          val texStep = 1.0 / (xR - xL)
+          var t = 0.0
+          var i = xL
+          while (i < xR) {
+            pixels.setElem(i + j * screenWidth, tri.color.getRGB())
+            t += texStep
+            i += 1
+          }
+        }
+        j += 1
+      }
+    }
+  }
+  def triangleTextureDraw(
+      tri: Triangle,
+      pixels: DataBuffer,
+      texture: DataBuffer
+  ): Unit = {
+    val maxSize = pixels.getSize()
+    val yDescTri = tri.sortbyYAsc
+    val (x1, y1, x2, y2, x3, y3) = (
+      yDescTri.pos1.x.toInt,
+      yDescTri.pos1.y.toInt,
+      yDescTri.pos2.x.toInt,
+      yDescTri.pos2.y.toInt,
+      yDescTri.pos3.x.toInt,
+      yDescTri.pos3.y.toInt
+    )
+    val (tx1, ty1, tx2, ty2, tx3, ty3) = (
+      yDescTri.texPos1.x,
+      yDescTri.texPos1.y,
+      yDescTri.texPos2.x,
+      yDescTri.texPos2.y,
+      yDescTri.texPos3.x,
+      yDescTri.texPos3.y
+    )
+    var dy1 = y2 - y1
+    var dx1 = x2 - x1
+
+    var dv1 = ty2 - ty1
+    var du1 = tx2 - tx1
+
+    val dy2 = y3 - y1
+    val dx2 = x3 - x1
+
+    val dv2 = ty3 - ty1
+    var du2 = tx3 - tx1
+    var xLeft = 0.0
+    var xRight = 0.0
+    var du1_step = 0.0
+    var dv1_step = 0.0
+    var du2_step = 0.0
+    var dv2_step = 0.0
+    if (dy1 != 0) {
+      xLeft = dx1 / Math.abs(dy1).toDouble
+      du1_step = du1 / Math.abs(dy1)
+      dv1_step = dv1 / Math.abs(dy1)
+    }
+    if (dy2 != 0) {
+      xRight = dx2 / Math.abs(dy2).toDouble
+      du2_step = du2 / Math.abs(dy2)
+      dv2_step = dv2 / Math.abs(dy2)
+    }
+    if (dy1 != 0) {
+      var j = y1
+      while (j <= y2) {
+        var xL = (x1 + (j - y1) * xLeft).toInt
+        var xR = (x1 + (j - y1) * xRight).toInt
+
+        var texS = tx1 + (j - y1) * du1_step
+        var teyS = ty1 + (j - y1) * dv1_step
+
+        var texE = tx1 + (j - y1) * du2_step
+        var teyE = ty1 + (j - y1) * dv2_step
+        if (xR != xL) {
+          if (xL > xR) {
+            val (temp1, temp2, temp3) = (xL, texS, teyS)
+            xL = xR
+            texS = texE
+            teyS = teyE
+            xR = temp1
+            texE = temp2
+            teyE = temp3
+          }
+          var tLocU = texS
+          var tLocV = teyS
+
+          val texStep = 1.0 / (xR - xL)
+          var t = 0.0
+          var i = xL
+          while (i < xR) {
+            tLocU = (1 - texStep) * texS + t * texE
+            tLocV = (1 - texStep) * teyS + t * teyE
+            // val col = texture.getElem({
+            //   Math.max(Math.ceil(tLocU * 160).toInt - 1, 0) +
+            //     Math.max(Math.ceil(tLocV * 160).toInt - 1, 0) * 160
+            // })
+            pixels.setElem(i + j * screenWidth, tri.color.getRGB())
+            t += texStep
+            i += 1
+          }
+        }
+        j += 1
+      }
+    }
+    dy1 = y3 - y2
+    dx1 = x3 - x2
+    dv1 = ty3 - ty2
+    du1 = tx3 - tx2
+    if (dy1 != 0) {
+      xLeft = dx1 / Math.abs(dy1).toDouble
+    }
+    if (dy2 != 0) {
+      xRight = dx2 / Math.abs(dy2).toDouble
+    }
+    if (dy2 != 0) {
+      var j = y2
+      while (j <= y3) {
+        var xL = (x2 + (j - y2) * xLeft).toInt
+        var xR = (x1 + (j - y1) * xRight).toInt
+
+        var texS = tx2 + (j - y2) * du1_step
+        var teyS = ty2 + (j - y2) * dv1_step
+
+        var texE = tx1 + (j - y1) * du2_step
+        var teyE = ty1 + (j - y1) * dv2_step
+        if (xR != xL) {
+          if (xL > xR) {
+            val (temp1, temp2, temp3) = (xL, texS, teyS)
+            xL = xR
+            texS = texE
+            teyS = teyE
+            xR = temp1
+            texE = temp2
+            teyE = temp3
+          }
+          var tLocU = texS
+          var tLocV = teyS
+
+          val texStep = 1.0 / (xR - xL)
+          var t = 0.0
+          var i = xL
+          while (i < xR) {
+            tLocU = (1 - texStep) * texS + t * texE
+            tLocV = (1 - texStep) * teyS + t * teyE
+            pixels.setElem(i + j * screenWidth, tri.color.getRGB())
+            t += texStep
+            i += 1
+          }
+        }
+        j += 1
+      }
+    }
+  }
   def generateFrameImage(triangles: Vector[Triangle]): BufferedImage = {
     val textureImg = VisualizerApp.brickTexture
     val textureDataBuffer = textureImg.getData().getDataBuffer()
@@ -124,17 +359,20 @@ object Rendererer {
     val image = VisualizerApp.frame
       .getGraphicsConfiguration()
       .createCompatibleImage(screenWidth, screenHeight)
+    val g = image.getGraphics()
     val imagePixels = image.getRaster().getDataBuffer()
+    val maxIndex = imagePixels.getSize()
     VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
-    
-    triangles.foreach(n =>
-      n.poses.foreach(pos => {
-        imagePixels.setElem(
-          (Math.max(0, pos.x.toInt + pos.y.toInt * screenWidth - 1)),
-          0xffffff
-        )
-      })
-    )
+    triangles.foreach(tri => {
+      if (tri.texPoses != null) {
+        triangleTextureDraw(tri, imagePixels, textureDataBuffer)
+      } else triangleDraw(tri, imagePixels)
+    })
+    // for (y <- 0 until 160; x <- 0 until 160) {
+    //   val col = textureDataBuffer.getElem(x + y * 160)
+    //   imagePixels.setElem(x + 500 + (y + 600) * screenWidth, col)
+    // }
+    g.dispose()
     image
   }
 

@@ -4,6 +4,7 @@ import java.awt.Color
 import scala.collection.parallel.CollectionConverters._
 import java.awt.Graphics
 import java.awt.image.BufferedImage
+import java.awt.image.DataBuffer
 trait Shapes {
   val position: Pos
   val rotation: Pos
@@ -14,7 +15,7 @@ trait Shapes {
         .translate(-player)
     )
   }
-  def worldSpaceTris(player: Pos, camera: Pos2D) = {
+  def worldSpaceTris(player: Pos, camera: Pos) = {
     triangles.par.map(tri => {
       Triangle(
         tri.poses.map(n =>
@@ -40,12 +41,12 @@ trait Shapes {
     isBetween(bottomCornerWorld.y, topCornerWorld.y, pos.y) &&
     isBetween(bottomCornerWorld.z, topCornerWorld.z, pos.z)
   }
-  val texture: BufferedImage
+  val texture: Texture
 }
 
 class Triangle(
     val poses: Array[Pos],
-    val texPoses: Array[Pos2D] = null,
+    val texPoses: Array[Pos] = null,
     var color: Color = null
 ) {
   def pos1 = poses(0)
@@ -80,6 +81,100 @@ class Triangle(
     f(pos2)
     f(pos3)
   }
+  def sortbyYAscNoTexture:Triangle={
+        // y1<y2
+    if (pos1.y < pos2.y) {
+      // y1<y2 & y1<y3
+      if (pos1.y < pos3.y) {
+        // y1<y2 & y1<y3 & y3<y2
+        if (pos3.y < pos2.y) {
+          return Triangle(
+            (pos1, pos3, pos2),
+            color
+          )
+        }
+        // y1<y2 & y1<y3 & y3>y2
+        return this
+      }
+      // y1<y2 & y3<y1
+      return Triangle(
+        (pos3, pos1, pos2),
+        color
+      )
+    } else // y2<y1
+      {
+        if (pos3.y < pos2.y) {
+          // y3<y2<y1
+          return Triangle(
+            (pos3, pos2, pos1),
+            color
+          )
+        }
+        // y2<y3 & y2<1
+        if (pos3.y < pos1.y) {
+          // y2<y3 & y2<1 & y3<y1
+          return Triangle(
+            (pos2, pos3, pos1),
+            color
+          )
+        }
+
+      }
+    Triangle(
+      (pos2, pos1, pos3),
+      color
+    )
+  }
+  //flip the triangles so that the the points are ordered by descending Y-value 
+  def sortbyYAsc: Triangle = {
+    // y1<y2
+    if (pos1.y < pos2.y) {
+      // y1<y2 & y1<y3
+      if (pos1.y < pos3.y) {
+        // y1<y2 & y1<y3 & y3<y2
+        if (pos3.y < pos2.y) {
+          return Triangle(
+            (pos1, pos3, pos2),
+            (texPos1, texPos3, texPos3),
+            color
+          )
+        }
+        // y1<y2 & y1<y3 & y3>y2
+        return this
+      }
+      // y1<y2 & y3<y1
+      return Triangle(
+        (pos3, pos1, pos2),
+        (texPos3, texPos1, texPos2),
+        color
+      )
+    } else // y2<y1
+      {
+        if (pos3.y < pos2.y) {
+          // y3<y2<y1
+          return Triangle(
+            (pos3, pos2, pos1),
+            (texPos3, texPos2, texPos1),
+            color
+          )
+        }
+        // y2<y3 & y2<1
+        if (pos3.y < pos1.y) {
+          // y2<y3 & y2<1 & y3<y1
+          return Triangle(
+            (pos2, pos3, pos1),
+            (texPos2, texPos3, texPos1),
+            color
+          )
+        }
+
+      }
+    Triangle(
+      (pos2, pos1, pos3),
+      (texPos2, texPos1, texPos3),
+      color
+    )
+  }
   override def toString(): String =
     pos1.toString + pos2.toString + pos3.toString()
 }
@@ -91,14 +186,14 @@ object Triangle {
   def apply(poses: Array[Pos]) = {
     new Triangle(poses)
   }
-  def apply(pos1: Pos, pos2: Pos, pos3: Pos, texPoses: Array[Pos2D]) = {
+  def apply(pos1: Pos, pos2: Pos, pos3: Pos, texPoses: Array[Pos]) = {
     new Triangle(Array(pos1, pos2, pos3), texPoses)
   }
   def apply(
       pos1: Pos,
       pos2: Pos,
       pos3: Pos,
-      texPoses: Array[Pos2D],
+      texPoses: Array[Pos],
       col: Color
   ) = {
     new Triangle(Array(pos1, pos2, pos3), texPoses, col)
@@ -106,7 +201,14 @@ object Triangle {
   def apply(poses: (Pos, Pos, Pos), col: Color) = {
     new Triangle(Array(poses._1, poses._2, poses._3), color = col)
   }
-  def apply(poses: (Pos, Pos, Pos), texPoses: (Pos2D, Pos2D, Pos2D)) = {
+  def apply(poses: (Pos, Pos, Pos), texPoses: (Pos, Pos, Pos), col: Color) = {
+    new Triangle(
+      Array(poses._1, poses._2, poses._3),
+      texPoses = Array(texPoses._1, texPoses._2, texPoses._3),
+      col
+    )
+  }
+  def apply(poses: (Pos, Pos, Pos), texPoses: (Pos, Pos, Pos)) = {
     new Triangle(
       Array(poses._1, poses._2, poses._3),
       texPoses = Array(texPoses._1, texPoses._2, texPoses._3)
@@ -117,7 +219,7 @@ object Triangle {
       Array(pos1, pos2, pos3)
     )
   }
-  def apply(positions: Array[Pos], texPositions: Array[Pos2D], col: Color) = {
+  def apply(positions: Array[Pos], texPositions: Array[Pos], col: Color) = {
     new Triangle(
       positions,
       texPositions,
@@ -164,7 +266,7 @@ case class Object(
       Pos(maxX, maxY, maxZ)
     )
   }
-  val texture: BufferedImage = null
+  val texture: Texture = null
 }
 class Wall(val position: Pos, val rotation: Pos) extends Shapes {
   val poses = Vector[Pos](
@@ -197,7 +299,7 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
   )
   val bottomCornerWorld = poses(0)
   val topCornerWorld = poses(3)
-  val texture: BufferedImage = null
+  val texture: Texture = null
 }
 
 object Cube extends Shapes {
@@ -220,11 +322,11 @@ object Cube extends Shapes {
   val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
-      (Pos2D(0, 0), Pos2D(0, 159), Pos2D(159, 159))
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
     ),
     Triangle(
       (poses(0), poses(2), poses(1)),
-      (Pos2D(0, 0), Pos2D(159, 159), Pos2D(159, 0))
+      (Pos(0, 0), Pos(1.0,1.0), Pos(1.0, 0))
     ),
     Triangle(poses(1), poses(2), poses(3)),
     Triangle(poses(1), poses(3), poses(6)),
@@ -240,5 +342,10 @@ object Cube extends Shapes {
 
   val bottomCornerWorld = poses(0)
   val topCornerWorld = poses(3)
-  val texture: BufferedImage = VisualizerApp.brickTexture
+  val texture: Texture = null
+}
+
+
+class Texture(image:BufferedImage) {
+  
 }
