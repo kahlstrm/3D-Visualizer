@@ -332,26 +332,46 @@ object Cube extends Shapes {
       (poses(0), poses(2), poses(1)),
       (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
     ),
-    Triangle((poses(1), poses(2), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))),
-    Triangle((poses(1), poses(3), poses(6)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))),
-    Triangle((poses(6), poses(3), poses(4)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))),
-    Triangle((poses(6), poses(4), poses(5)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))),
-    Triangle((poses(5), poses(4), poses(7)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))),
-    Triangle((poses(5), poses(7), poses(0)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))),
-    Triangle((poses(7), poses(4), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))),
-    Triangle((poses(7), poses(3), poses(2)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))),
-    Triangle((poses(6), poses(5), poses(0)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))),
-    Triangle((poses(6), poses(0), poses(1)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)))
+    Triangle(
+      (poses(1), poses(2), poses(3)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+    ),
+    Triangle(
+      (poses(1), poses(3), poses(6)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+    ),
+    Triangle(
+      (poses(6), poses(3), poses(4)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+    ),
+    Triangle(
+      (poses(6), poses(4), poses(5)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+    ),
+    Triangle(
+      (poses(5), poses(4), poses(7)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+    ),
+    Triangle(
+      (poses(5), poses(7), poses(0)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+    ),
+    Triangle(
+      (poses(7), poses(4), poses(3)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+    ),
+    Triangle(
+      (poses(7), poses(3), poses(2)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+    ),
+    Triangle(
+      (poses(6), poses(5), poses(0)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+    ),
+    Triangle(
+      (poses(6), poses(0), poses(1)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+    )
   )
 
   val bottomCornerWorld = poses(0)

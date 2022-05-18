@@ -63,7 +63,7 @@ object GfxMath {
     Pos(
       (1-fac) * (texPosOut.x - texPosIn.x) + texPosIn.x,
       (1-fac) * (texPosOut.y - texPosIn.y) + texPosIn.y,
-      1
+      (1-fac) * (texPosOut.z - texPosIn.z) + texPosIn.z
     )
   }
   // heavy spaghetti code to clip triangles so only triangles on screen show
@@ -364,7 +364,7 @@ class Pos(
       Pos(
       this.x * GfxMath.zNear / posz,
       this.y * GfxMath.zNear / posz,
-      1.0/(GfxMath.zNear/posz)
+      (GfxMath.zNear/posz)
     )
   }
   // fpsRotation matrix, took way too long to got this working

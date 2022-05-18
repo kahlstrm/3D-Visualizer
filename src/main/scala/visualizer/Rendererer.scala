@@ -54,12 +54,11 @@ object Rendererer {
                   .perspective()
                   .center()
               ),
-              n.texPoses
-              /*Array[Pos](
+              Array[Pos](
                 n.texPos1.perspectiveTexture(n.pos1.z),
                 n.texPos2.perspectiveTexture(n.pos2.z),
                 n.texPos3.perspectiveTexture(n.pos3.z)
-              )*/,
+              ),
               n.color
             )
             if (newTri.color == null) newTri.color = {
@@ -352,15 +351,15 @@ object Rendererer {
         var tezE = tz1 + (j - y1) * dw2_step
 
         if (xL > xR) {
-          val (temp1, temp2, temp3,temp4) = (xL, texS, teyS,tezS)
+          val (temp1, temp2, temp3, temp4) = (xL, texS, teyS, tezS)
           xL = xR
           texS = texE
           teyS = teyE
-          tezS=tezE
+          tezS = tezE
           xR = temp1
           texE = temp2
           teyE = temp3
-          tezE=temp4
+          tezE = temp4
         }
         var tLocU = texS
         var tLocV = teyS
@@ -372,8 +371,8 @@ object Rendererer {
         while (i < xR) {
           tLocU = (1 - t) * texS + t * texE
           tLocV = (1 - t) * teyS + t * teyE
-          tLocW = (1-t)*tezS+t*tezE
-          val col = texture.getColor(tLocU/tLocW, tLocV/tLocW)
+          tLocW = (1 - t) * tezS + t * tezE
+          val col = texture.getColor(tLocU / tLocW, tLocV / tLocW)
           pixels.setElem(i + j * screenWidth, col)
           t += texStep
           i += 1
