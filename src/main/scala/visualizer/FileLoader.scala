@@ -50,7 +50,6 @@ object FileLoader {
   val g2d= optimizedImg.createGraphics()
   g2d.drawImage(img,0,0,null)
   g2d.dispose()
-  println(optimizedImg.getColorModel().equals(gc.getColorModel())+"hei moi")
   optimizedImg
 }
 def loadObject(source:String):(Vector[Pos],Vector[Triangle])={

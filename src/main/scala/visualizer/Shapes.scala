@@ -81,8 +81,8 @@ class Triangle(
     f(pos2)
     f(pos3)
   }
-  def sortbyYAscNoTexture:Triangle={
-        // y1<y2
+  def sortbyYAscNoTexture: Triangle = {
+    // y1<y2
     if (pos1.y < pos2.y) {
       // y1<y2 & y1<y3
       if (pos1.y < pos3.y) {
@@ -125,7 +125,7 @@ class Triangle(
       color
     )
   }
-  //flip the triangles so that the the points are ordered by descending Y-value 
+  // flip the triangles so that the the points are ordered by descending Y-value
   def sortbyYAsc: Triangle = {
     // y1<y2
     if (pos1.y < pos2.y) {
@@ -135,7 +135,7 @@ class Triangle(
         if (pos3.y < pos2.y) {
           return Triangle(
             (pos1, pos3, pos2),
-            (texPos1, texPos3, texPos3),
+            (texPos1, texPos3, texPos2),
             color
           )
         }
@@ -241,7 +241,11 @@ case class Object(
   )
   val triangles: Vector[Triangle] = objInfo._2.map(tri =>
     Triangle(
-      tri.poses.map(pos => (pos * scale))
+      tri.poses.map(pos =>
+        (pos * scale)
+          .rotate(rotation)
+          .translate(position)
+      )
     )
   )
   val (bottomCornerWorld, topCornerWorld): (Pos, Pos) = {
@@ -326,18 +330,28 @@ object Cube extends Shapes {
     ),
     Triangle(
       (poses(0), poses(2), poses(1)),
-      (Pos(0, 0), Pos(1.0,1.0), Pos(1.0, 0))
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
     ),
-    Triangle(poses(1), poses(2), poses(3)),
-    Triangle(poses(1), poses(3), poses(6)),
-    Triangle(poses(6), poses(3), poses(4)),
-    Triangle(poses(6), poses(4), poses(5)),
-    Triangle(poses(5), poses(4), poses(7)),
-    Triangle(poses(5), poses(7), poses(0)),
-    Triangle(poses(7), poses(4), poses(3)),
-    Triangle(poses(7), poses(3), poses(2)),
-    Triangle(poses(6), poses(5), poses(0)),
-    Triangle(poses(6), poses(0), poses(1))
+    Triangle((poses(1), poses(2), poses(3)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))),
+    Triangle((poses(1), poses(3), poses(6)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))),
+    Triangle((poses(6), poses(3), poses(4)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))),
+    Triangle((poses(6), poses(4), poses(5)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))),
+    Triangle((poses(5), poses(4), poses(7)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))),
+    Triangle((poses(5), poses(7), poses(0)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))),
+    Triangle((poses(7), poses(4), poses(3)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))),
+    Triangle((poses(7), poses(3), poses(2)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))),
+    Triangle((poses(6), poses(5), poses(0)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))),
+    Triangle((poses(6), poses(0), poses(1)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)))
   )
 
   val bottomCornerWorld = poses(0)
@@ -345,7 +359,27 @@ object Cube extends Shapes {
   val texture: Texture = null
 }
 
+// simple texture class that provides color information
+class Texture(image: BufferedImage) {
+  private val texturePixels = image.getData().getDataBuffer()
 
-class Texture(image:BufferedImage) {
-  
+  // returns colors
+  def getColorPixel(x: Int, y: Int): Int = {
+    if (x >= width || x < 0 || y >= height || x < 0) {
+      println(f"x:$x y:$y out of range")
+      return 0
+    }
+    return texturePixels.getElem(x + y * width)
+  }
+  def getColor(x: Double, y: Double): Int = {
+    if (x > 1 || x < 0 || y > 1 || y < 0) {
+      // println(f"x:$x y:$y out of range")
+      return 0
+    }
+    val xPixel = Math.max(0, Math.ceil(x * width).toInt - 1)
+    val yPixel = Math.max(0, Math.ceil(y * height).toInt - 1)
+    return getColorPixel(xPixel, yPixel)
+  }
+  private val width = image.getWidth()
+  private val height = image.getHeight()
 }

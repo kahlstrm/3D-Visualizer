@@ -54,7 +54,12 @@ object Rendererer {
                   .perspective()
                   .center()
               ),
-              n.texPoses,
+              n.texPoses
+              /*Array[Pos](
+                n.texPos1.perspectiveTexture(n.pos1.z),
+                n.texPos2.perspectiveTexture(n.pos2.z),
+                n.texPos3.perspectiveTexture(n.pos3.z)
+              )*/,
               n.color
             )
             if (newTri.color == null) newTri.color = {
@@ -118,10 +123,10 @@ object Rendererer {
   }
 
   def triangleDraw(
-    tri:Triangle,
-    pixels:DataBuffer
-  ):Unit={
-        val maxSize = pixels.getSize()
+      tri: Triangle,
+      pixels: DataBuffer
+  ): Unit = {
+    val maxSize = pixels.getSize()
     val yDescTri = tri.sortbyYAscNoTexture
     val (x1, y1, x2, y2, x3, y3) = (
       yDescTri.pos1.x.toInt,
@@ -133,8 +138,6 @@ object Rendererer {
     )
     var dy1 = y2 - y1
     var dx1 = x2 - x1
-
-
     val dy2 = y3 - y1
     val dx2 = x3 - x1
 
@@ -154,7 +157,7 @@ object Rendererer {
 
         if (xR != xL) {
           if (xL > xR) {
-            val temp1= xL
+            val temp1 = xL
             xL = xR
             xR = temp1
           }
@@ -189,10 +192,9 @@ object Rendererer {
         var xL = (x2 + (j - y2) * xLeft).toInt
         var xR = (x1 + (j - y1) * xRight).toInt
 
-
         if (xR != xL) {
           if (xL > xR) {
-            val temp1= xL
+            val temp1 = xL
             xL = xR
             xR = temp1
           }
@@ -213,7 +215,7 @@ object Rendererer {
   def triangleTextureDraw(
       tri: Triangle,
       pixels: DataBuffer,
-      texture: DataBuffer
+      texture: Texture
   ): Unit = {
     val maxSize = pixels.getSize()
     val yDescTri = tri.sortbyYAsc
@@ -225,40 +227,56 @@ object Rendererer {
       yDescTri.pos3.x.toInt,
       yDescTri.pos3.y.toInt
     )
-    val (tx1, ty1, tx2, ty2, tx3, ty3) = (
+    val (tx1, ty1, tz1, tx2, ty2, tz2, tx3, ty3, tz3) = (
       yDescTri.texPos1.x,
       yDescTri.texPos1.y,
+      yDescTri.texPos1.z,
       yDescTri.texPos2.x,
       yDescTri.texPos2.y,
+      yDescTri.texPos2.z,
       yDescTri.texPos3.x,
-      yDescTri.texPos3.y
+      yDescTri.texPos3.y,
+      yDescTri.texPos3.z
     )
+    // println(s"x1:$x1,y1:$y1")
+    // println(s"tx1:$tx1,ty1:$ty1")
+    // println(s"x2:$x2,y2:$y2")
+    // println(s"tx2:$tx2,ty2:$ty2")
+    // println(s"x3:$x3,y3:$y3")
+    // println(s"tx3:$tx3,ty3:$ty3")
     var dy1 = y2 - y1
     var dx1 = x2 - x1
 
     var dv1 = ty2 - ty1
     var du1 = tx2 - tx1
+    var dw1 = tz2 - tz1
 
     val dy2 = y3 - y1
     val dx2 = x3 - x1
 
     val dv2 = ty3 - ty1
     var du2 = tx3 - tx1
+    var dw2 = tz3 - tz1
+
     var xLeft = 0.0
     var xRight = 0.0
     var du1_step = 0.0
     var dv1_step = 0.0
+    var dw1_step = 0.0
     var du2_step = 0.0
     var dv2_step = 0.0
+    var dw2_step = 0.0
     if (dy1 != 0) {
       xLeft = dx1 / Math.abs(dy1).toDouble
       du1_step = du1 / Math.abs(dy1)
       dv1_step = dv1 / Math.abs(dy1)
+      dw1_step = dw1 / Math.abs(dy1)
     }
     if (dy2 != 0) {
       xRight = dx2 / Math.abs(dy2).toDouble
       du2_step = du2 / Math.abs(dy2)
       dv2_step = dv2 / Math.abs(dy2)
+      dw2_step = dw2 / Math.abs(dy2)
     }
     if (dy1 != 0) {
       var j = y1
@@ -268,37 +286,40 @@ object Rendererer {
 
         var texS = tx1 + (j - y1) * du1_step
         var teyS = ty1 + (j - y1) * dv1_step
+        var tezS = tz1 + (j - y1) * dw1_step
 
         var texE = tx1 + (j - y1) * du2_step
         var teyE = ty1 + (j - y1) * dv2_step
-        if (xR != xL) {
-          if (xL > xR) {
-            val (temp1, temp2, temp3) = (xL, texS, teyS)
-            xL = xR
-            texS = texE
-            teyS = teyE
-            xR = temp1
-            texE = temp2
-            teyE = temp3
-          }
-          var tLocU = texS
-          var tLocV = teyS
+        var tezE = tz1 + (j - y1) * dw2_step
 
-          val texStep = 1.0 / (xR - xL)
-          var t = 0.0
-          var i = xL
-          while (i < xR) {
-            tLocU = (1 - texStep) * texS + t * texE
-            tLocV = (1 - texStep) * teyS + t * teyE
-            // val col = texture.getElem({
-            //   Math.max(Math.ceil(tLocU * 160).toInt - 1, 0) +
-            //     Math.max(Math.ceil(tLocV * 160).toInt - 1, 0) * 160
-            // })
-            pixels.setElem(i + j * screenWidth, tri.color.getRGB())
-            t += texStep
-            i += 1
-          }
+        if (xL > xR) {
+          val (temp1, temp2, temp3, temp4) = (xL, texS, teyS, tezS)
+          xL = xR
+          texS = texE
+          teyS = teyE
+          tezS = tezE
+          xR = temp1
+          texE = temp2
+          teyE = temp3
+          tezE = temp4
         }
+        var tLocU = texS
+        var tLocV = teyS
+        var tLocW = tezS
+
+        val texStep = 1.0 / (xR - xL)
+        var t = 0.0
+        var i = xL
+        while (i < xR) {
+          tLocU = (1 - t) * texS + t * texE
+          tLocV = (1 - t) * teyS + t * teyE
+          tLocW = (1 - t) * tezS + t * tezE
+          val col = texture.getColor(tLocU / tLocW, tLocV / tLocW)
+          pixels.setElem(i + j * screenWidth, col)
+          t += texStep
+          i += 1
+        }
+
         j += 1
       }
     }
@@ -306,13 +327,17 @@ object Rendererer {
     dx1 = x3 - x2
     dv1 = ty3 - ty2
     du1 = tx3 - tx2
+    dw1 = tz3 - tz2;
     if (dy1 != 0) {
       xLeft = dx1 / Math.abs(dy1).toDouble
+      du1_step = du1 / Math.abs(dy1).toDouble
+      dv1_step = dv1 / Math.abs(dy1).toDouble
+      dw1_step = dw1 / Math.abs(dy1).toDouble
     }
     if (dy2 != 0) {
       xRight = dx2 / Math.abs(dy2).toDouble
     }
-    if (dy2 != 0) {
+    if (dy1 != 0) {
       var j = y2
       while (j <= y3) {
         var xL = (x2 + (j - y2) * xLeft).toInt
@@ -320,41 +345,46 @@ object Rendererer {
 
         var texS = tx2 + (j - y2) * du1_step
         var teyS = ty2 + (j - y2) * dv1_step
+        var tezS = tz2 + (j - y2) * dw1_step
 
         var texE = tx1 + (j - y1) * du2_step
         var teyE = ty1 + (j - y1) * dv2_step
-        if (xR != xL) {
-          if (xL > xR) {
-            val (temp1, temp2, temp3) = (xL, texS, teyS)
-            xL = xR
-            texS = texE
-            teyS = teyE
-            xR = temp1
-            texE = temp2
-            teyE = temp3
-          }
-          var tLocU = texS
-          var tLocV = teyS
+        var tezE = tz1 + (j - y1) * dw2_step
 
-          val texStep = 1.0 / (xR - xL)
-          var t = 0.0
-          var i = xL
-          while (i < xR) {
-            tLocU = (1 - texStep) * texS + t * texE
-            tLocV = (1 - texStep) * teyS + t * teyE
-            pixels.setElem(i + j * screenWidth, tri.color.getRGB())
-            t += texStep
-            i += 1
-          }
+        if (xL > xR) {
+          val (temp1, temp2, temp3,temp4) = (xL, texS, teyS,tezS)
+          xL = xR
+          texS = texE
+          teyS = teyE
+          tezS=tezE
+          xR = temp1
+          texE = temp2
+          teyE = temp3
+          tezE=temp4
         }
+        var tLocU = texS
+        var tLocV = teyS
+        var tLocW = tezS
+
+        val texStep = 1.0 / (xR - xL)
+        var t = 0.0
+        var i = xL
+        while (i < xR) {
+          tLocU = (1 - t) * texS + t * texE
+          tLocV = (1 - t) * teyS + t * teyE
+          tLocW = (1-t)*tezS+t*tezE
+          val col = texture.getColor(tLocU/tLocW, tLocV/tLocW)
+          pixels.setElem(i + j * screenWidth, col)
+          t += texStep
+          i += 1
+        }
+
         j += 1
       }
     }
   }
   def generateFrameImage(triangles: Vector[Triangle]): BufferedImage = {
-    val textureImg = VisualizerApp.brickTexture
-    val textureDataBuffer = textureImg.getData().getDataBuffer()
-    val texSize = textureDataBuffer.getSize()
+    val brick = VisualizerApp.brickTexture
     val start = misc.timeNanos()
     val image = VisualizerApp.frame
       .getGraphicsConfiguration()
@@ -365,12 +395,12 @@ object Rendererer {
     VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
     triangles.foreach(tri => {
       if (tri.texPoses != null) {
-        triangleTextureDraw(tri, imagePixels, textureDataBuffer)
+        triangleTextureDraw(tri, imagePixels, brick)
       } else triangleDraw(tri, imagePixels)
     })
-    // for (y <- 0 until 160; x <- 0 until 160) {
-    //   val col = textureDataBuffer.getElem(x + y * 160)
-    //   imagePixels.setElem(x + 500 + (y + 600) * screenWidth, col)
+    // for (y <- 0 until screenHeight; x <- 0 until screenWidth) {
+    //   val col = brick.getColor(x%159/159.0,y%159/159.0)
+    //   imagePixels.setElem(x + (y) * screenWidth, col)
     // }
     g.dispose()
     image

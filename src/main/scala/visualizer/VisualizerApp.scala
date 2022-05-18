@@ -14,18 +14,18 @@ import javax.swing.WindowConstants
 object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
-  System.setProperty("sun.java2d.opengl", "True");
+  System.setProperty("sun.java2d.opengl", "true");
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val worldObjects = walls ++ Vector[Shapes](
-    new Object(
-      FileLoader.loadObject("dragon_low_poly.obj"),
-      Pos(0, 0, 300),
-      Pos(0, 0, 0),
-      100
-    )
-    // Cube
+    //  Object(
+    //   FileLoader.loadObject("dragon_low_poly.obj"),
+    //   Pos(0, 0, 300),
+    //   Pos(0, 0, 0),
+    //   100
+    // )
+    Cube
   )
-  val brickTexture = FileLoader.loadTexture("brick.png")
+  val brickTexture = new Texture(FileLoader.loadTexture("stonebrick.png"))
   val frame: JFrame = new JFrame("3d-visualizer")
   var running = true
   var preRendering = false
@@ -89,7 +89,14 @@ object VisualizerApp extends App {
     // if (preRendering) {
     //   drawFramesFuture(frameIterator.next(), g, wireFrame)
     // } else drawFrame(createFrames(Player.pos, Player.camera.pos), g, wireFrame)
-    g.drawImage(generateFrameImage(createFrames(Player.pos, Camera.pos)),0,0,frame.getWidth(),frame.getHeight(),null)
+    g.drawImage(
+      generateFrameImage(createFrames(Player.pos, Camera.pos)),
+      0,
+      0,
+      frame.getWidth(),
+      frame.getHeight(),
+      null
+    )
     g.setColor(Color.GRAY)
     g.fillRect(40, 40, 300, 150)
     g.setColor(Color.WHITE)

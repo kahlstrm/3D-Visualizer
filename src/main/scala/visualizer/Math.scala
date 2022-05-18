@@ -61,8 +61,8 @@ object GfxMath {
   }
   def newTexPos(texPosOut: Pos, texPosIn: Pos, fac: Double): Pos = {
     Pos(
-      fac * (texPosOut.x - texPosIn.x) + texPosIn.x,
-      fac * (texPosOut.y - texPosIn.y) + texPosIn.y,
+      (1-fac) * (texPosOut.x - texPosIn.x) + texPosIn.x,
+      (1-fac) * (texPosOut.y - texPosIn.y) + texPosIn.y,
       1
     )
   }
@@ -95,9 +95,9 @@ object GfxMath {
         intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
       var newTexPoses = tri.texPoses
       if (newTexPoses != null) {
-        newTexPoses =
-          newTexPoses.updated(0, newTexPos(tri.texPos1, tri.texPos3, fac1))
-        newTexPoses(1) = newTexPos(tri.texPos2, tri.texPos3, fac2)
+        newTexPoses = newTexPoses
+          .updated(0, newTexPos(tri.texPos1, tri.texPos3, fac1))
+          .updated(1, newTexPos(tri.texPos2, tri.texPos3, fac2))
       }
       return Vector[Triangle](
         Triangle(
@@ -106,8 +106,8 @@ object GfxMath {
           // tri.pos3,
           tri.poses.updated(0, newpos1).updated(1, newpos2),
           newTexPoses,
-         // tri.color
-         Color.BLUE
+          // tri.color
+          Color.BLUE
         )
       )
     }
@@ -121,9 +121,9 @@ object GfxMath {
         intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
       var newTexPoses = tri.texPoses
       if (newTexPoses != null) {
-        newTexPoses =
-          newTexPoses.updated(0, newTexPos(tri.texPos1, tri.texPos2, fac1))
-        newTexPoses(2) = newTexPos(tri.texPos3, tri.texPos2, fac3)
+        newTexPoses = newTexPoses
+          .updated(0, newTexPos(tri.texPos1, tri.texPos2, fac1))
+          .updated(2, newTexPos(tri.texPos3, tri.texPos2, fac3))
       }
       return Vector[Triangle](
         Triangle(
@@ -147,9 +147,9 @@ object GfxMath {
         intersectPointWithPlane(tri.pos3, tri.pos1, plane, planeNormalUnit)
       var newTexPoses = tri.texPoses
       if (newTexPoses != null) {
-        newTexPoses =
-          newTexPoses.updated(1, newTexPos(tri.texPos2, tri.texPos1, fac2))
-        newTexPoses(2) = newTexPos(tri.texPos3, tri.texPos1, fac3)
+        newTexPoses = newTexPoses
+          .updated(1, newTexPos(tri.texPos2, tri.texPos1, fac2))
+          .updated(2, newTexPos(tri.texPos3, tri.texPos1, fac3))
       }
       return Vector[Triangle](
         Triangle(
@@ -177,8 +177,9 @@ object GfxMath {
         val newTexPos1 = newTexPos(tri.texPos1, tri.texPos2, fac1)
         val newTexPos2 = newTexPos(tri.texPos1, tri.texPos3, fac2)
         newTexPoses = newTexPoses.updated(0, newTexPos1)
-        newTexPoses2 = newTexPoses2.updated(0, newTexPos2)
-        newTexPoses2(1) = newTexPos1
+        newTexPoses2 = newTexPoses2
+          .updated(0, newTexPos2)
+          .updated(1, newTexPos1)
       }
       return Vector[Triangle](
         Triangle(
@@ -215,7 +216,7 @@ object GfxMath {
         val newTexPos2 = newTexPos(tri.texPos2, tri.texPos3, fac2)
         newTexPoses = newTexPoses.updated(1, newTexPos2)
         newTexPoses2 = newTexPoses2.updated(1, newTexPos1)
-        newTexPoses2(2) = newTexPos2
+        .updated(2,newTexPos2)
       }
       return Vector[Triangle](
         Triangle(
@@ -252,7 +253,7 @@ object GfxMath {
         val newTexPos2 = newTexPos(tri.texPos3, tri.texPos2, fac2)
         newTexPoses = newTexPoses.updated(2, newTexPos1)
         newTexPoses2 = newTexPoses2.updated(0, newTexPos1)
-        newTexPoses2(2) = newTexPos2
+        .updated(2,newTexPos2)
       }
       return Vector[Triangle](
         Triangle(
@@ -357,6 +358,13 @@ class Pos(
       this.x * GfxMath.zNear / z,
       this.y * GfxMath.zNear / z,
       z
+    )
+  }
+  def perspectiveTexture(posz:Double):Pos={
+      Pos(
+      this.x * GfxMath.zNear / posz,
+      this.y * GfxMath.zNear / posz,
+      1.0/(GfxMath.zNear/posz)
     )
   }
   // fpsRotation matrix, took way too long to got this working
@@ -500,8 +508,8 @@ object Pos {
   def apply(pos: Pos): Pos = {
     new Pos(pos.x, pos.y, pos.z)
   }
-  def apply(x:Double,y:Double):Pos={
-    new Pos(x,y,1)
+  def apply(x: Double, y: Double): Pos = {
+    new Pos(x, y, 1)
   }
 }
 
