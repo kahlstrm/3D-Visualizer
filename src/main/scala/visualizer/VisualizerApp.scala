@@ -5,28 +5,35 @@ import java.awt.event._
 import scala.concurrent._
 import scala.concurrent.duration.Duration
 import java.awt.Color
-import java.awt
 import Rendererer._
 import misc._
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants
+import java.awt.image.DataBufferDouble
 object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
   System.setProperty("sun.java2d.opengl", "true");
-  val (walls, playerPos) = FileLoader.loadFile("test.map")
+  val (walls, playerPos) = FileLoader.loadFile("hello.map")
+  val textures: Map[String, Texture] = Map(
+    "stonebrick" ->
+      Texture(FileLoader.loadTexture("stonebrick.png")),
+    "dirt" -> Texture(FileLoader.loadTexture("minecraft.jpg"))
+  )
   val worldObjects = walls ++ Vector[Shapes](
-    //  Object(
-    //   FileLoader.loadObject("dragon_low_poly.obj"),
+    // Object(
+    //   FileLoader.loadObject("dragon.obj"),
     //   Pos(0, 0, 300),
     //   Pos(0, 0, 0),
     //   100
-    // )
-    Cube
+    // ),
+    Cube(Pos(-100,0,0),Pos(0,0,0),"dirt"),
+    Cube(Pos(100,0,0),Pos(0,0,0),"stonebrick")
   )
-  val brickTexture = new Texture(FileLoader.loadTexture("stonebrick.png"))
+
   val frame: JFrame = new JFrame("3d-visualizer")
+  val futureFrameIterator = frameIterator
   var running = true
   var preRendering = false
   val renderDistance = 10000
@@ -36,8 +43,8 @@ object VisualizerApp extends App {
   var frametime = 0.0
   var othertime = 0.0
   var frames = 0
-  val width = 1280
-  val height = 800
+  val width = 1920
+  val height = 1080
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
@@ -59,10 +66,15 @@ object VisualizerApp extends App {
   frame.setIgnoreRepaint(true)
   val bs = frame.getBufferStrategy()
   val gc = area.getGraphicsConfiguration()
+  val zBuffer= new DataBufferDouble(frame.getWidth*frame.getHeight())
   println(gc)
   def runGameNow() = {
     while (running) {
       update()
+      //clear zBuffer
+      for(i<- 0 until zBuffer.getSize()){
+        zBuffer.setElemDouble(i,0.0)
+      }
       render()
       frames += 1;
     }
@@ -87,16 +99,19 @@ object VisualizerApp extends App {
     g.fillRect(0, 0, frame.getWidth(), frame.getHeight())
     g.setColor(Color.WHITE)
     // if (preRendering) {
-    //   drawFramesFuture(frameIterator.next(), g, wireFrame)
+    //   drawFramesFuture(futureframeIterator.next(), g, wireFrame)
     // } else drawFrame(createFrames(Player.pos, Player.camera.pos), g, wireFrame)
-    g.drawImage(
-      generateFrameImage(createFrames(Player.pos, Camera.pos)),
-      0,
-      0,
-      frame.getWidth(),
-      frame.getHeight(),
-      null
-    )
+    if (wireFrame) {
+      drawFrame(createFrames(Player.pos, Player.camera.pos), g, wireFrame)
+    } else
+      g.drawImage(
+        generateFrameImage(createFrames(Player.pos, Camera.pos),zBuffer),
+        0,
+        0,
+        frame.getWidth(),
+        frame.getHeight(),
+        null
+      )
     g.setColor(Color.GRAY)
     g.fillRect(40, 40, 300, 150)
     g.setColor(Color.WHITE)

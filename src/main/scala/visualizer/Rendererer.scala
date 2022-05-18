@@ -25,12 +25,12 @@ object Rendererer {
             avgPos < VisualizerApp.renderDistance
           })
       )
-    val viewTris = generateViewTriangles(worldSpaceTriangles)
-    val res = generateDrawableTriangles(viewTris)
-    res
+    generateViewTriangles(worldSpaceTriangles)
+    // val res = generateDrawableTriangles(viewTris)
+    // res
   }
 
-  val frameIterator: Iterator[Future[Vector[Triangle]]] =
+  def frameIterator: Iterator[Future[Vector[Triangle]]] =
     new Iterator[Future[Vector[Triangle]]] {
       private var current = Future(createFrames(Player.pos, Camera.pos)(ec))
       def hasNext: Boolean = true
@@ -48,19 +48,32 @@ object Rendererer {
         val clippedTrianglesWithZ = calcClipping(tri, zPlane, zPlaneNormal)
         clippedTrianglesWithZ
           .map(n => {
-            val newTri = Triangle(
-              n.poses.map(pos =>
-                pos
-                  .perspective()
-                  .center()
-              ),
-              Array[Pos](
-                n.texPos1.perspectiveTexture(n.pos1.z),
-                n.texPos2.perspectiveTexture(n.pos2.z),
-                n.texPos3.perspectiveTexture(n.pos3.z)
-              ),
-              n.color
-            )
+            val newTri = {
+              if (n.texPoses == null) {
+                Triangle(
+                  n.poses.map(pos =>
+                    pos
+                      .perspective()
+                      .center()
+                  ),
+                  n.color
+                )
+              } else
+                Triangle(
+                  n.poses.map(pos =>
+                    pos
+                      .perspective()
+                      .center()
+                  ),
+                  Array[Pos](
+                    n.texPos1.perspectiveTexture(n.pos1.z),
+                    n.texPos2.perspectiveTexture(n.pos2.z),
+                    n.texPos3.perspectiveTexture(n.pos3.z)
+                  ),
+                  n.color,
+                  n.texture
+                )
+            }
             if (newTri.color == null) newTri.color = {
               val col = getColor(newTri)
               new Color(col, col, col)
@@ -70,27 +83,27 @@ object Rendererer {
           .filter(getNormal(_).z < 0)
           // calculate clippings for the sides of the screen, which is represented by a plane with point on the plane,
           // and with the normal pointing towards the screen
-          .flatMap(calcClipping(_, Pos(20, 0, 0), Pos(1, 0, 0)))
-          .flatMap(calcClipping(_, Pos(screenWidth - 20, 0, 0), Pos(-1, 0, 0)))
-          .flatMap(calcClipping(_, Pos(0, 50, 0), Pos(0, 1, 0)))
-          .flatMap(calcClipping(_, Pos(0, screenHeight - 20, 0), Pos(0, -1, 0)))
+          .flatMap(calcClipping(_, Pos(0, 30, 0), Pos(1, 0, 0)))
+          .flatMap(calcClipping(_, Pos(screenWidth - 9, 0, 0), Pos(-1, 0, 0)))
+          .flatMap(calcClipping(_, Pos(0, 9, 0), Pos(0, 1, 0)))
+          .flatMap(calcClipping(_, Pos(0, screenHeight - 9, 0), Pos(0, -1, 0)))
       })
     newTriangles.toVector
   }
-  def generateDrawableTriangles(
-      triangles: Vector[Triangle]
-  ): Vector[Triangle] = {
-    VisualizerApp.triangleCount = triangles.size
-    if (VisualizerApp.wireFrame) {
-      triangles
-    } else {
-      val sorted = triangles
-        .sortBy(tri => {
-          -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3
-        })
-      sorted
-    }
-  }
+  // def generateDrawableTriangles(
+  //     triangles: Vector[Triangle]
+  // ): Vector[Triangle] = {
+  //   VisualizerApp.triangleCount = triangles.size
+  //   if (VisualizerApp.wireFrame) {
+  //     triangles
+  //   } else {
+  //     triangles
+  //       .sortBy(tri => {
+  //         -(tri.pos1.z + tri.pos2.z + tri.pos3.z) / 3
+  //       })
+
+  //   }
+  // }
   def drawFrame(
       triangles: Vector[Triangle],
       g: Graphics,
@@ -214,9 +227,9 @@ object Rendererer {
   def triangleTextureDraw(
       tri: Triangle,
       pixels: DataBuffer,
-      texture: Texture
+      zBuffer: DataBuffer
   ): Unit = {
-    val maxSize = pixels.getSize()
+    val texture = tri.texture
     val yDescTri = tri.sortbyYAsc
     val (x1, y1, x2, y2, x3, y3) = (
       yDescTri.pos1.x.toInt,
@@ -237,12 +250,6 @@ object Rendererer {
       yDescTri.texPos3.y,
       yDescTri.texPos3.z
     )
-    // println(s"x1:$x1,y1:$y1")
-    // println(s"tx1:$tx1,ty1:$ty1")
-    // println(s"x2:$x2,y2:$y2")
-    // println(s"tx2:$tx2,ty2:$ty2")
-    // println(s"x3:$x3,y3:$y3")
-    // println(s"tx3:$tx3,ty3:$ty3")
     var dy1 = y2 - y1
     var dx1 = x2 - x1
 
@@ -313,8 +320,15 @@ object Rendererer {
           tLocU = (1 - t) * texS + t * texE
           tLocV = (1 - t) * teyS + t * teyE
           tLocW = (1 - t) * tezS + t * tezE
-          val col = texture.getColor(tLocU / tLocW, tLocV / tLocW)
-          pixels.setElem(i + j * screenWidth, col)
+          val screenLoc = i + j * screenWidth
+          if (tLocW > zBuffer.getElemDouble(screenLoc)) {
+            val col =
+              if (texture != null)
+                texture.getColor(tLocU / tLocW, tLocV / tLocW)
+              else tri.color.getRGB()
+            pixels.setElem(screenLoc, col)
+            zBuffer.setElemDouble(screenLoc, tLocW)
+          }
           t += texStep
           i += 1
         }
@@ -372,8 +386,15 @@ object Rendererer {
           tLocU = (1 - t) * texS + t * texE
           tLocV = (1 - t) * teyS + t * teyE
           tLocW = (1 - t) * tezS + t * tezE
-          val col = texture.getColor(tLocU / tLocW, tLocV / tLocW)
-          pixels.setElem(i + j * screenWidth, col)
+          val screenLoc = i + j * screenWidth
+          if (tLocW > zBuffer.getElemDouble(screenLoc)) {
+            val col =
+              if (texture != null)
+                texture.getColor(tLocU / tLocW, tLocV / tLocW)
+              else tri.color.getRGB()
+            pixels.setElem(screenLoc, col)
+            zBuffer.setElemDouble(screenLoc, tLocW)
+          }
           t += texStep
           i += 1
         }
@@ -382,26 +403,25 @@ object Rendererer {
       }
     }
   }
-  def generateFrameImage(triangles: Vector[Triangle]): BufferedImage = {
-    val brick = VisualizerApp.brickTexture
-    val start = misc.timeNanos()
+  def generateFrameImage(
+      triangles: Vector[Triangle],
+      zBuffer: DataBuffer
+  ): BufferedImage = {
     val image = VisualizerApp.frame
       .getGraphicsConfiguration()
       .createCompatibleImage(screenWidth, screenHeight)
-    val g = image.getGraphics()
     val imagePixels = image.getRaster().getDataBuffer()
-    val maxIndex = imagePixels.getSize()
-    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
+    val start = misc.timeNanos()
     triangles.foreach(tri => {
       if (tri.texPoses != null) {
-        triangleTextureDraw(tri, imagePixels, brick)
+        triangleTextureDraw(tri, imagePixels, zBuffer)
       } else triangleDraw(tri, imagePixels)
     })
+    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
     // for (y <- 0 until screenHeight; x <- 0 until screenWidth) {
     //   val col = brick.getColor(x%159/159.0,y%159/159.0)
     //   imagePixels.setElem(x + (y) * screenWidth, col)
     // }
-    g.dispose()
     image
   }
 

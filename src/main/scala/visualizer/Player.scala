@@ -13,7 +13,7 @@ object Player {
     time = misc.timeNanos()
     val oldPos = pos
     var newPos = pos
-    val forwardMove = Camera.forwardVector.unit()
+    val forwardMove = Camera.forwardVector.dropY().unit()
     val rightMove = Camera.rightVector
     val upMove = Pos(0, 1, 0)
     var moveVecXZ = Pos(0, 0, 0)

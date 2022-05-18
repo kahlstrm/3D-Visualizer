@@ -26,7 +26,8 @@ trait Shapes {
         ),
         tri.texPoses,
         // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0)),
-        tri.color
+        tri.color,
+        tri.texture
       )
     })
   }
@@ -47,7 +48,8 @@ trait Shapes {
 class Triangle(
     val poses: Array[Pos],
     val texPoses: Array[Pos] = null,
-    var color: Color = null
+    var color: Color = null,
+    val texture: Texture = null
 ) {
   def pos1 = poses(0)
   def pos2 = poses(1)
@@ -75,11 +77,6 @@ class Triangle(
       poses.map(_.y.toInt),
       3
     )
-  }
-  def foreach[U](f: Pos => U): Unit = {
-    f(pos1)
-    f(pos2)
-    f(pos3)
   }
   def sortbyYAscNoTexture: Triangle = {
     // y1<y2
@@ -136,7 +133,7 @@ class Triangle(
           return Triangle(
             (pos1, pos3, pos2),
             (texPos1, texPos3, texPos2),
-            color
+            texture
           )
         }
         // y1<y2 & y1<y3 & y3>y2
@@ -146,7 +143,7 @@ class Triangle(
       return Triangle(
         (pos3, pos1, pos2),
         (texPos3, texPos1, texPos2),
-        color
+        texture
       )
     } else // y2<y1
       {
@@ -155,7 +152,7 @@ class Triangle(
           return Triangle(
             (pos3, pos2, pos1),
             (texPos3, texPos2, texPos1),
-            color
+            texture
           )
         }
         // y2<y3 & y2<1
@@ -164,7 +161,7 @@ class Triangle(
           return Triangle(
             (pos2, pos3, pos1),
             (texPos2, texPos3, texPos1),
-            color
+            texture
           )
         }
 
@@ -172,7 +169,7 @@ class Triangle(
     Triangle(
       (pos2, pos1, pos3),
       (texPos2, texPos1, texPos3),
-      color
+      texture
     )
   }
   override def toString(): String =
@@ -180,32 +177,40 @@ class Triangle(
 }
 
 object Triangle {
-  def apply(poses: (Pos, Pos, Pos)) = {
-    new Triangle(Array(poses._1, poses._2, poses._3))
-  }
+  // def apply(poses: (Pos, Pos, Pos)) = {
+  //   new Triangle(Array(poses._1, poses._2, poses._3))
+  // }
   def apply(poses: Array[Pos]) = {
     new Triangle(poses)
   }
-  def apply(pos1: Pos, pos2: Pos, pos3: Pos, texPoses: Array[Pos]) = {
-    new Triangle(Array(pos1, pos2, pos3), texPoses)
+  def apply(poses: Array[Pos], col: Color) = {
+    new Triangle(poses, color = col)
   }
-  def apply(
-      pos1: Pos,
-      pos2: Pos,
-      pos3: Pos,
-      texPoses: Array[Pos],
-      col: Color
-  ) = {
-    new Triangle(Array(pos1, pos2, pos3), texPoses, col)
-  }
+  // def apply(pos1: Pos, pos2: Pos, pos3: Pos, texPoses: Array[Pos]) = {
+  //   new Triangle(Array(pos1, pos2, pos3), texPoses)
+  // }
+  // def apply(
+  //     pos1: Pos,
+  //     pos2: Pos,
+  //     pos3: Pos,
+  //     texPoses: Array[Pos],
+  //     col: Color
+  // ) = {
+  //   new Triangle(Array(pos1, pos2, pos3), texPoses, col)
+  // }
   def apply(poses: (Pos, Pos, Pos), col: Color) = {
     new Triangle(Array(poses._1, poses._2, poses._3), color = col)
   }
-  def apply(poses: (Pos, Pos, Pos), texPoses: (Pos, Pos, Pos), col: Color) = {
+
+  def apply(
+      poses: (Pos, Pos, Pos),
+      texPoses: (Pos, Pos, Pos),
+      texture: Texture
+  ) = {
     new Triangle(
       Array(poses._1, poses._2, poses._3),
-      texPoses = Array(texPoses._1, texPoses._2, texPoses._3),
-      col
+      Array(texPoses._1, texPoses._2, texPoses._3),
+      texture = texture
     )
   }
   def apply(poses: (Pos, Pos, Pos), texPoses: (Pos, Pos, Pos)) = {
@@ -219,16 +224,22 @@ object Triangle {
       Array(pos1, pos2, pos3)
     )
   }
-  def apply(positions: Array[Pos], texPositions: Array[Pos], col: Color) = {
+  def apply(
+      positions: Array[Pos],
+      texPositions: Array[Pos],
+      col: Color,
+      texture: Texture
+  ) = {
     new Triangle(
       positions,
       texPositions,
-      col
+      col,
+      texture
     )
   }
 
 }
-case class Object(
+class Object(
     objInfo: (Vector[Pos], Vector[Triangle]),
     val position: Pos,
     val rotation: Pos,
@@ -272,7 +283,15 @@ case class Object(
   }
   val texture: Texture = null
 }
-class Wall(val position: Pos, val rotation: Pos) extends Shapes {
+object Object {
+  def apply(
+      objInfo: (Vector[Pos], Vector[Triangle]),
+      position: Pos,
+      rotation: Pos,
+      scale: Double
+  ) = new Object(objInfo, position, rotation, scale)
+}
+class Wall(val position: Pos, val rotation: Pos,textureString:String=null) extends Shapes {
   val poses = Vector[Pos](
     Pos(-300, -200, -100),
     Pos(300, -200, -100),
@@ -287,28 +306,86 @@ class Wall(val position: Pos, val rotation: Pos) extends Shapes {
       .rotate(rotation)
       .translate(position)
   )
+  val texture =
+    if (textureString != null)
+      try {
+        VisualizerApp.textures(textureString)
+      } catch {
+        case e: NoSuchElementException =>
+          println(
+            s"No texture loaded called $textureString, loading no texture for $this"
+          ); null
+      }
+    else null
   val triangles = Vector[Triangle](
-    Triangle(poses(0), poses(7), poses(2)),
-    Triangle(poses(0), poses(2), poses(1)),
-    Triangle(poses(1), poses(2), poses(3)),
-    Triangle(poses(1), poses(3), poses(6)),
-    Triangle(poses(6), poses(3), poses(4)),
-    Triangle(poses(6), poses(4), poses(5)),
-    Triangle(poses(5), poses(4), poses(7)),
-    Triangle(poses(5), poses(7), poses(0)),
-    Triangle(poses(7), poses(4), poses(3)),
-    Triangle(poses(7), poses(3), poses(2)),
-    Triangle(poses(6), poses(5), poses(0)),
-    Triangle(poses(6), poses(0), poses(1))
+    Triangle(
+      (poses(0), poses(7), poses(2)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
+    ),
+    Triangle(
+      (poses(0), poses(2), poses(1)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
+    ),
+    Triangle(
+      (poses(1), poses(2), poses(3)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
+    ),
+    Triangle(
+      (poses(1), poses(3), poses(6)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
+    ),
+    Triangle(
+      (poses(6), poses(3), poses(4)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
+    ),
+    Triangle(
+      (poses(6), poses(4), poses(5)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
+    ),
+    Triangle(
+      (poses(5), poses(4), poses(7)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
+    ),
+    Triangle(
+      (poses(5), poses(7), poses(0)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
+    ),
+    Triangle(
+      (poses(7), poses(4), poses(3)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
+    ),
+    Triangle(
+      (poses(7), poses(3), poses(2)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
+    ),
+    Triangle(
+      (poses(6), poses(5), poses(0)),
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
+    ),
+    Triangle(
+      (poses(6), poses(0), poses(1)),
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
+    )
   )
   val bottomCornerWorld = poses(0)
   val topCornerWorld = poses(3)
-  val texture: Texture = null
 }
 
-object Cube extends Shapes {
-  val position: Pos = Pos(0, 0, 0)
-  val rotation: Pos = Pos(0, 0, 0)
+class Cube(val position: Pos, val rotation: Pos, textureString: String)
+    extends Shapes {
+
   val poses = Vector[Pos](
     Pos(-100, -100, -100),
     Pos(100, -100, -100),
@@ -323,83 +400,88 @@ object Cube extends Shapes {
       .rotate(rotation)
       .translate(position)
   )
+  val texture =
+    if (textureString != null)
+      try {
+        VisualizerApp.textures(textureString)
+      } catch {
+        case e: NoSuchElementException =>
+          println(
+            s"No texture loaded called $textureString, loading no texture for $this"
+          ); null
+      }
+    else null
   val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
     ),
     Triangle(
       (poses(0), poses(2), poses(1)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
     ),
     Triangle(
       (poses(1), poses(2), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
     ),
     Triangle(
       (poses(1), poses(3), poses(6)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
     ),
     Triangle(
       (poses(6), poses(3), poses(4)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
     ),
     Triangle(
       (poses(6), poses(4), poses(5)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
     ),
     Triangle(
       (poses(5), poses(4), poses(7)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
     ),
     Triangle(
       (poses(5), poses(7), poses(0)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
     ),
     Triangle(
       (poses(7), poses(4), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
     ),
     Triangle(
       (poses(7), poses(3), poses(2)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
     ),
     Triangle(
       (poses(6), poses(5), poses(0)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0))
+      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      texture
     ),
     Triangle(
       (poses(6), poses(0), poses(1)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0))
+      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      texture
     )
   )
 
   val bottomCornerWorld = poses(0)
   val topCornerWorld = poses(3)
-  val texture: Texture = null
+
+  override def toString(): String =
+    s"Cube at $position"
 }
 
-// simple texture class that provides color information
-class Texture(image: BufferedImage) {
-  private val texturePixels = image.getData().getDataBuffer()
-
-  // returns colors
-  def getColorPixel(x: Int, y: Int): Int = {
-    if (x >= width || x < 0 || y >= height || x < 0) {
-      println(f"x:$x y:$y out of range")
-      return 0
-    }
-    return texturePixels.getElem(x + y * width)
-  }
-  def getColor(x: Double, y: Double): Int = {
-    if (x > 1 || x < 0 || y > 1 || y < 0) {
-      // println(f"x:$x y:$y out of range")
-      return 0
-    }
-    val xPixel = Math.max(0, Math.ceil(x * width).toInt - 1)
-    val yPixel = Math.max(0, Math.ceil(y * height).toInt - 1)
-    return getColorPixel(xPixel, yPixel)
-  }
-  private val width = image.getWidth()
-  private val height = image.getHeight()
+object Cube {
+  def apply(position: Pos, rotation: Pos, textureString: String) =
+    new Cube(position, rotation, textureString)
 }

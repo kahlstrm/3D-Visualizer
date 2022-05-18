@@ -94,7 +94,7 @@ object GfxMath {
       val (newpos2, fac2) =
         intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
       var newTexPoses = tri.texPoses
-      if (newTexPoses != null) {
+      if (tri.texPoses != null) {
         newTexPoses = newTexPoses
           .updated(0, newTexPos(tri.texPos1, tri.texPos3, fac1))
           .updated(1, newTexPos(tri.texPos2, tri.texPos3, fac2))
@@ -106,8 +106,8 @@ object GfxMath {
           // tri.pos3,
           tri.poses.updated(0, newpos1).updated(1, newpos2),
           newTexPoses,
-          // tri.color
-          Color.BLUE
+          tri.color,
+          tri.texture
         )
       )
     }
@@ -120,7 +120,7 @@ object GfxMath {
       val (newpos3, fac3) =
         intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
       var newTexPoses = tri.texPoses
-      if (newTexPoses != null) {
+      if (tri.texPoses != null) {
         newTexPoses = newTexPoses
           .updated(0, newTexPos(tri.texPos1, tri.texPos2, fac1))
           .updated(2, newTexPos(tri.texPos3, tri.texPos2, fac3))
@@ -132,8 +132,8 @@ object GfxMath {
           // newpos3,
           tri.poses.updated(0, newpos1).updated(2, newpos3),
           newTexPoses,
-          // tri.color
-          Color.BLUE
+          tri.color,
+          tri.texture
         )
       )
     }
@@ -146,7 +146,7 @@ object GfxMath {
       val (newpos3, fac3) =
         intersectPointWithPlane(tri.pos3, tri.pos1, plane, planeNormalUnit)
       var newTexPoses = tri.texPoses
-      if (newTexPoses != null) {
+      if (tri.texPoses != null) {
         newTexPoses = newTexPoses
           .updated(1, newTexPos(tri.texPos2, tri.texPos1, fac2))
           .updated(2, newTexPos(tri.texPos3, tri.texPos1, fac3))
@@ -158,8 +158,8 @@ object GfxMath {
           // newpos3,
           tri.poses.updated(1, newpos2).updated(2, newpos3),
           newTexPoses,
-          // tri.color
-          Color.BLUE
+          tri.color,
+          tri.texture
         )
       )
     }
@@ -173,7 +173,7 @@ object GfxMath {
         intersectPointWithPlane(tri.pos1, tri.pos3, plane, planeNormalUnit)
       var newTexPoses = tri.texPoses
       var newTexPoses2 = tri.texPoses
-      if (newTexPoses != null) {
+      if (tri.texPoses != null) {
         val newTexPos1 = newTexPos(tri.texPos1, tri.texPos2, fac1)
         val newTexPos2 = newTexPos(tri.texPos1, tri.texPos3, fac2)
         newTexPoses = newTexPoses.updated(0, newTexPos1)
@@ -188,8 +188,8 @@ object GfxMath {
           // tri.pos3,
           tri.poses.updated(0, newpos1),
           newTexPoses,
-          // tri.color
-          Color.GREEN
+          tri.color,
+          tri.texture
         ),
         Triangle(
           // newpos2,
@@ -197,8 +197,8 @@ object GfxMath {
           // tri.pos3,
           tri.poses.updated(0, newpos2).updated(1, newpos1),
           newTexPoses2,
-          // tri.color
-          Color.RED
+          tri.color,
+          tri.texture
         )
       )
     }
@@ -211,7 +211,7 @@ object GfxMath {
         intersectPointWithPlane(tri.pos2, tri.pos3, plane, planeNormalUnit)
       var newTexPoses = tri.texPoses
       var newTexPoses2 = tri.texPoses
-      if (newTexPoses != null) {
+      if (tri.texPoses != null) {
         val newTexPos1 = newTexPos(tri.texPos2, tri.texPos1, fac1)
         val newTexPos2 = newTexPos(tri.texPos2, tri.texPos3, fac2)
         newTexPoses = newTexPoses.updated(1, newTexPos2)
@@ -225,8 +225,8 @@ object GfxMath {
           // tri.pos3,
           tri.poses.updated(1, newpos2),
           newTexPoses,
-          // tri.color
-          Color.GREEN
+          tri.color,
+          tri.texture
         ),
         Triangle(
           // tri.pos1,
@@ -234,8 +234,8 @@ object GfxMath {
           // newpos2,
           tri.poses.updated(1, newpos1).updated(2, newpos2),
           newTexPoses2,
-          // tri.color
-          Color.RED
+          tri.color,
+          tri.texture
         )
       )
     }
@@ -248,7 +248,7 @@ object GfxMath {
         intersectPointWithPlane(tri.pos3, tri.pos2, plane, planeNormalUnit)
       var newTexPoses = tri.texPoses
       var newTexPoses2 = tri.texPoses
-      if (newTexPoses != null) {
+      if (tri.texPoses != null) {
         val newTexPos1 = newTexPos(tri.texPos3, tri.texPos1, fac1)
         val newTexPos2 = newTexPos(tri.texPos3, tri.texPos2, fac2)
         newTexPoses = newTexPoses.updated(2, newTexPos1)
@@ -262,8 +262,8 @@ object GfxMath {
           // newpos1,
           tri.poses.updated(2, newpos1),
           newTexPoses,
-          // tri.color
-          Color.GREEN
+          tri.color,
+          tri.texture
         ),
         Triangle(
           // newpos1,
@@ -271,8 +271,8 @@ object GfxMath {
           // newpos2,
           tri.poses.updated(0, newpos1).updated(2, newpos2),
           newTexPoses2,
-          // tri.color
-          Color.PINK
+          tri.color,
+          tri.texture
         )
       )
     }
