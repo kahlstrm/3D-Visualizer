@@ -43,8 +43,8 @@ object VisualizerApp extends App {
   var frametime = 0.0f
   var othertime = 0.0f
   var frames = 0
-  val width = 1920
-  val height = 1080
+  val width = 1600
+  val height = 900
   val fov = 90
   var previousMouse: Option[Point] = None
   val windowHeight = height + 30
