@@ -8,8 +8,10 @@ object Player {
     hiddenPos = pos
   }
   private var time = misc.timeNanos()
-  def move(): Pos = {
-    val movementSpeed = if(speedUp) 4000 * misc.timeBetween(time, misc.timeNanos()) else 1000 * misc.timeBetween(time, misc.timeNanos())
+  def move(collision: Boolean): Unit = {
+    val movementSpeed =
+      if (speedUp) 4000 * misc.timeBetween(time, misc.timeNanos())
+      else 1000 * misc.timeBetween(time, misc.timeNanos())
     time = misc.timeNanos()
     val oldPos = pos
     var newPos = pos
@@ -37,8 +39,13 @@ object Player {
       moveVecY += (upMove)
     }
     newPos += moveVecXZ.unit() * movementSpeed + moveVecY * movementSpeed
-    hiddenPos = newPos
-    oldPos
+    if (collision) {
+      val isInsideWall =
+        VisualizerApp.worldObjects.find(_.isInside(newPos))
+      if (isInsideWall.isDefined) {
+        println("siellä on ihminen sisällä!")
+      } else hiddenPos = newPos
+    } else hiddenPos = newPos
   }
   var moveForward = false
   var moveBackward = false
@@ -46,6 +53,6 @@ object Player {
   var moveRight = false
   var moveUp = false
   var moveDown = false
-  var speedUp=false
+  var speedUp = false
   override def toString(): String = s"Player is currently at ${pos}"
 }

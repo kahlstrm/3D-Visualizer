@@ -34,7 +34,7 @@ trait Shapes {
 
   def isInside(pos: Pos) = {
     def isBetween(a: Double, b: Double, c: Double) =
-      Math.min(a, b) - 20 < c && Math.max(a, b) + 20 > c
+      Math.min(a, b) < c && Math.max(a, b) > c
     isBetween(bottomCornerWorld.x, topCornerWorld.x, pos.x) &&
     isBetween(bottomCornerWorld.y, topCornerWorld.y, pos.y) &&
     isBetween(bottomCornerWorld.z, topCornerWorld.z, pos.z)

@@ -41,7 +41,7 @@ object VisualizerApp extends App {
   val worldTris = worldObjects.flatMap(_.triangles).par
   val frame: JFrame = new JFrame("3d-visualizer")
   var running = true
-  val renderDistance = 10000
+  val renderDistance = 20000
   var triangleCount = 0
   var wireFrame = false
   var collisionEnabled = true
@@ -90,16 +90,7 @@ object VisualizerApp extends App {
     }
   }
   private def update() = {
-    val oldPlayerPos = Player.move()
-    if (collisionEnabled) {
-      val isInsideWall =
-        !worldObjects.forall(!_.isInside(Player.pos))
-      if (isInsideWall) {
-        println("siellä on ihminen sisällä!")
-        Player.updatePos(oldPlayerPos)
-      }
-
-    }
+    Player.move(collisionEnabled)
   }
   private def render() = {
     val g = bs.getDrawGraphics()
@@ -125,13 +116,13 @@ object VisualizerApp extends App {
     }
 
     g.setColor(Color.GRAY)
-    g.fillRect(40, 40, 300, 150)
+    g.fillRect(40, 40, 290, 130)
     g.setColor(Color.WHITE)
     g.drawString("WASD to move, ESCAPE to close", 50, 60)
     g.drawString(Player.pos.toString(), 50, 80)
     g.drawString(Player.camera.toString(), 50, 100)
     g.drawString(
-      f"frametime: $frametime%.3f s, other $othertime%.3f s",
+      f"frametime: $frametime%.3f s, drawtime $othertime%.3f s",
       50,
       120
     )

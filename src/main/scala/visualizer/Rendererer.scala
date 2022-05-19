@@ -6,6 +6,7 @@ import visualizer.GfxMath._
 import java.awt.image.DataBuffer
 import scala.concurrent.ExecutionContext
 import scala.collection.parallel.immutable.ParVector
+import scala.collection.parallel.CollectionConverters._
 object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
@@ -13,7 +14,6 @@ object Rendererer {
 
   def createFrameTriangles(player: Pos, camera: Pos): Vector[Triangle] = {
 
-    val start = misc.timeNanos()
     val worldSpaceTriangles =
       // generate all triangles in worldSpace, that is translated to a coordinate system where "player" is at 0,0,0
       // and then rotated according to the camera
@@ -25,7 +25,6 @@ object Rendererer {
           avgPos < VisualizerApp.renderDistance
         })
 
-    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
     val triangles = generateViewTriangles(worldSpaceTriangles)
     VisualizerApp.triangleCount = triangles.size
     // val res = generateDrawableTriangles(viewTris)
@@ -264,6 +263,7 @@ object Rendererer {
         j += 1
       }
     }
+
   }
 
   // draws the image to be put to the framebuffer
@@ -273,9 +273,14 @@ object Rendererer {
       image: BufferedImage
   ): BufferedImage = {
     val imagePixels = image.getRaster().getDataBuffer()
+
+    val start = misc.timeNanos()
+
     triangles.foreach(tri => {
       triangleTextureDraw(tri, imagePixels, zBuffer)
     })
+
+    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
     image
   }
   // old method which is still used for drawing wireframes which slight remodeling
