@@ -12,7 +12,7 @@ import java.awt.image.DataBufferFloat
 object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
-
+//USER CONFIG START
   val textures: Map[String, Texture] = Map(
     "stonebrick" ->
       Texture(FileLoader.loadTexture("stone_bricks.png")),
@@ -23,7 +23,7 @@ object VisualizerApp extends App {
   val wallTexture = "dark_oak_plank"
   val floorTexture = "stonebrick"
   val (walls, floors, playerPos) =
-    FileLoader.loadFile("hello.map", wallTexture, floorTexture) // to test other objects, I suggets using test.map
+    FileLoader.loadFile("hello.map", wallTexture, floorTexture) // to test other objects, I suggest using test.map
   val worldObjects = walls ++ floors ++ Vector[Shapes](
     // Object("dragon.obj",(0, 0, 0), (0, 0, 0), 100), // a .obj with 210729 Triangles, quite big
     Object("dragon_low_poly.obj", (8200, -100, -1800), (0, 0, 0), 100), // 10x smaller triangle count dragon, still quite big 
@@ -32,19 +32,22 @@ object VisualizerApp extends App {
     Cube((7300, 100, -1800), (0, 0, 0), "brick"),
     Cube((7100, 100, -1800), (0, 0, 0), "stonebrick")
   )
-  val worldTris = worldObjects.flatMap(_.triangles).par
-  val frame: JFrame = new JFrame("3d-visualizer")
-  var running = true
   val renderDistance = 20000
-  var triangleCount = 0
-  var wireFrame = false
-  var collisionEnabled = true
-  var frametime = 0.0f
-  var othertime = 0.0f
-  var frames = 0
   val width = 1600
   val height = 900
   val fov = 90
+  
+  
+  // USER CONFIG END
+  val worldTris = worldObjects.flatMap(_.triangles).par
+  var frames = 0
+  var wireFrame = false
+  var collisionEnabled = true
+  val frame: JFrame = new JFrame("3d-visualizer")
+  var frametime = 0.0f
+  var othertime = 0.0f
+  var triangleCount = 0
+  var running = true
   var previousMouse: Option[Point] = None
   frame.setResizable(false)
   val area: JPanel = new JPanel {
