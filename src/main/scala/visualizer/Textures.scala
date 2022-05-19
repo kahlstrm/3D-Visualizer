@@ -27,7 +27,8 @@ class Texture(image: BufferedImage) {
   private val height = image.getHeight()
 }
 object Texture{
-  def apply(image:BufferedImage):Texture={
+  def apply(imageSource:String):Texture={
+    val image =FileLoader.loadTexture(imageSource)
     if(image!=null) new Texture(image) else null
   }
 }

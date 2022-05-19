@@ -14,11 +14,10 @@ object VisualizerApp extends App {
     ExecutionContext.global
 //USER CONFIG START
   val textures: Map[String, Texture] = Map(
-    "stonebrick" ->
-      Texture(FileLoader.loadTexture("stone_bricks.png")),
-    "dirt" -> Texture(FileLoader.loadTexture("dirt.png")),
-    "brick" -> Texture(FileLoader.loadTexture("bricks.png")),
-    "dark_oak_plank" -> Texture(FileLoader.loadTexture("dark_oak_planks.png"))
+    "stonebrick"     -> Texture("stone_bricks.png"),
+    "dirt"           -> Texture("dirt.png"),
+    "brick"          -> Texture("bricks.png"),
+    "dark_oak_plank" -> Texture("dark_oak_planks.png")
   )
   val wallTexture = "dark_oak_plank"
   val floorTexture = "stonebrick"
