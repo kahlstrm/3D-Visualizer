@@ -72,9 +72,9 @@ object Rendererer {
           // calculate clippings for the sides of the screen, which is represented by a plane with point on the plane,
           // and with the normal pointing towards the screen
           .flatMap(calcClipping(_, Pos(0, 0, 0), Pos(1, 0, 0)))
-          .flatMap(calcClipping(_, Pos(screenWidth - 1, 0, 0), Pos(-1, 0, 0)))
-          .flatMap(calcClipping(_, Pos(0, clippingPlaneTop, 0), Pos(0, 1, 0)))
-          .flatMap(calcClipping(_, Pos(0, screenHeight - 1, 0), Pos(0, -1, 0)))
+          .flatMap(calcClipping(_, Pos((screenWidth - 1).toFloat, 0, 0), Pos(-1, 0, 0)))
+          .flatMap(calcClipping(_, Pos(0, clippingPlaneTop.toFloat, 0), Pos(0, 1, 0)))
+          .flatMap(calcClipping(_, Pos(0, (screenHeight - 1).toFloat, 0), Pos(0, -1, 0)))
       })
     newTriangles.toVector
   }

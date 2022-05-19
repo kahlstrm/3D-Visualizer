@@ -21,7 +21,7 @@ class Pos(
     this.y = that.y
     this.z = that.z
   }
-  def unary_-(): Pos = {
+  def unary_- : Pos = {
     Pos(
       -this.x,
       -this.y,

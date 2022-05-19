@@ -33,7 +33,7 @@ object GfxMath {
     val planeNormalized = planeNormal.unit()
     val u = pos2 + (-pos1)
     val dot = planeNormalized.dotProduct(u)
-    val w = pos1 + (-plane)
+    val w = pos1 + -plane
     val factor = -((planeNormalized.dotProduct(w)) / dot)
     val mul = (u * factor)
     return (mul + pos1, factor)

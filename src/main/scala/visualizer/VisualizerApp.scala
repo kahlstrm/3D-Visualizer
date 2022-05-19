@@ -105,11 +105,11 @@ object VisualizerApp extends App {
     g.fillRect(0, 0, realWidth, realHeight)
     g.setColor(Color.WHITE)
     if (wireFrame) {
-      drawFrame(createFrameTriangles(Player.pos, Player.camera.pos), g)
+      drawFrame(createFrameTriangles(Player.pos, Camera.pos()), g)
     } else {
       g.drawImage(
         generateFrameImage(
-          createFrameTriangles(Player.pos, Camera.pos),
+          createFrameTriangles(Player.pos, Camera.pos()),
           zBuffer,
           image
         ),
@@ -148,7 +148,7 @@ object VisualizerApp extends App {
     def run(): Unit = {
       try {
         println("game is now running")
-        VisualizerApp.runGameNow
+        VisualizerApp.runGameNow()
       } catch {
         case a: Exception => throw a
       }

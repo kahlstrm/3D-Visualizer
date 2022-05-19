@@ -27,20 +27,20 @@ object FileLoader {
           c match {
             case '_' =>
               walls += new Wall(
-                Pos(i * 600, 0, -200 + lineCounter * (-600)),
+                Pos(i * 600.0f, 0, -200.0f + lineCounter * (-600.0f)),
                 Pos(0, 0, 0)
               )
             case '-' =>
               walls += new Wall(
-                Pos(i * 600, 0, 200 + lineCounter * (-600)),
+                Pos(i * 600.0f, 0, 200.0f + lineCounter * (-600.0f)),
                 Pos(0, 0, 0)
               )
             case '|' =>
               walls += new Wall(
-                Pos(i * 600, 0, lineCounter * (-600)),
+                Pos(i * 600.0f, 0, lineCounter * (-600.0f)),
                 Pos(0, Math.PI / 2, 0)
               )
-            case 'S' => playerPos = Pos(i * 600, 0, lineCounter * (-600))
+            case 'S' => playerPos = Pos(i * 600.0f, 0, lineCounter * (-600.0f))
             case _   =>
           }
         }
