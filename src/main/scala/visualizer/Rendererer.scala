@@ -6,39 +6,38 @@ import java.awt.image.BufferedImage
 import visualizer.GfxMath._
 import java.awt.image.DataBuffer
 import scala.concurrent.ExecutionContext
+import scala.collection.parallel.immutable.ParVector
 object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
   private val clippingPlaneTop = screenHeight - VisualizerApp.height - 8
 
-
   def createFrameTriangles(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
   ): Vector[Triangle] = {
-    val worldSpaceTriangles =
 
-    //generate all triangles in worldSpace, that is translated to a coordinate system where "player" is at 0,0,0
-    // and then rotated according to the camera
-      VisualizerApp.worldObjects.flatMap(
-        _.worldSpaceTris(player, camera)
-          // filter triangles that are too away, defined by renderDistance
-          .filter(tri => {
-            val avgPos = ((tri.pos1 + tri.pos2 + tri.pos3) / 3).length
-            avgPos < VisualizerApp.renderDistance
-          })
-      )
-    
+    val start = misc.timeNanos()
+    val worldSpaceTriangles =
+      // generate all triangles in worldSpace, that is translated to a coordinate system where "player" is at 0,0,0
+      // and then rotated according to the camera
+      VisualizerApp.worldTris
+        .map(_.worldSpace(player, camera))
+        // filter triangles that are too away, defined by renderDistance
+        .filter(tri => {
+          val avgPos = ((tri.pos1 + tri.pos2 + tri.pos3) / 3).length
+          avgPos < VisualizerApp.renderDistance
+        })
+
+    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
     val triangles = generateViewTriangles(worldSpaceTriangles)
     VisualizerApp.triangleCount = triangles.size
     // val res = generateDrawableTriangles(viewTris)
     triangles
   }
 
-
-
-  //clip triangles first on the zPlane, then apply perspective and center on the screen,
+  // clip triangles first on the zPlane, then apply perspective and center on the screen,
   // THEN once in "screen space" clip against all the screen edges
-  def generateViewTriangles(triangles: Vector[Triangle]) = {
+  def generateViewTriangles(triangles: ParVector[Triangle]) = {
 
     val newTriangles = triangles.par
       .flatMap(tri => {
@@ -72,9 +71,19 @@ object Rendererer {
           // calculate clippings for the sides of the screen, which is represented by a plane with point on the plane,
           // and with the normal pointing towards the screen
           .flatMap(calcClipping(_, Pos(0, 0, 0), Pos(1, 0, 0)))
-          .flatMap(calcClipping(_, Pos((screenWidth - 1).toFloat, 0, 0), Pos(-1, 0, 0)))
-          .flatMap(calcClipping(_, Pos(0, clippingPlaneTop.toFloat, 0), Pos(0, 1, 0)))
-          .flatMap(calcClipping(_, Pos(0, (screenHeight - 1).toFloat, 0), Pos(0, -1, 0)))
+          .flatMap(
+            calcClipping(_, Pos((screenWidth - 1).toFloat, 0, 0), Pos(-1, 0, 0))
+          )
+          .flatMap(
+            calcClipping(_, Pos(0, clippingPlaneTop.toFloat, 0), Pos(0, 1, 0))
+          )
+          .flatMap(
+            calcClipping(
+              _,
+              Pos(0, (screenHeight - 1).toFloat, 0),
+              Pos(0, -1, 0)
+            )
+          )
       })
     newTriangles.toVector
   }

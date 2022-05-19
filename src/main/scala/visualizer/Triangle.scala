@@ -52,6 +52,20 @@ class Triangle(
     val normalZ = a.x * b.y - a.y * b.x
     Pos(normalX, normalY, normalZ)
   }
+  def worldSpace(player:Pos,camera:Pos): Triangle = {
+    Triangle(
+      this.poses.map(n =>
+        n
+          .translate(-player)
+          .fpsRotate(0, camera.x)
+          .fpsRotate(camera.y, 0)
+      // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0)),
+      ),
+      this.texPoses,
+      this.color,
+      this.texture
+    )
+  }
   // flip the triangles so that the the points are ordered by descending Y-value
   def sortbyYAsc: Triangle = {
     // y1<y2

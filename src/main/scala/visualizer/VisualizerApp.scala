@@ -35,7 +35,7 @@ object VisualizerApp extends App {
     // Cube(Pos(100, 0, 0), Pos(0, 0, 0), "dirt"),
     // Cube(Pos(300,0,0),Pos(0,0,0),"dark_oak_plank")
   )
-
+  val worldTris = worldObjects.flatMap(_.triangles).par
   val frame: JFrame = new JFrame("3d-visualizer")
   var running = true
   val renderDistance = 10000
