@@ -4,7 +4,7 @@ import java.awt.Color
 
 object GfxMath {
   val screenWidth = VisualizerApp.realWidth
-  val screenHeight = VisualizerApp.readHeight
+  val screenHeight = VisualizerApp.realHeight
   val fovinRadians = VisualizerApp.fov * math.Pi / 180.0
   val zNear = (screenWidth / 2.0) / tan(fovinRadians / 2.0)
   val zPlane = Pos(0, 0, 1)

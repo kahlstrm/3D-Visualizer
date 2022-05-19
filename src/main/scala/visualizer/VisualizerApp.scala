@@ -15,13 +15,14 @@ import java.awt.image.BufferedImage
 object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
-  System.setProperty("sun.java2d.opengl", "true");
+  // System.setProperty("sun.java2d.opengl", "True");
+  System.setProperty("sun.java2d.d3d", "True");
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val textures: Map[String, Texture] = Map(
     "stonebrick" ->
       Texture(FileLoader.loadTexture("stonebrick.png")),
     "dirt" -> Texture(FileLoader.loadTexture("minecraft.jpg")),
-    "brick"->Texture(FileLoader.loadTexture("brick.png"))
+    "brick" -> Texture(FileLoader.loadTexture("brick.png"))
   )
   val worldObjects = walls ++ Vector[Shapes](
     Object(
@@ -66,12 +67,13 @@ object VisualizerApp extends App {
   frame.setIgnoreRepaint(true)
   val bs = frame.getBufferStrategy()
   val gc = frame.getGraphicsConfiguration()
-  val realWidth=frame.getWidth()
-  val readHeight=frame.getHeight()
+  val realWidth = frame.getWidth()
+  val realHeight = frame.getHeight()
   private val image = gc
-    .createCompatibleImage(realWidth, frame.getHeight)
+    .createCompatibleImage(realWidth, realHeight)
+  image.setAccelerationPriority(1)
   private val imagePixels = image.getRaster().getDataBuffer()
-  private val zBuffer = new DataBufferDouble(realWidth * readHeight)
+  private val zBuffer = new DataBufferDouble(realWidth * realHeight)
   println(gc)
   private def runGameNow() = {
     while (running) {
@@ -102,11 +104,11 @@ object VisualizerApp extends App {
     val g = bs.getDrawGraphics()
     val start = timeNanos()
     g.setColor(Color.BLACK)
-    g.fillRect(0, 0, realWidth, readHeight)
+    g.fillRect(0, 0, realWidth, realHeight)
     g.setColor(Color.WHITE)
     if (wireFrame) {
       drawFrame(createFrames(Player.pos, Player.camera.pos), g)
-    } else
+    } else {
       g.drawImage(
         generateFrameImage(
           createFrames(Player.pos, Camera.pos),
@@ -116,9 +118,11 @@ object VisualizerApp extends App {
         0,
         0,
         realWidth,
-        readHeight,
+        realHeight,
         null
       )
+    }
+
     g.setColor(Color.GRAY)
     g.fillRect(40, 40, 300, 150)
     g.setColor(Color.WHITE)
@@ -138,9 +142,9 @@ object VisualizerApp extends App {
     )
     drawCrosshair(g)
     val time = timeBetween(start, timeNanos())
-    VisualizerApp.frametime = time
     g.dispose()
     bs.show()
+    VisualizerApp.frametime = time
   }
   val gameThread = new Thread(new Runnable {
     def run(): Unit = {
@@ -148,7 +152,7 @@ object VisualizerApp extends App {
         println("game is now running")
         VisualizerApp.runGameNow
       } catch {
-        case a: Exception            => throw a
+        case a: Exception => throw a
       }
     }
   })

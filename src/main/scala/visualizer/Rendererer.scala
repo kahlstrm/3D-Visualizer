@@ -257,11 +257,9 @@ object Rendererer {
       image: BufferedImage
   ): BufferedImage = {
     val imagePixels = image.getRaster().getDataBuffer()
-    val start = misc.timeNanos()
     triangles.foreach(tri => {
       triangleTextureDraw(tri, imagePixels, zBuffer)
     })
-    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
     image
   }
   // old method which is still used for drawing wireframes which slight remodeling
