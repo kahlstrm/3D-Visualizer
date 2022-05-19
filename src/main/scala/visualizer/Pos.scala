@@ -189,7 +189,7 @@ object Camera extends Pos(0, 0, 0) {
     ).unit()
   }
   // upvector, always orthogonal from forwad and right
-  def testUp = {
+  def upVector = {
     forwardVector.crossProduct(rightVector)
   }
   def cameraVector(): Pos = {
