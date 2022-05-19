@@ -186,7 +186,7 @@ class Object(
     objInfo: (Vector[Pos], Vector[Triangle]),
     val position: Pos,
     val rotation: Pos,
-    scale: Double
+    scale: Float
 ) extends Shapes {
   val poses = objInfo._1.map(pos =>
     (pos * scale)
@@ -233,7 +233,7 @@ object Object {
       objInfo: (Vector[Pos], Vector[Triangle]),
       position: Pos,
       rotation: Pos,
-      scale: Double
+      scale: Float
   ) = new Object(objInfo, position, rotation, scale)
 }
 class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
@@ -266,62 +266,62 @@ class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
   val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(0), poses(2), poses(1)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(1), poses(2), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(1), poses(3), poses(6)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(3), poses(4)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(4), poses(5)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(5), poses(4), poses(7)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(5), poses(7), poses(0)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(7), poses(4), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(7), poses(3), poses(2)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(5), poses(0)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(0), poses(1)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     )
   )
@@ -360,62 +360,62 @@ class Cube(val position: Pos, val rotation: Pos, textureString: String)
   val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(0), poses(2), poses(1)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(1), poses(2), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(1), poses(3), poses(6)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(3), poses(4)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(4), poses(5)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(5), poses(4), poses(7)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(5), poses(7), poses(0)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(7), poses(4), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(7), poses(3), poses(2)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(5), poses(0)),
-      (Pos(0, 0), Pos(0, 1.0), Pos(1.0, 1.0)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(0), poses(1)),
-      (Pos(0, 0), Pos(1.0, 1.0), Pos(1.0, 0)),
+      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
       texture
     )
   )

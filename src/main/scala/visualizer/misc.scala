@@ -4,14 +4,15 @@ import java.awt.image.BufferedImage
 import java.awt.Point
 import java.awt.Robot
 import java.awt.Graphics
+import java.awt.Transparency
 object misc {
   private def frame = VisualizerApp.frame
-  val emptyCursor = frame
+  def emptyCursor = frame
     .getToolkit()
     .createCustomCursor(
       frame
         .getGraphicsConfiguration()
-        .createCompatibleImage(16, 16, BufferedImage.TYPE_INT_ARGB),
+        .createCompatibleImage(16, 16, Transparency.BITMASK),
       new Point(0, 0),
       "empty cursor"
     )
@@ -21,7 +22,7 @@ object misc {
     */
   def timeNanos() = System.nanoTime()
 
-  def timeBetween(start: Long, end: Long) = (end - start) / 1000000000.0
+  def timeBetween(start: Long, end: Long) = (end - start) / 1000000000.0f
 
   def drawCrosshair(g: Graphics) = {
     val w = GfxMath.screenWidth

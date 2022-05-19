@@ -6,7 +6,7 @@ object GfxMath {
   val screenWidth = VisualizerApp.realWidth
   val screenHeight = VisualizerApp.realHeight
   val fovinRadians = VisualizerApp.fov * math.Pi / 180.0
-  val zNear = (screenWidth / 2.0) / tan(fovinRadians / 2.0)
+  val zNear = ((screenWidth / 2.0) / tan(fovinRadians / 2.0)).toFloat
   val zPlane = Pos(0, 0, 1)
   val zPlaneNormal = Pos(0, 0, 1)
 
@@ -46,7 +46,7 @@ object GfxMath {
       pos2: Pos,
       plane: Pos,
       planeNormal: Pos
-  ): (Pos, Double) = {
+  ): (Pos, Float) = {
     val planeNormalized = planeNormal.unit()
     val u = pos2 + (-pos1)
     val dot = planeNormalized.dotProduct(u)
@@ -59,11 +59,11 @@ object GfxMath {
     (planeNormalUnit.x * pos.x + planeNormalUnit.y * pos.y + planeNormalUnit.z * pos.z - planeNormalUnit
       .dotProduct(plane));
   }
-  def newTexPos(texPosOut: Pos, texPosIn: Pos, fac: Double): Pos = {
+  def newTexPos(texPosOut: Pos, texPosIn: Pos, fac: Float): Pos = {
     Pos(
-      (1-fac) * (texPosOut.x - texPosIn.x) + texPosIn.x,
-      (1-fac) * (texPosOut.y - texPosIn.y) + texPosIn.y,
-      (1-fac) * (texPosOut.z - texPosIn.z) + texPosIn.z
+      (1 - fac) * (texPosOut.x - texPosIn.x) + texPosIn.x,
+      (1 - fac) * (texPosOut.y - texPosIn.y) + texPosIn.y,
+      (1 - fac) * (texPosOut.z - texPosIn.z) + texPosIn.z
     )
   }
   // heavy spaghetti code to clip triangles so only triangles on screen show
@@ -215,8 +215,9 @@ object GfxMath {
         val newTexPos1 = newTexPos(tri.texPos2, tri.texPos1, fac1)
         val newTexPos2 = newTexPos(tri.texPos2, tri.texPos3, fac2)
         newTexPoses = newTexPoses.updated(1, newTexPos2)
-        newTexPoses2 = newTexPoses2.updated(1, newTexPos1)
-        .updated(2,newTexPos2)
+        newTexPoses2 = newTexPoses2
+          .updated(1, newTexPos1)
+          .updated(2, newTexPos2)
       }
       return Vector[Triangle](
         Triangle(
@@ -252,8 +253,9 @@ object GfxMath {
         val newTexPos1 = newTexPos(tri.texPos3, tri.texPos1, fac1)
         val newTexPos2 = newTexPos(tri.texPos3, tri.texPos2, fac2)
         newTexPoses = newTexPoses.updated(2, newTexPos1)
-        newTexPoses2 = newTexPoses2.updated(0, newTexPos1)
-        .updated(2,newTexPos2)
+        newTexPoses2 = newTexPoses2
+          .updated(0, newTexPos1)
+          .updated(2, newTexPos2)
       }
       return Vector[Triangle](
         Triangle(
@@ -282,9 +284,9 @@ object GfxMath {
 }
 
 class Pos(
-    var x: Double,
-    var y: Double,
-    var z: Double
+    var x: Float,
+    var y: Float,
+    var z: Float
 ) {
 
   def distance(that: Pos) = {
@@ -309,21 +311,21 @@ class Pos(
       -this.z
     )
   }
-  def *(mul: Double): Pos = {
+  def *(mul: Float): Pos = {
     Pos(
       this.x * mul,
       this.y * mul,
       this.z * mul
     )
   }
-  def /(div: Double): Pos = {
+  def /(div: Float): Pos = {
     Pos(
       this.x / div,
       this.y / div,
       this.z / div
     )
   }
-  def dotProduct(that: Pos): Double = {
+  def dotProduct(that: Pos): Float = {
     this.x * that.x + this.y * that.y + this.z * that.z
   }
   def crossProduct(that: Pos): Pos = {
@@ -360,18 +362,18 @@ class Pos(
       z
     )
   }
-  def perspectiveTexture(posz:Double):Pos={
-      Pos(
+  def perspectiveTexture(posz: Float): Pos = {
+    Pos(
       this.x * GfxMath.zNear / posz,
       this.y * GfxMath.zNear / posz,
-      (GfxMath.zNear/posz)
+      (GfxMath.zNear / posz)
     )
   }
   // fpsRotation matrix, took way too long to got this working
   // rotates the view by a specified angle, this is applied twice
   // first for the x-axis, then for the y-axis
   // https://www.3dgep.com/understanding-the-view-matrix/
-  def xyzAxes(pitch: Double, y: Double) = {
+  def xyzAxes(pitch: Float, y: Float) = {
     val yaw = y + Math.PI // get yaw range between 0-360
     val cosP = cos(pitch)
     val sinP = sin(pitch)
@@ -382,7 +384,7 @@ class Pos(
     val zAxis = -Pos(sinY * cosP, -sinP, cosP * cosY)
     (xAxis, yAxis, zAxis)
   }
-  def fpsRotate(pitch: Double, y: Double): Pos = {
+  def fpsRotate(pitch: Float, y: Float): Pos = {
     val (xAxis, yAxis, zAxis) = xyzAxes(pitch, y)
     Pos(
       this.x * xAxis.x + this.y * yAxis.x + this.z * zAxis.x,
@@ -425,7 +427,7 @@ class Pos(
       0
     )
   }
-  def unit(): Pos = if (this.length == 0) this else this / this.length
+  def unit(): Pos = if (this.length == 0) this else this / this.length.toFloat
   def rotate(rotation: Pos): Pos = {
     Pos(
       this.x * (cos(rotation.z) * cos(rotation.y)) +
@@ -503,12 +505,15 @@ object Camera extends Pos(0, 0, 0) {
 
 object Pos {
   def apply(x: Double, y: Double, z: Double): Pos = {
+    new Pos(x.toFloat, y.toFloat, z.toFloat)
+  }
+  def apply(x: Float, y: Float, z: Float): Pos = {
     new Pos(x, y, z)
   }
   def apply(pos: Pos): Pos = {
     new Pos(pos.x, pos.y, pos.z)
   }
-  def apply(x: Double, y: Double): Pos = {
+  def apply(x: Float, y: Float): Pos = {
     new Pos(x, y, 1)
   }
 }

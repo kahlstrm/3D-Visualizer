@@ -10,13 +10,11 @@ import misc._
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants
-import java.awt.image.DataBufferDouble
+import java.awt.image.DataBufferFloat
 import java.awt.image.BufferedImage
 object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
-  // System.setProperty("sun.java2d.opengl", "True");
-  System.setProperty("sun.java2d.d3d", "True");
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val textures: Map[String, Texture] = Map(
     "stonebrick" ->
@@ -41,8 +39,8 @@ object VisualizerApp extends App {
   var triangleCount = 0
   var wireFrame = false
   var collisionEnabled = true
-  var frametime = 0.0
-  var othertime = 0.0
+  var frametime = 0.0f
+  var othertime = 0.0f
   var frames = 0
   val width = 1920
   val height = 1080
@@ -73,14 +71,15 @@ object VisualizerApp extends App {
     .createCompatibleImage(realWidth, realHeight)
   image.setAccelerationPriority(1)
   private val imagePixels = image.getRaster().getDataBuffer()
-  private val zBuffer = new DataBufferDouble(realWidth * realHeight)
+  private val zBuffer = new DataBufferFloat(realWidth * realHeight)
   println(gc)
+  println(gc.getDevice().getAvailableAcceleratedMemory())
   private def runGameNow() = {
     while (running) {
       update()
       // clear Buffers
       for (i <- 0 until zBuffer.getSize()) {
-        zBuffer.setElemDouble(i, 0.0)
+        zBuffer.setElemFloat(i, 0.0f)
         imagePixels.setElem(i, 0)
       }
       render()
