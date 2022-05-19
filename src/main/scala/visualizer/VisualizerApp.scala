@@ -25,16 +25,18 @@ object VisualizerApp extends App {
   val (walls, floors, playerPos) =
     FileLoader.loadFile("hello.map", wallTexture, floorTexture)
   val worldObjects = walls ++ floors ++ Vector[Shapes](
-   // Object(FileLoader.loadObject("dragon.obj"), Pos(0, 0, 0), Pos(0, 0, 0), 100) // a .obj with 210729 Triangles, quite big
-     Object(
-       FileLoader.loadObject("dragon_low_poly.obj"), // a .obj with a "low" trianglecount of 26341
-       Pos(8200, -100, -1800),
-       Pos(0, 0, 0),
-       100
-     ),
+    // Object(FileLoader.loadObject("dragon.obj"), Pos(0, 0, 0), Pos(0, 0, 0), 100) // a .obj with 210729 Triangles, quite big
+    Object(
+      FileLoader.loadObject(
+        "dragon_low_poly.obj"
+      ), // a .obj with a "low" trianglecount of 26341
+      Pos(8200, -100, -1800),
+      Pos(0, 0, 0),
+      100
+    ),
     Cube(Pos(7500, 100, -1800), Pos(0, 0, 0), "dirt"),
-    Cube(Pos(7300,100,-1800),Pos(0,0,0),"brick"),
-    Cube(Pos(7100,100,-1800),Pos(0,0,0),"stonebrick")
+    Cube(Pos(7300, 100, -1800), Pos(0, 0, 0), "brick"),
+    Cube(Pos(7100, 100, -1800), Pos(0, 0, 0), "stonebrick")
   )
   val worldTris = worldObjects.flatMap(_.triangles).par
   val frame: JFrame = new JFrame("3d-visualizer")
@@ -90,14 +92,13 @@ object VisualizerApp extends App {
   private def update() = {
     val oldPlayerPos = Player.move()
     if (collisionEnabled) {
-      Future {
-        val isInsideWall =
-          !worldObjects.forall(!_.isInside(Player.pos))
-        if (isInsideWall) {
-          println("siellä on ihminen sisällä!")
-          Player.updatePos(oldPlayerPos)
-        }
+      val isInsideWall =
+        !worldObjects.forall(!_.isInside(Player.pos))
+      if (isInsideWall) {
+        println("siellä on ihminen sisällä!")
+        Player.updatePos(oldPlayerPos)
       }
+
     }
   }
   private def render() = {
