@@ -9,7 +9,7 @@ object FileLoader {
   def loadFile(source: String): (Vector[Shapes], Pos) = {
     val fileReader =
       try {
-        new FileReader(source)
+        new FileReader(s"maps/${source}")
       } catch {
         case e: FileNotFoundException => {
           println("map File not found")

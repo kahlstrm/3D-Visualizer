@@ -18,8 +18,7 @@ object misc {
     )
   val robot = new Robot()
 
-  /** Class for measuring time Wall time
-    */
+  //helper functions for time measuring
   def timeNanos() = System.nanoTime()
 
   def timeBetween(start: Long, end: Long) = (end - start) / 1000000000.0f
