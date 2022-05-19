@@ -10,7 +10,6 @@ object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
 private val clippingPlaneTop = screenHeight-VisualizerApp.height-8
-private val clippingPlaneLeft= screenWidth-VisualizerApp.width-8
   def createFrames(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
   ): Vector[Triangle] = {
@@ -59,7 +58,7 @@ private val clippingPlaneLeft= screenWidth-VisualizerApp.width-8
           .filter(getNormal(_).z < 0)
           // calculate clippings for the sides of the screen, which is represented by a plane with point on the plane,
           // and with the normal pointing towards the screen
-          .flatMap(calcClipping(_, Pos(clippingPlaneLeft, 0, 0), Pos(1, 0, 0)))
+          .flatMap(calcClipping(_, Pos(0, 0, 0), Pos(1, 0, 0)))
           .flatMap(calcClipping(_, Pos(screenWidth - 1, 0, 0), Pos(-1, 0, 0)))
           .flatMap(calcClipping(_, Pos(0, clippingPlaneTop, 0), Pos(0, 1, 0)))
           .flatMap(calcClipping(_, Pos(0, screenHeight - 1, 0), Pos(0, -1, 0)))
