@@ -1,9 +1,6 @@
 package visualizer
 import scala.swing._
-import scala.swing.event._
-import java.awt.event._
 import scala.concurrent._
-import scala.concurrent.duration.Duration
 import java.awt.Color
 import Rendererer._
 import misc._
@@ -11,7 +8,6 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants
 import java.awt.image.DataBufferFloat
-import java.awt.image.BufferedImage
 object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
