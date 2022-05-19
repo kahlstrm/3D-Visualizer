@@ -1,10 +1,5 @@
 package visualizer
-import java.awt.TexturePaint
-import java.awt.Color
 import scala.collection.parallel.CollectionConverters._
-import java.awt.Graphics
-import java.awt.image.BufferedImage
-import java.awt.image.DataBuffer
 
 
 trait Shapes {

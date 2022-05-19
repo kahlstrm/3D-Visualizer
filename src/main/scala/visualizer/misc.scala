@@ -1,6 +1,5 @@
 package visualizer
 
-import java.awt.image.BufferedImage
 import java.awt.Point
 import java.awt.Robot
 import java.awt.Graphics

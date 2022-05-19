@@ -1,6 +1,5 @@
 package visualizer
 import scala.math._
-import java.awt.Color
 
 object GfxMath {
   val screenWidth = VisualizerApp.realWidth

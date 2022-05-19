@@ -4,7 +4,6 @@ import scala.collection.mutable.Buffer
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 import java.awt.GraphicsEnvironment
-import VisualizerApp._
 object FileLoader {
   def loadFile(source: String): (Vector[Shapes], Pos) = {
     val fileReader =
@@ -54,7 +53,7 @@ object FileLoader {
   def loadTexture(source: String): BufferedImage = {
     val img =
       try {
-        ImageIO.read(new File(source))
+        ImageIO.read(new File(s"textures/${source}"))
       } catch {
         case e: FileNotFoundException => {
           println("image File not found")
