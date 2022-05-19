@@ -290,7 +290,9 @@ object Rendererer {
       // wireFrame: Boolean
   ): Unit = {
     /*if (wireFrame)*/
+    val start=misc.timeNanos()
     triangles.foreach(_.draw(g))
+    VisualizerApp.othertime=misc.timeBetween(start,misc.timeNanos())
     // else
     //   triangles.foreach(tri => {
     //     if (tri.color != null) tri.draw(g, tri.color)
