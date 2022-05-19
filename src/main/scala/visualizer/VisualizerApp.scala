@@ -109,11 +109,11 @@ object VisualizerApp extends App {
     g.fillRect(0, 0, realWidth, realHeight)
     g.setColor(Color.WHITE)
     if (wireFrame) {
-      drawFrame(createFrames(Player.pos, Player.camera.pos), g)
+      drawFrame(createFrameTriangles(Player.pos, Player.camera.pos), g)
     } else {
       g.drawImage(
         generateFrameImage(
-          createFrames(Player.pos, Camera.pos),
+          createFrameTriangles(Player.pos, Camera.pos),
           zBuffer,
           image
         ),

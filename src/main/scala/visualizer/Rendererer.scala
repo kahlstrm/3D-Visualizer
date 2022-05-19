@@ -9,24 +9,35 @@ import scala.concurrent.ExecutionContext
 object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
-private val clippingPlaneTop = screenHeight-VisualizerApp.height-8
-  def createFrames(player: Pos, camera: Pos)(implicit
+  private val clippingPlaneTop = screenHeight - VisualizerApp.height - 8
+
+
+  def createFrameTriangles(player: Pos, camera: Pos)(implicit
       ec: ExecutionContext
   ): Vector[Triangle] = {
     val worldSpaceTriangles =
+
+    //generate all triangles in worldSpace, that is translated to a coordinate system where "player" is at 0,0,0
+    // and then rotated according to the camera
       VisualizerApp.worldObjects.flatMap(
         _.worldSpaceTris(player, camera)
+          // filter triangles that are too away, defined by renderDistance
           .filter(tri => {
             val avgPos = ((tri.pos1 + tri.pos2 + tri.pos3) / 3).length
             avgPos < VisualizerApp.renderDistance
           })
       )
+    
     val triangles = generateViewTriangles(worldSpaceTriangles)
     VisualizerApp.triangleCount = triangles.size
     // val res = generateDrawableTriangles(viewTris)
     triangles
   }
 
+
+
+  //clip triangles first on the zPlane, then apply perspective and center on the screen,
+  // THEN once in "screen space" clip against all the screen edges
   def generateViewTriangles(triangles: Vector[Triangle]) = {
 
     val newTriangles = triangles.par
@@ -55,6 +66,8 @@ private val clippingPlaneTop = screenHeight-VisualizerApp.height-8
             }
             newTri
           })
+
+          // filter all triangles out that are not facing towards us
           .filter(getNormal(_).z < 0)
           // calculate clippings for the sides of the screen, which is represented by a plane with point on the plane,
           // and with the normal pointing towards the screen
@@ -66,7 +79,7 @@ private val clippingPlaneTop = screenHeight-VisualizerApp.height-8
     newTriangles.toVector
   }
 
-// draw
+// draw triangles to a DataBuffer using scanline rendering
   def triangleTextureDraw(
       tri: Triangle,
       pixels: DataBuffer,
