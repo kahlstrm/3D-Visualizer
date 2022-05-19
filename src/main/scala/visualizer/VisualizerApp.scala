@@ -47,7 +47,6 @@ object VisualizerApp extends App {
   val height = 900
   val fov = 90
   var previousMouse: Option[Point] = None
-  val windowHeight = height + 30
   frame.setResizable(false)
   val area: JPanel = new JPanel {
     setPreferredSize(new Dimension(width, height))
@@ -74,6 +73,10 @@ object VisualizerApp extends App {
   private val imagePixels = image.getRaster().getDataBuffer()
   private val zBuffer = new DataBufferFloat(realWidth * realHeight)
   println(gc)
+  println(width)
+  println(height)
+  println(realWidth)
+  println(realHeight)
   private def runGameNow() = {
     while (running) {
       update()
