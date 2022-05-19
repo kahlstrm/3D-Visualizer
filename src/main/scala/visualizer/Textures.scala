@@ -14,7 +14,7 @@ case class Texture(image: BufferedImage) {
     }
     return texturePixels.getElem(x + y * width)
   }
-  def getColor(x: Double, y: Double): Int = {
+  def getColor(x: Float, y: Float): Int = {
     if (x > 1 || x < 0 || y > 1 || y < 0) {
       // println(f"x:$x y:$y out of range")
       return 0

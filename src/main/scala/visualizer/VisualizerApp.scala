@@ -73,7 +73,6 @@ object VisualizerApp extends App {
   private val imagePixels = image.getRaster().getDataBuffer()
   private val zBuffer = new DataBufferFloat(realWidth * realHeight)
   println(gc)
-  println(gc.getDevice().getAvailableAcceleratedMemory())
   private def runGameNow() = {
     while (running) {
       update()

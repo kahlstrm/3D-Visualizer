@@ -110,22 +110,22 @@ object Rendererer {
     var du2 = tx3 - tx1
     var dw2 = tz3 - tz1
 
-    var xLeft = 0.0
-    var xRight = 0.0
-    var du1_step = 0.0
-    var dv1_step = 0.0
-    var dw1_step = 0.0
-    var du2_step = 0.0
-    var dv2_step = 0.0
-    var dw2_step = 0.0
+    var xLeft = 0.0f
+    var xRight = 0.0f
+    var du1_step = 0.0f
+    var dv1_step = 0.0f
+    var dw1_step = 0.0f
+    var du2_step = 0.0f
+    var dv2_step = 0.0f
+    var dw2_step = 0.0f
     if (dy1 != 0) {
-      xLeft = dx1 / Math.abs(dy1).toDouble
+      xLeft = dx1 / Math.abs(dy1).toFloat
       du1_step = du1 / Math.abs(dy1)
       dv1_step = dv1 / Math.abs(dy1)
       dw1_step = dw1 / Math.abs(dy1)
     }
     if (dy2 != 0) {
-      xRight = dx2 / Math.abs(dy2).toDouble
+      xRight = dx2 / Math.abs(dy2).toFloat
       du2_step = du2 / Math.abs(dy2)
       dv2_step = dv2 / Math.abs(dy2)
       dw2_step = dw2 / Math.abs(dy2)
@@ -159,8 +159,8 @@ object Rendererer {
         var tLocV = teyS
         var tLocW = tezS
 
-        val texStep = 1.0 / (xR - xL)
-        var t = 0.0
+        val texStep = 1.0f / (xR - xL)
+        var t = 0.0f
         var i = xL
         while (i < xR) {
           tLocU = (1 - t) * texS + t * texE
@@ -188,13 +188,13 @@ object Rendererer {
     du1 = tx3 - tx2
     dw1 = tz3 - tz2;
     if (dy1 != 0) {
-      xLeft = dx1 / Math.abs(dy1).toDouble
-      du1_step = du1 / Math.abs(dy1).toDouble
-      dv1_step = dv1 / Math.abs(dy1).toDouble
-      dw1_step = dw1 / Math.abs(dy1).toDouble
+      xLeft = dx1 / Math.abs(dy1).toFloat
+      du1_step = du1 / Math.abs(dy1).toFloat
+      dv1_step = dv1 / Math.abs(dy1).toFloat
+      dw1_step = dw1 / Math.abs(dy1).toFloat
     }
     if (dy2 != 0) {
-      xRight = dx2 / Math.abs(dy2).toDouble
+      xRight = dx2 / Math.abs(dy2).toFloat
     }
     if (dy1 != 0) {
       var j = y2
@@ -225,8 +225,8 @@ object Rendererer {
         var tLocV = teyS
         var tLocW = tezS
 
-        val texStep = 1.0 / (xR - xL)
-        var t = 0.0
+        val texStep = 1.0f / (xR - xL)
+        var t = 0.0f
         var i = xL
         while (i < xR) {
           tLocU = (1 - t) * texS + t * texE
