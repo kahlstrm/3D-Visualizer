@@ -19,22 +19,7 @@ class Triangle(
     g.drawLine(pos2.x.toInt, pos2.y.toInt, pos3.x.toInt, pos3.y.toInt)
     g.drawLine(pos3.x.toInt, pos3.y.toInt, pos1.x.toInt, pos1.y.toInt)
   }
-  def draw(g: Graphics, color: Color) = {
-    g.setColor(color)
-    g.fillPolygon(
-      Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
-      Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
-      3
-    )
-  }
-  def draw(g: Graphics, color: Int) = {
-    g.setColor(new Color(color, color, color))
-    g.fillPolygon(
-      poses.map(_.x.toInt),
-      poses.map(_.y.toInt),
-      3
-    )
-  }
+
   // calculate surface Normal https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
   def getNormal(): Pos = {
     val a = Pos(
@@ -169,3 +154,22 @@ object Triangle {
     )
   }
 }
+
+
+// obsolete methods
+  // def draw(g: Graphics, color: Color) = {
+  //   g.setColor(color)
+  //   g.fillPolygon(
+  //     Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
+  //     Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
+  //     3
+  //   )
+  // }
+  // def draw(g: Graphics, color: Int) = {
+  //   g.setColor(new Color(color, color, color))
+  //   g.fillPolygon(
+  //     poses.map(_.x.toInt),
+  //     poses.map(_.y.toInt),
+  //     3
+  //   )
+  // }
