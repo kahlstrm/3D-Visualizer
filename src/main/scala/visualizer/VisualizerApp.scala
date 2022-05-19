@@ -15,9 +15,6 @@ import java.awt.image.BufferedImage
 object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
-  if (System.getProperty("os.name").toLowerCase.contains("windows")) {
-    System.setProperty("sun.java2d.d3d", "true")
-  } else System.setProperty("sun.java2d.opengl", "true")
 
   val (walls, playerPos) = FileLoader.loadFile("test.map")
   val textures: Map[String, Texture] = Map(
