@@ -69,7 +69,6 @@ object VisualizerApp extends App {
   val realHeight = frame.getHeight()
   private val image = gc
     .createCompatibleImage(realWidth, realHeight)
-  image.setAccelerationPriority(1)
   private val imagePixels = image.getRaster().getDataBuffer()
   private val zBuffer = new DataBufferFloat(realWidth * realHeight)
   private def runGameNow() = {
