@@ -230,6 +230,9 @@ object Pos {
   def apply(pos: Pos): Pos = {
     new Pos(pos.x, pos.y, pos.z)
   }
+  def apply(pos:(Float,Float,Float))={
+    new Pos(pos._1,pos._2,pos._3)
+  }
   def apply(x: Float, y: Float): Pos = {
     new Pos(x, y, 1)
   }

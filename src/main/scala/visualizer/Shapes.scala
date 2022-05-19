@@ -90,12 +90,12 @@ class Object(
   val texture: Texture = null
 }
 object Object {
-  def apply(
-      objInfo: (Vector[Pos], Vector[Triangle]),
-      position: Pos,
-      rotation: Pos,
+ def apply(
+      objFile:String,
+      pos: (Float,Float,Float),
+      rot: (Float,Float,Float),
       scale: Float
-  ) = new Object(objInfo, position, rotation, scale)
+  ) = new Object(FileLoader.loadObject(objFile), Pos(pos), Pos(rot), scale)
 }
 class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
     extends Shapes {
@@ -189,6 +189,10 @@ class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
   val bottomCornerWorld = poses(0)
   val topCornerWorld = poses(3)
 }
+object Wall{
+  def apply(pos:(Float,Float,Float), rotation:(Float,Float,Float), textureString: String) =
+    new Wall(Pos(pos), Pos(rotation), textureString)
+}
 class Floor(val position: Pos, val rotation: Pos, textureString: String = null)
     extends Shapes {
   val poses = Vector[Pos](
@@ -281,7 +285,10 @@ class Floor(val position: Pos, val rotation: Pos, textureString: String = null)
   val bottomCornerWorld = poses(0)
   val topCornerWorld = poses(3)
 }
-
+object Floor{
+  def apply(pos:(Float,Float,Float), rotation:(Float,Float,Float), textureString: String) =
+    new Floor(Pos(pos), Pos(rotation), textureString)
+}
 
 class Cube(val position: Pos, val rotation: Pos, textureString: String)
     extends Shapes {
@@ -382,7 +389,7 @@ class Cube(val position: Pos, val rotation: Pos, textureString: String)
 }
 
 object Cube {
-  def apply(position: Pos, rotation: Pos, textureString: String) =
-    new Cube(position, rotation, textureString)
+  def apply(pos:(Float,Float,Float), rotation:(Float,Float,Float), textureString: String) =
+    new Cube(Pos(pos), Pos(rotation), textureString)
 }
 

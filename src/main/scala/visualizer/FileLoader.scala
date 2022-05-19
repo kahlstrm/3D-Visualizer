@@ -48,59 +48,59 @@ object FileLoader {
         case (c, i) => {
           c match {
             case '_' =>
-              walls += new Wall(
-                Pos(i * 600.0f, 0, -200.0f + lineCounter * (-600.0f)),
-                Pos(0, 0, 0),
+              walls +=  Wall(
+                (i * 600.0f, 0, -200.0f + lineCounter * (-600.0f)),
+                (0, 0, 0),
                 texture
               )
               if (floorTexture != null) {
-                floors += new Floor(
-                  Pos(i * 600.0f, 300, lineCounter * (-600.0f)),
-                  Pos(0, 0, 0),
+                floors +=  Floor(
+                  (i * 600.0f, 300, lineCounter * (-600.0f)),
+                  (0, 0, 0),
                   floorTexture
                 )
               }
             case '-' =>
-              walls += new Wall(
-                Pos(i * 600.0f, 0, 200.0f + lineCounter * (-600.0f)),
-                Pos(0, 0, 0),
+              walls += Wall(
+                (i * 600.0f, 0, 200.0f + lineCounter * (-600.0f)),
+                (0, 0, 0),
                 texture
               )
               if (floorTexture != null) {
-                floors += new Floor(
-                  Pos(i * 600.0f, 300, lineCounter * (-600.0f)),
-                  Pos(0, 0, 0),
+                floors += Floor(
+                  (i * 600.0f, 300, lineCounter * (-600.0f)),
+                  (0, 0, 0),
                   floorTexture
                 )
               }
             case '|' =>
-              walls += new Wall(
-                Pos(i * 600.0f, 0, lineCounter * (-600.0f)),
-                Pos(0, Math.PI / 2, 0),
+              walls += Wall(
+                (i * 600.0f, 0, lineCounter * (-600.0f)),
+                (0, (Math.PI / 2).toFloat, 0),
                 texture
               )
               if (floorTexture != null) {
-                floors += new Floor(
-                  Pos(i * 600.0f, 300, lineCounter * (-600.0f)),
-                  Pos(0, 0, 0),
+                floors += Floor(
+                  (i * 600.0f, 300, lineCounter * (-600.0f)),
+                  (0, 0, 0),
                   floorTexture
                 )
               }
             case 'S' => {
               playerPos = Pos(i * 600.0f, 0, lineCounter * (-600.0f))
               if (floorTexture != null) {
-                floors += new Floor(
-                  Pos(i * 600.0f, 300, lineCounter * (-600.0f)),
-                  Pos(0, 0, 0),
+                floors += Floor(
+                  (i * 600.0f, 300, lineCounter * (-600.0f)),
+                  (0, 0, 0),
                   floorTexture
                 )
               }
             }
             case 'F' =>
               if (floorTexture != null) {
-                floors += new Floor(
-                  Pos(i * 600.0f, 300, lineCounter * (-600.0f)),
-                  Pos(0, 0, 0),
+                floors +=  Floor(
+                  (i * 600.0f, 300, lineCounter * (-600.0f)),
+                  (0, 0, 0),
                   floorTexture
                 )
               }
