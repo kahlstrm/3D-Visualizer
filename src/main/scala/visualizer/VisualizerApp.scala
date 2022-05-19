@@ -33,8 +33,8 @@ object VisualizerApp extends App {
     Cube((7100, 100, -1800), (0, 0, 0), "stonebrick")
   )
   val renderDistance = 20000
-  val width = 1600
-  val height = 900
+  val width = 1280
+  val height = 720
   val fov = 90
   
   
