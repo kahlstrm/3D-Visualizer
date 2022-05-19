@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage
 
 // simple texture class that provides color information
 case class Texture(image: BufferedImage) {
-  private val texturePixels = image.getData().getDataBuffer()
+  private lazy val texturePixels = image.getData().getDataBuffer()
 
   // returns colors
   def getColorPixel(x: Int, y: Int): Int = {

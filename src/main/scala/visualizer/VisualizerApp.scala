@@ -23,14 +23,14 @@ object VisualizerApp extends App {
     "brick" -> Texture(FileLoader.loadTexture("brick.png"))
   )
   val worldObjects = walls ++ Vector[Shapes](
-    Object(
-      FileLoader.loadObject("dragon.obj"),
-      Pos(0, 0, 300),
-      Pos(0, 0, 0),
-      100
-    )
-    // Cube(Pos(-100, 0, 0), Pos(0, 0, 0), "dirt"),
-    // Cube(Pos(100, 0, 0), Pos(0, 0, 0), "stonebrick")
+    // Object(
+    //   FileLoader.loadObject("dragon.obj"),
+    //   Pos(0, 0, 300),
+    //   Pos(0, 0, 0),
+    //   100
+    // ),
+    Cube(Pos(-100, 0, 0), Pos(0, 0, 0), "dirt"),
+    Cube(Pos(100, 0, 0), Pos(0, 0, 0), "stonebrick")
   )
 
   val frame: JFrame = new JFrame("3d-visualizer")
