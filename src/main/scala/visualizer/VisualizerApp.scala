@@ -74,11 +74,6 @@ object VisualizerApp extends App {
   image.setAccelerationPriority(1)
   private val imagePixels = image.getRaster().getDataBuffer()
   private val zBuffer = new DataBufferFloat(realWidth * realHeight)
-  println(gc)
-  println(width)
-  println(height)
-  println(realWidth)
-  println(realHeight)
   private def runGameNow() = {
     while (running) {
       update()
@@ -153,7 +148,6 @@ object VisualizerApp extends App {
   val gameThread = new Thread(new Runnable {
     def run(): Unit = {
       try {
-        println("game is now running")
         VisualizerApp.runGameNow()
       } catch {
         case a: Exception => throw a
