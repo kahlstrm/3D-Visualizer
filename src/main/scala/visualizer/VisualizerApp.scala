@@ -27,7 +27,7 @@ object VisualizerApp extends App {
   val worldObjects = walls ++ floors ++ Vector[Shapes](
    // Object(FileLoader.loadObject("dragon.obj"), Pos(0, 0, 0), Pos(0, 0, 0), 100) // a .obj with 210729 Triangles, quite big
      Object(
-       FileLoader.loadObject("dragon_low_poly.obj"),
+       FileLoader.loadObject("dragon_low_poly.obj"), // a .obj with a "low" trianglecount of 26341
        Pos(8200, -100, -1800),
        Pos(0, 0, 0),
        100

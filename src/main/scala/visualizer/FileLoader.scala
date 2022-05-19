@@ -138,49 +138,55 @@ object FileLoader {
   }
   def loadObject(source: String): (Vector[Pos], Vector[Triangle]) = {
     val start = System.currentTimeMillis()
-    val fileReader =
       try {
-        new FileReader(s"objects/${source}")
+        val fileReader =
+          new FileReader(s"objects/${source}")
+        val poses = Buffer[Pos]()
+        val tris = Buffer[Vector[Int]]()
+        val lineReader = new BufferedReader(fileReader)
+        var line = ""
+        while ({ line = lineReader.readLine(); line != null }) {
+          val first = line.take(2).trim()
+          first match {
+            case "v" => {
+              val rest = line.drop(2).strip
+              val vectorCoords = rest.split(" ").map(_.toDouble)
+              val newPos =
+                Pos(vectorCoords(0), vectorCoords(1), vectorCoords(2))
+              poses += newPos
+            }
+            case "f" => {
+              val indices = line
+                .drop(2)
+                .strip
+                .split(" ")
+              if (indices.length == 3) {
+                val newTri = indices.map(_.toInt - 1).toVector
+                tris += newTri
+              } else println("unsupported format")
+            }
+            case _ =>
+          }
+        }
+        fileReader.close()
+        (poses, tris)
+
+        val triangles =
+          tris
+            .map(n => Triangle(poses(n(0)), poses(n(1)), poses(n(2))))
+            .toVector
+        val end = System.currentTimeMillis()
+        println(
+          s"${source} ${poses.length} vertices and ${triangles.length} Triangles"
+        )
+        println(s"this took ${(end - start) / 1000.0} seconds")
+        (poses.toVector, triangles.toVector)
       } catch {
         case _: FileNotFoundException => {
-          throw new Exception("Object File not found, check path")
+          println(s"Object File ${source} not found, check path")
+          (Vector[Pos](), Vector[Triangle]())
         }
       }
-    val poses = Buffer[Pos]()
-    val tris = Buffer[Vector[Int]]()
-    val lineReader = new BufferedReader(fileReader)
-    var line = ""
-    while ({ line = lineReader.readLine(); line != null }) {
-      val first = line.take(2).trim()
-      first match {
-        case "v" => {
-          val rest = line.drop(2).strip
-          val vectorCoords = rest.split(" ").map(_.toDouble)
-          val newPos = Pos(vectorCoords(0), vectorCoords(1), vectorCoords(2))
-          poses += newPos
-        }
-        case "f" => {
-          val indices = line
-            .drop(2)
-            .strip
-            .split(" ")
-          if (indices.length == 3) {
-            val newTri = indices.map(_.toInt - 1).toVector
-            tris += newTri
-          } else println("unsupported format")
-        }
-        case _ =>
-      }
-    }
-    fileReader.close()
-    val triangles =
-      tris.map(n => Triangle(poses(n(0)), poses(n(1)), poses(n(2)))).toVector
-    val end = System.currentTimeMillis()
-    println(
-      s"${source} ${poses.length} vertices and ${triangles.length} Triangles"
-    )
-    println(s"this took ${(end - start) / 1000.0} seconds")
-    (poses.toVector, triangles.toVector)
   }
 }
 
