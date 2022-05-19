@@ -5,35 +5,36 @@ import scala.io.StdIn.readLine
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 import java.awt.GraphicsEnvironment
+import javax.imageio.IIOException
 object FileLoader {
   def loadFile(
       source: String,
-      texture: String = null,
+      textureString: String = null,
       floorTexture: String = null
   ): (Vector[Shapes], Vector[Shapes], Pos) = {
     val fileReader =
       try {
         new FileReader(s"maps/${source}")
       } catch {
-        case e: FileNotFoundException => {
+        case _: FileNotFoundException => {
           println("map File not found")
           return (Vector[Shapes](), Vector[Shapes](), Pos(0, 0, 0))
         }
       }
     // this implementation doesn't work directly in VSCode debug so commented this out,
     // probably a GUI drop down menu would be better
-    // var texture: String = null
-    // while (texture == null) {
-    //   println("available textures:")
-    //   val texturesWords = VisualizerApp.textures.keySet
-    //   println(texturesWords.mkString("\n"))
-    //   println(
-    //     "select which texture you want to apply to the walls, empty for no texture:"
-    //   )
-    //   val textureRead = readLine()
-    //   if (textureRead == "" || texturesWords.contains(texture))
-    //     texture = textureRead
-    // }
+    var texture = textureString
+    while (texture == null) {
+      println("available textures:")
+      val texturesWords = VisualizerApp.textures.keySet
+      println(texturesWords.mkString("\n"))
+      println(
+        "select which texture you want to apply to the walls, empty for no texture:"
+      )
+      val textureRead = readLine()
+      if (textureRead == "" || texturesWords.contains(texture))
+        texture = textureRead
+    }
 
     var playerPos = Pos(0, 0, 0)
     val walls = Buffer[Wall]()
@@ -113,24 +114,27 @@ object FileLoader {
     return (walls.toVector, floors.toVector, playerPos)
   }
   def loadTexture(source: String): BufferedImage = {
-    val img =
-      try {
-        ImageIO.read(new File(s"textures/${source}"))
-      } catch {
-        case e: FileNotFoundException => {
-          println("image File not found")
-          throw e
-        }
+    try {
+      val img = ImageIO.read(new File(s"textures/${source}"))
+      val gc = GraphicsEnvironment
+        .getLocalGraphicsEnvironment()
+        .getDefaultScreenDevice()
+        .getDefaultConfiguration()
+      val optimizedImg =
+        gc.createCompatibleImage(img.getWidth(), img.getHeight())
+      val g2d = optimizedImg.createGraphics()
+      g2d.drawImage(img, 0, 0, null)
+      g2d.dispose()
+      optimizedImg
+    } catch {
+      case _: IIOException => {
+        println(
+          s"image File not found for texture $source, using empty texture instead"
+        )
+        null
       }
-    val gc = GraphicsEnvironment
-      .getLocalGraphicsEnvironment()
-      .getDefaultScreenDevice()
-      .getDefaultConfiguration()
-    val optimizedImg = gc.createCompatibleImage(img.getWidth(), img.getHeight())
-    val g2d = optimizedImg.createGraphics()
-    g2d.drawImage(img, 0, 0, null)
-    g2d.dispose()
-    optimizedImg
+    }
+
   }
   def loadObject(source: String): (Vector[Pos], Vector[Triangle]) = {
     val start = System.currentTimeMillis()
@@ -138,7 +142,7 @@ object FileLoader {
       try {
         new FileReader(s"objects/${source}")
       } catch {
-        case e: FileNotFoundException => {
+        case _: FileNotFoundException => {
           throw new Exception("Object File not found, check path")
         }
       }

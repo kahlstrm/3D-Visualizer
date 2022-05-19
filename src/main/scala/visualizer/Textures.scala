@@ -3,7 +3,7 @@ package visualizer
 import java.awt.image.BufferedImage
 
 // simple texture class that provides color information
-case class Texture(image: BufferedImage) {
+class Texture(image: BufferedImage) {
   private lazy val texturePixels = image.getData().getDataBuffer()
 
   // returns colors
@@ -25,4 +25,9 @@ case class Texture(image: BufferedImage) {
   }
   private val width = image.getWidth()
   private val height = image.getHeight()
+}
+object Texture{
+  def apply(image:BufferedImage):Texture={
+    if(image!=null) new Texture(image) else null
+  }
 }

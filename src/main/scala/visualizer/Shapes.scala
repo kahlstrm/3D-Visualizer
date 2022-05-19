@@ -118,7 +118,7 @@ class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
       try {
         VisualizerApp.textures(textureString)
       } catch {
-        case e: NoSuchElementException =>
+        case _: NoSuchElementException =>
           println(
             s"No texture loaded called $textureString, loading no texture for $this"
           ); null
@@ -210,7 +210,7 @@ class Floor(val position: Pos, val rotation: Pos, textureString: String = null)
       try {
         VisualizerApp.textures(textureString)
       } catch {
-        case e: NoSuchElementException =>
+        case _: NoSuchElementException =>
           println(
             s"No texture loaded called $textureString, loading no texture for $this"
           ); null
@@ -305,7 +305,7 @@ class Cube(val position: Pos, val rotation: Pos, textureString: String)
       try {
         VisualizerApp.textures(textureString)
       } catch {
-        case e: NoSuchElementException =>
+        case _: NoSuchElementException =>
           println(
             s"No texture loaded called $textureString, loading no texture for $this"
           ); null

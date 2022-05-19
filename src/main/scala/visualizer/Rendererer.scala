@@ -1,6 +1,5 @@
 package visualizer
 import java.awt.Graphics
-import scala.collection.parallel.CollectionConverters._
 import java.awt.Color
 import java.awt.image.BufferedImage
 import visualizer.GfxMath._
@@ -12,9 +11,7 @@ object Rendererer {
     ExecutionContext.global
   private val clippingPlaneTop = screenHeight - VisualizerApp.height - 8
 
-  def createFrameTriangles(player: Pos, camera: Pos)(implicit
-      ec: ExecutionContext
-  ): Vector[Triangle] = {
+  def createFrameTriangles(player: Pos, camera: Pos): Vector[Triangle] = {
 
     val start = misc.timeNanos()
     val worldSpaceTriangles =
@@ -129,8 +126,8 @@ object Rendererer {
     val dx2 = x3 - x1
 
     val dv2 = ty3 - ty1
-    var du2 = tx3 - tx1
-    var dw2 = tz3 - tz1
+    val du2 = tx3 - tx1
+    val dw2 = tz3 - tz1
 
     var xLeft = 0.0f
     var xRight = 0.0f
@@ -214,9 +211,6 @@ object Rendererer {
       du1_step = du1 / Math.abs(dy1).toFloat
       dv1_step = dv1 / Math.abs(dy1).toFloat
       dw1_step = dw1 / Math.abs(dy1).toFloat
-    }
-    if (dy2 != 0) {
-      xRight = dx2 / Math.abs(dy2).toFloat
     }
     if (dy1 != 0) {
       var j = y2
