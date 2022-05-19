@@ -58,9 +58,9 @@ object Input {
             (newVal + Math.PI * 2).toFloat
           } else newVal.toFloat
         }
-        Player.camera.y = (-Math.PI / 2.0 max
+        Player.camera.y = ((-Math.PI / 2.0 +0.00001) max
           (Player.camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
-          Math.PI / 2.0).toFloat
+          (Math.PI / 2.0-0.00001)).toFloat
         val centerOfWindow = area.getLocationOnScreen()
         robot.mouseMove(
           centerOfWindow.x + width / 2,
@@ -71,6 +71,6 @@ object Input {
         previousMouse = Some(point)
       }
     }
-    def mouseDragged(e: MouseEvent): Unit = {}
+    def mouseDragged(e: MouseEvent): Unit = mouseMoved(e)
   }
 }
