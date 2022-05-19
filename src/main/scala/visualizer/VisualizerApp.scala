@@ -23,19 +23,12 @@ object VisualizerApp extends App {
   val wallTexture = "dark_oak_plank"
   val floorTexture = "stonebrick"
   val (walls, floors, playerPos) =
-    FileLoader.loadFile("test.map", wallTexture, floorTexture)
+    FileLoader.loadFile("hello.map", wallTexture, floorTexture) // to test other objects, I suggets using test.map
   val worldObjects = walls ++ floors ++ Vector[Shapes](
-    // Object("dragon.obj", Pos(0, 0, 0), Pos(0, 0, 0), 100) // a .obj with 210729 Triangles, quite big
-    // Object(
-    //   "dragon_low_poly.obj", // a .obj with a "low" trianglecount of 26341, still quite big
-    //   (8200, -100, -1800),
-    //   (0, 0, 0),
-    //   100
-    // ),
-    Object("pallo.obj",
-    (0,0,0),(0,0,0),100)
-    ,
-    Cube((7500, 100, -1800),(0, 0, 0), "dirt"),
+    // Object("dragon.obj",(0, 0, 0), (0, 0, 0), 100), // a .obj with 210729 Triangles, quite big
+    Object("dragon_low_poly.obj", (8200, -100, -1800), (0, 0, 0), 100), // 10x smaller triangle count dragon, still quite big 
+    // Object("REALpallo.obj", (0, 0, 0), (0, 0, 0), 100), // a ball object with 5940 Triangles
+    Cube((7500, 100, -1800), (0, 0, 0), "dirt"),
     Cube((7300, 100, -1800), (0, 0, 0), "brick"),
     Cube((7100, 100, -1800), (0, 0, 0), "stonebrick")
   )
