@@ -1,22 +1,43 @@
 package visualizer
 import java.io._
 import scala.collection.mutable.Buffer
+import scala.io.StdIn.readLine
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 import java.awt.GraphicsEnvironment
 object FileLoader {
-  def loadFile(source: String): (Vector[Shapes], Pos) = {
+  def loadFile(
+      source: String,
+      texture: String = null,
+      floorTexture: String = null
+  ): (Vector[Shapes], Vector[Shapes], Pos) = {
     val fileReader =
       try {
         new FileReader(s"maps/${source}")
       } catch {
         case e: FileNotFoundException => {
           println("map File not found")
-          return (Vector[Shapes](), Pos(0, 0, 0))
+          return (Vector[Shapes](), Vector[Shapes](), Pos(0, 0, 0))
         }
       }
+    // this implementation doesn't work directly in VSCode debug so commented this out,
+    // probably a GUI drop down menu would be better
+    // var texture: String = null
+    // while (texture == null) {
+    //   println("available textures:")
+    //   val texturesWords = VisualizerApp.textures.keySet
+    //   println(texturesWords.mkString("\n"))
+    //   println(
+    //     "select which texture you want to apply to the walls, empty for no texture:"
+    //   )
+    //   val textureRead = readLine()
+    //   if (textureRead == "" || texturesWords.contains(texture))
+    //     texture = textureRead
+    // }
+
     var playerPos = Pos(0, 0, 0)
     val walls = Buffer[Wall]()
+    val floors = Buffer[Floor]()
     val lineReader = new BufferedReader(fileReader)
     var line = ""
     var lineCounter = 0
@@ -28,27 +49,68 @@ object FileLoader {
             case '_' =>
               walls += new Wall(
                 Pos(i * 600.0f, 0, -200.0f + lineCounter * (-600.0f)),
-                Pos(0, 0, 0)
+                Pos(0, 0, 0),
+                texture
               )
+              if (floorTexture != null) {
+                floors += new Floor(
+                  Pos(i * 600.0f, 300, lineCounter * (-600.0f)),
+                  Pos(0, 0, 0),
+                  floorTexture
+                )
+              }
             case '-' =>
               walls += new Wall(
                 Pos(i * 600.0f, 0, 200.0f + lineCounter * (-600.0f)),
-                Pos(0, 0, 0)
+                Pos(0, 0, 0),
+                texture
               )
+              if (floorTexture != null) {
+                floors += new Floor(
+                  Pos(i * 600.0f, 300, lineCounter * (-600.0f)),
+                  Pos(0, 0, 0),
+                  floorTexture
+                )
+              }
             case '|' =>
               walls += new Wall(
                 Pos(i * 600.0f, 0, lineCounter * (-600.0f)),
-                Pos(0, Math.PI / 2, 0)
+                Pos(0, Math.PI / 2, 0),
+                texture
               )
-            case 'S' => playerPos = Pos(i * 600.0f, 0, lineCounter * (-600.0f))
-            case _   =>
+              if (floorTexture != null) {
+                floors += new Floor(
+                  Pos(i * 600.0f, 300, lineCounter * (-600.0f)),
+                  Pos(0, 0, 0),
+                  floorTexture
+                )
+              }
+            case 'S' => {
+              playerPos = Pos(i * 600.0f, 0, lineCounter * (-600.0f))
+              if (floorTexture != null) {
+                floors += new Floor(
+                  Pos(i * 600.0f, 300, lineCounter * (-600.0f)),
+                  Pos(0, 0, 0),
+                  floorTexture
+                )
+              }
+            }
+            case 'F' =>
+              if (floorTexture != null) {
+                floors += new Floor(
+                  Pos(i * 600.0f, 300, lineCounter * (-600.0f)),
+                  Pos(0, 0, 0),
+                  floorTexture
+                )
+              }
+            case _ =>
           }
         }
       })
       lineCounter += 1
     }
     fileReader.close()
-    return (walls.toVector, playerPos)
+    return (walls.toVector, floors.toVector, playerPos)
   }
   def loadTexture(source: String): BufferedImage = {
     val img =

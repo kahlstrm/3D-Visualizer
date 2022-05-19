@@ -4,6 +4,7 @@ import scala.concurrent._
 import java.awt.Color
 import Rendererer._
 import misc._
+import scala.collection.parallel.CollectionConverters._
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants
@@ -12,22 +13,27 @@ object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
 
-  val (walls, playerPos) = FileLoader.loadFile("test.map")
   val textures: Map[String, Texture] = Map(
     "stonebrick" ->
-      Texture(FileLoader.loadTexture("stonebrick.png")),
-    "dirt" -> Texture(FileLoader.loadTexture("minecraft.jpg")),
-    "brick" -> Texture(FileLoader.loadTexture("brick.png"))
+      Texture(FileLoader.loadTexture("stone_bricks.png")),
+    "dirt" -> Texture(FileLoader.loadTexture("dirt.png")),
+    "brick" -> Texture(FileLoader.loadTexture("bricks.png")),
+    "dark_oak_plank" -> Texture(FileLoader.loadTexture("dark_oak_planks.png"))
   )
-  val worldObjects = walls ++ Vector[Shapes](
-    // Object(
-    //   FileLoader.loadObject("dragon.obj"),
-    //   Pos(0, 0, 300),
-    //   Pos(0, 0, 0),
-    //   100
-    // ),
-    Cube(Pos(-100, 0, 0), Pos(0, 0, 0), "dirt"),
-    Cube(Pos(100, 0, 0), Pos(0, 0, 0), "stonebrick")
+  val wallTexture = "dark_oak_plank"
+  val floorTexture = "stonebrick"
+  val (walls, floors, playerPos) =
+    FileLoader.loadFile("test.map", wallTexture, floorTexture)
+  val worldObjects = walls ++ floors ++ Vector[Shapes](
+    Object(FileLoader.loadObject("dragon.obj"), Pos(0, 0, 0), Pos(0, 0, 0), 100)
+    //  Object(
+    //    FileLoader.loadObject("dragon_low_poly.obj"),
+    //    Pos(8200, -100, -1800),
+    //    Pos(0, 0, 0),
+    //    100
+    //  ),
+    // Cube(Pos(100, 0, 0), Pos(0, 0, 0), "dirt"),
+    // Cube(Pos(300,0,0),Pos(0,0,0),"dark_oak_plank")
   )
 
   val frame: JFrame = new JFrame("3d-visualizer")

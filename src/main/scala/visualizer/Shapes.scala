@@ -127,68 +127,161 @@ class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
   val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Pos(0, 0), Pos(0, 2.0f), Pos(3.0f, 2.0f)),
       texture
     ),
     Triangle(
       (poses(0), poses(2), poses(1)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Pos(0, 0), Pos(3.0f, 2.0f), Pos(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(1), poses(2), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Pos(0, 0), Pos(0, 2.0f), Pos(1.0f, 2.0f)),
       texture
     ),
     Triangle(
       (poses(1), poses(3), poses(6)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Pos(0, 0), Pos(1.0f, 2.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(3), poses(4)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Pos(0, 0), Pos(0, 2.0f), Pos(3.0f, 2.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(4), poses(5)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Pos(0, 0), Pos(3.0f, 2.0f), Pos(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(5), poses(4), poses(7)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Pos(0, 0), Pos(0, 2.0f), Pos(1.0f, 2.0f)),
       texture
     ),
     Triangle(
       (poses(5), poses(7), poses(0)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Pos(0, 0), Pos(1.0f, 2.0f), Pos(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(7), poses(4), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(3.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(7), poses(3), poses(2)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Pos(0, 0), Pos(3.0f, 1.0f), Pos(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(5), poses(0)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Pos(0, 0), Pos(0, 2.0f), Pos(1.0f, 2.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(0), poses(1)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Pos(0, 0), Pos(1.0f, 2.0f), Pos(1.0f, 0)),
       texture
     )
   )
   val bottomCornerWorld = poses(0)
   val topCornerWorld = poses(3)
 }
+class Floor(val position: Pos, val rotation: Pos, textureString: String = null)
+    extends Shapes {
+  val poses = Vector[Pos](
+    Pos(-300, -100, -300),
+    Pos(300, -100, -300),
+    Pos(300, 100, -300),
+    Pos(300, 100, 300),
+    Pos(-300, 100, 300),
+    Pos(-300, -100, 300),
+    Pos(300, -100, 300),
+    Pos(-300, 100, -300)
+  ).map(pos =>
+    pos
+      .rotate(rotation)
+      .translate(position)
+  )
+  val texture =
+    if (textureString != null)
+      try {
+        VisualizerApp.textures(textureString)
+      } catch {
+        case e: NoSuchElementException =>
+          println(
+            s"No texture loaded called $textureString, loading no texture for $this"
+          ); null
+      }
+    else null
+  val triangles = Vector[Triangle](
+    Triangle(
+      (poses(0), poses(7), poses(2)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(3.0f, 1.0f)),
+      texture
+    ),
+    Triangle(
+      (poses(0), poses(2), poses(1)),
+      (Pos(0, 0), Pos(3.0f, 1.0f), Pos(3.0f, 0)),
+      texture
+    ),
+    Triangle(
+      (poses(1), poses(2), poses(3)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(3.0f, 1.0f)),
+      texture
+    ),
+    Triangle(
+      (poses(1), poses(3), poses(6)),
+      (Pos(0, 0), Pos(3.0f, 1.0f), Pos(3.0f, 0)),
+      texture
+    ),
+    Triangle(
+      (poses(6), poses(3), poses(4)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(3.0f, 1.0f)),
+      texture
+    ),
+    Triangle(
+      (poses(6), poses(4), poses(5)),
+      (Pos(0, 0), Pos(3.0f, 1.0f), Pos(3.0f, 0)),
+      texture
+    ),
+    Triangle(
+      (poses(5), poses(4), poses(7)),
+      (Pos(0, 0), Pos(0, 1.0f), Pos(3.0f, 1.0f)),
+      texture
+    ),
+    Triangle(
+      (poses(5), poses(7), poses(0)),
+      (Pos(0, 0), Pos(3.0f, 1.0f), Pos(3.0f, 0)),
+      texture
+    ),
+    Triangle(
+      (poses(7), poses(4), poses(3)),
+      (Pos(0, 0), Pos(0, 3.0f), Pos(3.0f, 3.0f)),
+      texture
+    ),
+    Triangle(
+      (poses(7), poses(3), poses(2)),
+      (Pos(0, 0), Pos(3.0f, 3.0f), Pos(3.0f, 0)),
+      texture
+    ),
+    Triangle(
+      (poses(6), poses(5), poses(0)),
+      (Pos(0, 0), Pos(0, 3.0f), Pos(3.0f, 3.0f)),
+      texture
+    ),
+    Triangle(
+      (poses(6), poses(0), poses(1)),
+      (Pos(0, 0), Pos(3.0f, 3.0f), Pos(3.0f, 0)),
+      texture
+    )
+  )
+  val bottomCornerWorld = poses(0)
+  val topCornerWorld = poses(3)
+}
+
 
 class Cube(val position: Pos, val rotation: Pos, textureString: String)
     extends Shapes {
