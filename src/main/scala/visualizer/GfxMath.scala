@@ -5,7 +5,7 @@ object GfxMath {
   val screenWidth = VisualizerApp.realWidth
   val screenHeight = VisualizerApp.realHeight
   val fovinRadians = VisualizerApp.fov * math.Pi / 180.0
-  val zNear = ((screenWidth / 2.0) / tan(fovinRadians / 2.0)).toFloat
+  val zNear = ((VisualizerApp.width / 2.0) / tan(fovinRadians / 2.0)).toFloat
   val zPlane = Pos(0, 0, 1)
   val zPlaneNormal = Pos(0, 0, 1)
 
