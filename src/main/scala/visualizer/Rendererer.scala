@@ -35,7 +35,7 @@ object Rendererer {
   // THEN once in "screen space" clip against all the screen edges
   def generateViewTriangles(triangles: ParVector[Triangle]) = {
 
-    val newTriangles = triangles.par
+    val newTriangles = triangles
       .flatMap(tri => {
         val clippedTrianglesWithZ = calcClipping(tri, zPlane, zPlaneNormal)
         clippedTrianglesWithZ
