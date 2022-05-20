@@ -2,11 +2,7 @@ package visualizer
 
 object Player {
   def pos = hiddenPos + Vec3d(0, 0, 0)
-  val camera = Camera
   private var hiddenPos = VisualizerApp.playerPos
-  def updatePos(pos: Vec3d) = {
-    hiddenPos = pos
-  }
   private var time = misc.timeNanos()
   def move(collision: Boolean): Unit = {
     val movementSpeed =

@@ -114,7 +114,7 @@ object VisualizerApp extends App {
     g.setColor(Color.WHITE)
     g.drawString("WASD to move, ESC to close, CTRL for speed", 50, 60)
     g.drawString(Player.pos.toString(), 50, 80)
-    g.drawString(Player.camera.toString(), 50, 100)
+    g.drawString(Camera.toString(), 50, 100)
     g.drawString(
       f"frametime: $frametime%.3f s, drawtime $othertime%.3f s",
       50,

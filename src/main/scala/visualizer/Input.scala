@@ -51,7 +51,7 @@ object Input {
         val prev = previousMouse.get
         val newCameraX = {
           val newVal =
-            (Player.camera.x + (prev.x - point.x).toDouble / 500) % (2 * math.Pi)
+            (Camera.x + (prev.x - point.x).toDouble / 500) % (2 * math.Pi)
           if (newVal > Math.PI) {
             (newVal - Math.PI * 2).toFloat
           } else if (newVal < -Math.PI) {
@@ -59,7 +59,7 @@ object Input {
           } else newVal.toFloat
         }
         val newCameraY = ((-Math.PI / 2.0 +0.00001) max
-          (Player.camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
+          (Camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
           (Math.PI / 2.0-0.00001)).toFloat
         Camera.update(Vec3d(newCameraX,newCameraY,Camera.z))
         val centerOfWindow = area.getLocationOnScreen()
