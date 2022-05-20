@@ -67,8 +67,8 @@ class Pos(
   }
   def center(): Pos = {
     Pos(
-      this.x + VisualizerApp.width / 2,
-      this.y + VisualizerApp.height / 2,
+      this.x + VisualizerApp.realWidth / 2,
+      this.y + VisualizerApp.realHeight / 2,
       this.z
     )
   }
