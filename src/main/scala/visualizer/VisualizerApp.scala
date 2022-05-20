@@ -61,7 +61,7 @@ object VisualizerApp extends App {
   frame.setLocationRelativeTo(null)
   frame.setVisible(true)
   frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
-  frame.createBufferStrategy(2)
+  frame.createBufferStrategy(3)
   frame.setIgnoreRepaint(true)
   val bs = frame.getBufferStrategy()
   val gc = frame.getGraphicsConfiguration()
