@@ -55,7 +55,7 @@ object Rendererer {
                 n.color,
                 n.texture
               )
-            if (newTri.color == null) newTri.color = {
+            if ( newTri.texture==null && newTri.color == null) newTri.color = {
               val col = getColor(newTri)
               new Color(col, col, col)
             }
