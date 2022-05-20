@@ -133,5 +133,5 @@ object VisualizerApp extends App {
     bs.show()
     VisualizerApp.frametime = time
   }
-  runGameNow
+  runGameNow()
 }
