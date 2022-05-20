@@ -3,8 +3,8 @@ package visualizer
 import java.awt.Color
 import java.awt.Graphics
 class Triangle(
-    val poses: Array[Pos],
-    val texPoses: Array[Pos] = null,
+    val poses: Array[Vec3d],
+    val texPoses: Array[Vec3d] = null,
     var color: Color = null,
     val texture: Texture = null
 ) {
@@ -21,13 +21,13 @@ class Triangle(
   }
 
   // calculate surface Normal https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
-  def getNormal(): Pos = {
-    val a = Pos(
+  def getNormal(): Vec3d = {
+    val a = Vec3d(
       this.pos2.x - this.pos1.x,
       this.pos2.y - this.pos1.y,
       this.pos2.z - this.pos1.z
     )
-    val b = Pos(
+    val b = Vec3d(
       this.pos3.x - this.pos1.x,
       this.pos3.y - this.pos1.y,
       this.pos3.z - this.pos1.z
@@ -35,9 +35,9 @@ class Triangle(
     val normalX = a.y * b.z - a.z * b.y
     val normalY = a.z * b.x - a.x * b.z
     val normalZ = a.x * b.y - a.y * b.x
-    Pos(normalX, normalY, normalZ)
+    Vec3d(normalX, normalY, normalZ)
   }
-  def worldSpace(player:Pos,camera:Pos): Triangle = {
+  def worldSpace(player:Vec3d,camera:Vec3d): Triangle = {
     Triangle(
       this.poses.map(n =>
         n
@@ -107,8 +107,8 @@ class Triangle(
 
 object Triangle {
   def apply(
-      poses: (Pos, Pos, Pos),
-      texPoses: (Pos, Pos, Pos),
+      poses: (Vec3d, Vec3d, Vec3d),
+      texPoses: (Vec3d, Vec3d, Vec3d),
       texture: Texture
   ) = {
     new Triangle(
@@ -117,21 +117,21 @@ object Triangle {
       texture = texture
     )
   }
-  def apply(poses: (Pos, Pos, Pos), texPoses: (Pos, Pos, Pos)) = {
+  def apply(poses: (Vec3d, Vec3d, Vec3d), texPoses: (Vec3d, Vec3d, Vec3d)) = {
     new Triangle(
       Array(poses._1, poses._2, poses._3),
       texPoses = Array(texPoses._1, texPoses._2, texPoses._3)
     )
   }
-  def apply(pos1: Pos, pos2: Pos, pos3: Pos) = {
+  def apply(pos1: Vec3d, pos2: Vec3d, pos3: Vec3d) = {
     new Triangle(
       Array(pos1, pos2, pos3),
-      Array(Pos(1, 1), Pos(1, 0), Pos(0, 0))
+      Array(Vec3d(1, 1), Vec3d(1, 0), Vec3d(0, 0))
     )
   }
   def apply(
-      positions: Array[Pos],
-      texPositions: Array[Pos],
+      positions: Array[Vec3d],
+      texPositions: Array[Vec3d],
       col: Color,
       texture: Texture
   ) = {
@@ -143,8 +143,8 @@ object Triangle {
     )
   }
   def apply(
-      positions: Array[Pos],
-      texPositions: Array[Pos],
+      positions: Array[Vec3d],
+      texPositions: Array[Vec3d],
       texture: Texture
   ) = {
     new Triangle(

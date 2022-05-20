@@ -6,17 +6,17 @@ object GfxMath {
   val screenHeight = VisualizerApp.realHeight
   val fovinRadians = VisualizerApp.fov * math.Pi / 180.0
   val zNear = ((VisualizerApp.realWidth / 2.0) / tan(fovinRadians / 2.0)).toFloat
-  val zPlane = Pos(0, 0, 1)
-  val zPlaneNormal = Pos(0, 0, 1)
+  val zPlane = Vec3d(0, 0, 1)
+  val zPlaneNormal = Vec3d(0, 0, 1)
 
 
   def getColor(tri: Triangle): Int = {
     val normal = tri.getNormal().unit()
     val avgPos = (tri.pos1 + tri.pos2 + tri.pos3) / 3
     // val playerPos =
-    // Pos(VisualizerApp.width / 2, VisualizerApp.height / 2, 0)
+    // Vec3d(VisualizerApp.width / 2, VisualizerApp.height / 2, 0)
     // val r = (avgPos).distance(playerPos) // "flashlight"
-    val cosBetweenTriandZ = normal.dotProduct(Pos(0, 0, -1))
+    val cosBetweenTriandZ = normal.dotProduct(Vec3d(0, 0, -1))
     // val rSquaredAndConstant = (Math.pow(r, 2) / 10000 + 1)
     val distanceFromZPlane = (avgPos).z / 2000 + 1 // "ambient light"
     (((225 / distanceFromZPlane).toInt + 30) * Math
@@ -25,11 +25,11 @@ object GfxMath {
 
   // point intersecting the a plane and the line between pos1 and pos2
   def intersectPointWithPlane(
-      pos1: Pos,
-      pos2: Pos,
-      plane: Pos,
-      planeNormal: Pos
-  ): (Pos, Float) = {
+      pos1: Vec3d,
+      pos2: Vec3d,
+      plane: Vec3d,
+      planeNormal: Vec3d
+  ): (Vec3d, Float) = {
     val planeNormalized = planeNormal.unit()
     val u = pos2 + (-pos1)
     val dot = planeNormalized.dotProduct(u)
@@ -38,12 +38,12 @@ object GfxMath {
     val mul = (u * factor)
     return (mul + pos1, factor)
   }
-  def distanceFromPlane(pos: Pos, plane: Pos, planeNormalUnit: Pos) = {
+  def distanceFromPlane(pos: Vec3d, plane: Vec3d, planeNormalUnit: Vec3d) = {
     (planeNormalUnit.x * pos.x + planeNormalUnit.y * pos.y + planeNormalUnit.z * pos.z - planeNormalUnit
       .dotProduct(plane));
   }
-  def newTexPos(texPosOut: Pos, texPosIn: Pos, fac: Float): Pos = {
-    Pos(
+  def newTexPos(texPosOut: Vec3d, texPosIn: Vec3d, fac: Float): Vec3d = {
+    Vec3d(
       (1 - fac) * (texPosOut.x - texPosIn.x) + texPosIn.x,
       (1 - fac) * (texPosOut.y - texPosIn.y) + texPosIn.y,
       (1 - fac) * (texPosOut.z - texPosIn.z) + texPosIn.z
@@ -52,8 +52,8 @@ object GfxMath {
   // heavy spaghetti code to clip triangles so only triangles on screen show
   def calcClipping(
       tri: Triangle,
-      plane: Pos,
-      planeNormal: Pos
+      plane: Vec3d,
+      planeNormal: Vec3d
   ): Vector[Triangle] = {
     val planeNormalUnit = planeNormal.unit()
 

@@ -3,16 +3,16 @@ import scala.collection.parallel.CollectionConverters._
 
 
 trait Shapes {
-  val position: Pos
-  val rotation: Pos
-  val poses: Vector[Pos]
+  val position: Vec3d
+  val rotation: Vec3d
+  val poses: Vector[Vec3d]
   // def worldSpacePos(player: Pos) = {
   //   poses.par.map(pos =>
   //     pos
   //       .translate(-player)
   //   )
   // }
-  def worldSpaceTris(player: Pos, camera: Pos) = {
+  def worldSpaceTris(player: Vec3d, camera: Vec3d) = {
     triangles.par.map(tri => {
       Triangle(
         tri.poses.map(n =>
@@ -29,10 +29,10 @@ trait Shapes {
     })
   }
   val triangles: Vector[Triangle]
-  val bottomCornerWorld: Pos
-  val topCornerWorld: Pos
+  val bottomCornerWorld: Vec3d
+  val topCornerWorld: Vec3d
 
-  def isInside(pos: Pos) = {
+  def isInside(pos: Vec3d) = {
     def isBetween(a: Double, b: Double, c: Double) =
       Math.min(a, b) < c+10 && Math.max(a, b) > c-10
     isBetween(bottomCornerWorld.x, topCornerWorld.x, pos.x) &&
@@ -44,9 +44,9 @@ trait Shapes {
 
 
 class Object(
-    objInfo: (Vector[Pos], Vector[Triangle]),
-    val position: Pos,
-    val rotation: Pos,
+    objInfo: (Vector[Vec3d], Vector[Triangle]),
+    val position: Vec3d,
+    val rotation: Vec3d,
     scale: Float
 ) extends Shapes {
   val poses = objInfo._1.map(pos =>
@@ -65,8 +65,8 @@ class Object(
       tri.texture
     )
   )
-  val (bottomCornerWorld, topCornerWorld): (Pos, Pos) = {
-    val firstPos = poses.headOption.getOrElse(Pos(0, 0, 0))
+  val (bottomCornerWorld, topCornerWorld): (Vec3d, Vec3d) = {
+    val firstPos = poses.headOption.getOrElse(Vec3d(0, 0, 0))
     var minX = firstPos.x
     var minY = firstPos.y
     var minZ = firstPos.z
@@ -83,8 +83,8 @@ class Object(
       maxZ = Math.max(pos.z, maxZ)
     })
     (
-      Pos(minX, minY, minZ),
-      Pos(maxX, maxY, maxZ)
+      Vec3d(minX, minY, minZ),
+      Vec3d(maxX, maxY, maxZ)
     )
   }
   val texture: Texture = null
@@ -95,19 +95,19 @@ object Object {
       pos: (Float,Float,Float),
       rot: (Float,Float,Float),
       scale: Float
-  ) = new Object(FileLoader.loadObject(objFile), Pos(pos), Pos(rot), scale)
+  ) = new Object(FileLoader.loadObject(objFile), Vec3d(pos), Vec3d(rot), scale)
 }
-class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
+class Wall(val position: Vec3d, val rotation: Vec3d, textureString: String = null)
     extends Shapes {
-  val poses = Vector[Pos](
-    Pos(-300, -200, -100),
-    Pos(300, -200, -100),
-    Pos(300, 200, -100),
-    Pos(300, 200, 100),
-    Pos(-300, 200, 100),
-    Pos(-300, -200, 100),
-    Pos(300, -200, 100),
-    Pos(-300, 200, -100)
+  val poses = Vector[Vec3d](
+    Vec3d(-300, -200, -100),
+    Vec3d(300, -200, -100),
+    Vec3d(300, 200, -100),
+    Vec3d(300, 200, 100),
+    Vec3d(-300, 200, 100),
+    Vec3d(-300, -200, 100),
+    Vec3d(300, -200, 100),
+    Vec3d(-300, 200, -100)
   ).map(pos =>
     pos
       .rotate(rotation)
@@ -127,62 +127,62 @@ class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
   val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
-      (Pos(0, 0), Pos(0, 2.0f), Pos(3.0f, 2.0f)),
+      (Vec3d(0, 0), Vec3d(0, 2.0f), Vec3d(3.0f, 2.0f)),
       texture
     ),
     Triangle(
       (poses(0), poses(2), poses(1)),
-      (Pos(0, 0), Pos(3.0f, 2.0f), Pos(3.0f, 0)),
+      (Vec3d(0, 0), Vec3d(3.0f, 2.0f), Vec3d(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(1), poses(2), poses(3)),
-      (Pos(0, 0), Pos(0, 2.0f), Pos(1.0f, 2.0f)),
+      (Vec3d(0, 0), Vec3d(0, 2.0f), Vec3d(1.0f, 2.0f)),
       texture
     ),
     Triangle(
       (poses(1), poses(3), poses(6)),
-      (Pos(0, 0), Pos(1.0f, 2.0f), Pos(1.0f, 0)),
+      (Vec3d(0, 0), Vec3d(1.0f, 2.0f), Vec3d(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(3), poses(4)),
-      (Pos(0, 0), Pos(0, 2.0f), Pos(3.0f, 2.0f)),
+      (Vec3d(0, 0), Vec3d(0, 2.0f), Vec3d(3.0f, 2.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(4), poses(5)),
-      (Pos(0, 0), Pos(3.0f, 2.0f), Pos(3.0f, 0)),
+      (Vec3d(0, 0), Vec3d(3.0f, 2.0f), Vec3d(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(5), poses(4), poses(7)),
-      (Pos(0, 0), Pos(0, 2.0f), Pos(1.0f, 2.0f)),
+      (Vec3d(0, 0), Vec3d(0, 2.0f), Vec3d(1.0f, 2.0f)),
       texture
     ),
     Triangle(
       (poses(5), poses(7), poses(0)),
-      (Pos(0, 0), Pos(1.0f, 2.0f), Pos(1.0f, 0)),
+      (Vec3d(0, 0), Vec3d(1.0f, 2.0f), Vec3d(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(7), poses(4), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(3.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(3.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(7), poses(3), poses(2)),
-      (Pos(0, 0), Pos(3.0f, 1.0f), Pos(3.0f, 0)),
+      (Vec3d(0, 0), Vec3d(3.0f, 1.0f), Vec3d(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(5), poses(0)),
-      (Pos(0, 0), Pos(0, 2.0f), Pos(1.0f, 2.0f)),
+      (Vec3d(0, 0), Vec3d(0, 2.0f), Vec3d(1.0f, 2.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(0), poses(1)),
-      (Pos(0, 0), Pos(1.0f, 2.0f), Pos(1.0f, 0)),
+      (Vec3d(0, 0), Vec3d(1.0f, 2.0f), Vec3d(1.0f, 0)),
       texture
     )
   )
@@ -191,19 +191,19 @@ class Wall(val position: Pos, val rotation: Pos, textureString: String = null)
 }
 object Wall{
   def apply(pos:(Float,Float,Float), rotation:(Float,Float,Float), textureString: String) =
-    new Wall(Pos(pos), Pos(rotation), textureString)
+    new Wall(Vec3d(pos), Vec3d(rotation), textureString)
 }
-class Floor(val position: Pos, val rotation: Pos, textureString: String = null)
+class Floor(val position: Vec3d, val rotation: Vec3d, textureString: String = null)
     extends Shapes {
-  val poses = Vector[Pos](
-    Pos(-300, -100, -300),
-    Pos(300, -100, -300),
-    Pos(300, 100, -300),
-    Pos(300, 100, 300),
-    Pos(-300, 100, 300),
-    Pos(-300, -100, 300),
-    Pos(300, -100, 300),
-    Pos(-300, 100, -300)
+  val poses = Vector[Vec3d](
+    Vec3d(-300, -100, -300),
+    Vec3d(300, -100, -300),
+    Vec3d(300, 100, -300),
+    Vec3d(300, 100, 300),
+    Vec3d(-300, 100, 300),
+    Vec3d(-300, -100, 300),
+    Vec3d(300, -100, 300),
+    Vec3d(-300, 100, -300)
   ).map(pos =>
     pos
       .rotate(rotation)
@@ -223,62 +223,62 @@ class Floor(val position: Pos, val rotation: Pos, textureString: String = null)
   val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(3.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(3.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(0), poses(2), poses(1)),
-      (Pos(0, 0), Pos(3.0f, 1.0f), Pos(3.0f, 0)),
+      (Vec3d(0, 0), Vec3d(3.0f, 1.0f), Vec3d(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(1), poses(2), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(3.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(3.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(1), poses(3), poses(6)),
-      (Pos(0, 0), Pos(3.0f, 1.0f), Pos(3.0f, 0)),
+      (Vec3d(0, 0), Vec3d(3.0f, 1.0f), Vec3d(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(3), poses(4)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(3.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(3.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(4), poses(5)),
-      (Pos(0, 0), Pos(3.0f, 1.0f), Pos(3.0f, 0)),
+      (Vec3d(0, 0), Vec3d(3.0f, 1.0f), Vec3d(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(5), poses(4), poses(7)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(3.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(3.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(5), poses(7), poses(0)),
-      (Pos(0, 0), Pos(3.0f, 1.0f), Pos(3.0f, 0)),
+      (Vec3d(0, 0), Vec3d(3.0f, 1.0f), Vec3d(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(7), poses(4), poses(3)),
-      (Pos(0, 0), Pos(0, 3.0f), Pos(3.0f, 3.0f)),
+      (Vec3d(0, 0), Vec3d(0, 3.0f), Vec3d(3.0f, 3.0f)),
       texture
     ),
     Triangle(
       (poses(7), poses(3), poses(2)),
-      (Pos(0, 0), Pos(3.0f, 3.0f), Pos(3.0f, 0)),
+      (Vec3d(0, 0), Vec3d(3.0f, 3.0f), Vec3d(3.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(5), poses(0)),
-      (Pos(0, 0), Pos(0, 3.0f), Pos(3.0f, 3.0f)),
+      (Vec3d(0, 0), Vec3d(0, 3.0f), Vec3d(3.0f, 3.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(0), poses(1)),
-      (Pos(0, 0), Pos(3.0f, 3.0f), Pos(3.0f, 0)),
+      (Vec3d(0, 0), Vec3d(3.0f, 3.0f), Vec3d(3.0f, 0)),
       texture
     )
   )
@@ -287,21 +287,21 @@ class Floor(val position: Pos, val rotation: Pos, textureString: String = null)
 }
 object Floor{
   def apply(pos:(Float,Float,Float), rotation:(Float,Float,Float), textureString: String) =
-    new Floor(Pos(pos), Pos(rotation), textureString)
+    new Floor(Vec3d(pos), Vec3d(rotation), textureString)
 }
 
-class Cube(val position: Pos, val rotation: Pos, textureString: String)
+class Cube(val position: Vec3d, val rotation: Vec3d, textureString: String)
     extends Shapes {
 
-  val poses = Vector[Pos](
-    Pos(-100, -100, -100),
-    Pos(100, -100, -100),
-    Pos(100, 100, -100),
-    Pos(100, 100, 100),
-    Pos(-100, 100, 100),
-    Pos(-100, -100, 100),
-    Pos(100, -100, 100),
-    Pos(-100, 100, -100)
+  val poses = Vector[Vec3d](
+    Vec3d(-100, -100, -100),
+    Vec3d(100, -100, -100),
+    Vec3d(100, 100, -100),
+    Vec3d(100, 100, 100),
+    Vec3d(-100, 100, 100),
+    Vec3d(-100, -100, 100),
+    Vec3d(100, -100, 100),
+    Vec3d(-100, 100, -100)
   ).map(pos =>
     pos
       .rotate(rotation)
@@ -321,62 +321,62 @@ class Cube(val position: Pos, val rotation: Pos, textureString: String)
   val triangles = Vector[Triangle](
     Triangle(
       (poses(0), poses(7), poses(2)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(0), poses(2), poses(1)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Vec3d(0, 0), Vec3d(1.0f, 1.0f), Vec3d(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(1), poses(2), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(1), poses(3), poses(6)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Vec3d(0, 0), Vec3d(1.0f, 1.0f), Vec3d(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(3), poses(4)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(4), poses(5)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Vec3d(0, 0), Vec3d(1.0f, 1.0f), Vec3d(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(5), poses(4), poses(7)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(5), poses(7), poses(0)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Vec3d(0, 0), Vec3d(1.0f, 1.0f), Vec3d(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(7), poses(4), poses(3)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(7), poses(3), poses(2)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Vec3d(0, 0), Vec3d(1.0f, 1.0f), Vec3d(1.0f, 0)),
       texture
     ),
     Triangle(
       (poses(6), poses(5), poses(0)),
-      (Pos(0, 0), Pos(0, 1.0f), Pos(1.0f, 1.0f)),
+      (Vec3d(0, 0), Vec3d(0, 1.0f), Vec3d(1.0f, 1.0f)),
       texture
     ),
     Triangle(
       (poses(6), poses(0), poses(1)),
-      (Pos(0, 0), Pos(1.0f, 1.0f), Pos(1.0f, 0)),
+      (Vec3d(0, 0), Vec3d(1.0f, 1.0f), Vec3d(1.0f, 0)),
       texture
     )
   )
@@ -390,6 +390,6 @@ class Cube(val position: Pos, val rotation: Pos, textureString: String)
 
 object Cube {
   def apply(pos:(Float,Float,Float), rotation:(Float,Float,Float), textureString: String) =
-    new Cube(Pos(pos), Pos(rotation), textureString)
+    new Cube(Vec3d(pos), Vec3d(rotation), textureString)
 }
 

@@ -1,10 +1,10 @@
 package visualizer
 
 object Player {
-  def pos = hiddenPos + Pos(0, 0, 0)
+  def pos = hiddenPos + Vec3d(0, 0, 0)
   val camera = Camera
   private var hiddenPos = VisualizerApp.playerPos
-  def updatePos(pos: Pos) = {
+  def updatePos(pos: Vec3d) = {
     hiddenPos = pos
   }
   private var time = misc.timeNanos()
@@ -17,9 +17,9 @@ object Player {
     var newPos = pos
     val forwardMove = Camera.forwardVector.dropY().unit()
     val rightMove = Camera.rightVector
-    val upMove = Pos(0, 1, 0)
-    var moveVecXZ = Pos(0, 0, 0)
-    var moveVecY = Pos(0, 0, 0)
+    val upMove = Vec3d(0, 1, 0)
+    var moveVecXZ = Vec3d(0, 0, 0)
+    var moveVecY = Vec3d(0, 0, 0)
     if (moveForward) {
       moveVecXZ += (forwardMove)
     }

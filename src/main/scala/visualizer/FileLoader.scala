@@ -11,14 +11,14 @@ object FileLoader {
       source: String,
       textureString: String = null,
       floorTexture: String = null
-  ): (Vector[Shapes], Vector[Shapes], Pos) = {
+  ): (Vector[Shapes], Vector[Shapes], Vec3d) = {
     val fileReader =
       try {
         new FileReader(s"maps/${source}")
       } catch {
         case _: FileNotFoundException => {
           println("map File not found")
-          return (Vector[Shapes](), Vector[Shapes](), Pos(0, 0, 0))
+          return (Vector[Shapes](), Vector[Shapes](), Vec3d(0, 0, 0))
         }
       }
     // this implementation doesn't work directly in VSCode debug so commented this out,
@@ -36,7 +36,7 @@ object FileLoader {
         texture = textureRead
     }
 
-    var playerPos = Pos(0, 0, 0)
+    var playerPos = Vec3d(0, 0, 0)
     val walls = Buffer[Wall]()
     val floors = Buffer[Floor]()
     val lineReader = new BufferedReader(fileReader)
@@ -87,7 +87,7 @@ object FileLoader {
                 )
               }
             case 'S' => {
-              playerPos = Pos(i * 600.0f, 0, lineCounter * (-600.0f))
+              playerPos = Vec3d(i * 600.0f, 0, lineCounter * (-600.0f))
               if (floorTexture != null) {
                 floors += Floor(
                   (i * 600.0f, 300, lineCounter * (-600.0f)),
@@ -136,12 +136,12 @@ object FileLoader {
     }
 
   }
-  def loadObject(source: String): (Vector[Pos], Vector[Triangle]) = {
+  def loadObject(source: String): (Vector[Vec3d], Vector[Triangle]) = {
     val start = System.currentTimeMillis()
       try {
         val fileReader =
           new FileReader(s"objects/${source}")
-        val poses = Buffer[Pos]()
+        val poses = Buffer[Vec3d]()
         val tris = Buffer[Vector[Int]]()
         val lineReader = new BufferedReader(fileReader)
         var line = ""
@@ -152,7 +152,7 @@ object FileLoader {
               val rest = line.drop(2).strip
               val vectorCoords = rest.split(" ").map(_.toDouble)
               val newPos =
-                Pos(vectorCoords(0), vectorCoords(1), vectorCoords(2))
+                Vec3d(vectorCoords(0), vectorCoords(1), vectorCoords(2))
               poses += newPos
             }
             case "f" => {
@@ -184,7 +184,7 @@ object FileLoader {
       } catch {
         case _: FileNotFoundException => {
           println(s"Object File ${source} not found, check path")
-          (Vector[Pos](), Vector[Triangle]())
+          (Vector[Vec3d](), Vector[Triangle]())
         }
       }
   }
