@@ -112,7 +112,7 @@ object VisualizerApp extends App {
     g.setColor(Color.GRAY)
     g.fillRect(40, 40, 290, 130)
     g.setColor(Color.WHITE)
-    g.drawString("WASD to move, ESCAPE to close", 50, 60)
+    g.drawString("WASD to move, ESC to close, CTRL for speed", 50, 60)
     g.drawString(Player.pos.toString(), 50, 80)
     g.drawString(Player.camera.toString(), 50, 100)
     g.drawString(
