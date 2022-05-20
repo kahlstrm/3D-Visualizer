@@ -15,8 +15,7 @@ object Input {
       val keyPress = new KeyPressed(e)
       keyPress.key match {
         case Key.Escape =>
-          println("bye"); running = false; gameThread.join();
-          frame.dispose()
+          println("bye"); running = false;
         case Key.W       => Player.moveForward = true
         case Key.S       => Player.moveBackward = true
         case Key.A       => Player.moveLeft = true

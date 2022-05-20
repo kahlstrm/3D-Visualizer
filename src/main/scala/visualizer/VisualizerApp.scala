@@ -82,6 +82,7 @@ object VisualizerApp extends App {
       render()
       frames += 1;
     }
+	frame.dispose()
   }
   private def update() = {
     Player.move(collisionEnabled)
@@ -132,14 +133,5 @@ object VisualizerApp extends App {
     bs.show()
     VisualizerApp.frametime = time
   }
-  val gameThread = new Thread(new Runnable {
-    def run(): Unit = {
-      try {
-        VisualizerApp.runGameNow()
-      } catch {
-        case a: Exception => throw a
-      }
-    }
-  })
-  gameThread.start()
+  runGameNow
 }
