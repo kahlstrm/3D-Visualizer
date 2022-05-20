@@ -1,11 +1,16 @@
 package visualizer
 import Math._
 class Vec3d(
-    var x: Float,
-    var y: Float,
-    var z: Float
+    xCoord: Float,
+    yCoord: Float,
+    zCoord: Float
 ) {
-
+  private var hiddenX=xCoord
+  private var hiddenY=yCoord
+  private var hiddenZ=zCoord
+  def x=hiddenX
+  def y=hiddenY
+  def z=hiddenZ
   def distance(that: Vec3d) = {
     math.sqrt(
       math.pow(that.x - this.x, 2) + math.pow(that.y - this.y, 2) + math.pow(
@@ -17,9 +22,9 @@ class Vec3d(
   def length = this.distance(Vec3d(0, 0, 0))
 
   def update(that: Vec3d): Unit = {
-    this.x = that.x
-    this.y = that.y
-    this.z = that.z
+    hiddenX = that.x
+    hiddenY = that.y
+    hiddenZ = that.z
   }
   def unary_- : Vec3d = {
     Vec3d(
@@ -173,6 +178,8 @@ class Vec3d(
 object Camera extends Vec3d(0, 0, 0) {
   def pos() = this + Vec3d(0, 0, 0)
   // forwardVector for camera movement
+
+  
   def forwardVector = {
     Vec3d(
       -cos(y) * sin(x),

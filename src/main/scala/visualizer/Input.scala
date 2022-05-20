@@ -49,7 +49,7 @@ object Input {
       val point = e.getPoint()
       if (previousMouse.isDefined && area.isFocusOwner()) {
         val prev = previousMouse.get
-        Player.camera.x = {
+        val newCameraX = {
           val newVal =
             (Player.camera.x + (prev.x - point.x).toDouble / 500) % (2 * math.Pi)
           if (newVal > Math.PI) {
@@ -58,9 +58,10 @@ object Input {
             (newVal + Math.PI * 2).toFloat
           } else newVal.toFloat
         }
-        Player.camera.y = ((-Math.PI / 2.0 +0.00001) max
+        val newCameraY = ((-Math.PI / 2.0 +0.00001) max
           (Player.camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
           (Math.PI / 2.0-0.00001)).toFloat
+        Camera.update(Vec3d(newCameraX,newCameraY,Camera.z))
         val centerOfWindow = area.getLocationOnScreen()
         robot.mouseMove(
           centerOfWindow.x + width / 2,
