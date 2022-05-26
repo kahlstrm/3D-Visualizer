@@ -21,18 +21,18 @@ object VisualizerApp extends App {
   )
   val wallTexture = "dark_oak_plank"
   val floorTexture = "stonebrick"
-  val (walls, floors, playerPos) = FileLoader.loadFile("hello.map", wallTexture, floorTexture) // to test other objects, I suggest using test.map
+  val (walls, floors, playerPos) = FileLoader.loadFile("hello.map",wallTexture,floorTexture) // to test other objects, I suggest using test.map
   val worldObjects = walls ++ floors ++ Vector[Shapes](
     // Object("dragon.obj",(0, 0, 0), (0, 0, 0), 100),                                         // a .obj with 210729 Triangles, quite big
-     Object("dragon_low_poly.obj", (8200, -100, -1800), (0, 0, 0), 100),                        // 10x smaller triangle count dragon, still quite big 
-    //Object("REALpallo.obj", (8200, -100, -1800), (0, 0, 0), 100),                                     // a ball object with 5940 Triangles
+    // Object("dragon_low_poly.obj", (8200, -100, -1800), (0, 0, 0), 100),                        // 10x smaller triangle count dragon, still quite big 
+    // Object("REALpallo.obj", (8200, -100, -1800), (0, 0, 0), 100),                                     // a ball object with 5940 Triangles
     Cube((7500, 100, -1800), (0, 0, 0), "dirt"),
     Cube((7300, 100, -1800), (0, 0, 0), "brick"),
     Cube((7100, 100, -1800), (0, 0, 0), "stonebrick")
   )
   val renderDistance = 20000
-  val width = 1280
-  val height = 720
+  val width = 1600
+  val height = 900
   val fov = 90
   
   
@@ -61,7 +61,7 @@ object VisualizerApp extends App {
   frame.setLocationRelativeTo(null)
   frame.setVisible(true)
   frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
-  frame.createBufferStrategy(3)
+  frame.createBufferStrategy(2)
   frame.setIgnoreRepaint(true)
   val bs = frame.getBufferStrategy()
   val gc = frame.getGraphicsConfiguration()
@@ -133,5 +133,10 @@ object VisualizerApp extends App {
     bs.show()
     VisualizerApp.frametime = time
   }
-  runGameNow()
+  val thread = new Thread(new Runnable{
+
+   def run =runGameNow()
+
+  })
+  thread.start()
 }

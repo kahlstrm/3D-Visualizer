@@ -14,6 +14,7 @@ object Rendererer {
 
   def createFrameTriangles(player: Vec3d, camera: Vec3d): Vector[Triangle] = {
 
+    // in parallel
     val worldSpaceTriangles =
       // generate all triangles in worldSpace, that is translated to a coordinate system where "player" is at 0,0,0
       // and then rotated according to the camera
@@ -26,6 +27,7 @@ object Rendererer {
         })
 
     val triangles = generateViewTriangles(worldSpaceTriangles)
+    //parallel ends here
     VisualizerApp.triangleCount = triangles.size
     // val res = generateDrawableTriangles(viewTris)
     triangles

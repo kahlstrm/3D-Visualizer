@@ -24,17 +24,17 @@ object FileLoader {
     // this implementation doesn't work directly in VSCode debug so commented this out,
     // probably a GUI drop down menu would be better
     var texture = textureString
-    while (texture == null) {
-      println("available textures:")
-      val texturesWords = VisualizerApp.textures.keySet
-      println(texturesWords.mkString("\n"))
-      println(
-        "select which texture you want to apply to the walls, empty for no texture:"
-      )
-      val textureRead = readLine()
-      if (textureRead == "" || texturesWords.contains(texture))
-        texture = textureRead
-    }
+    // while (texture == null) {
+    //   println("available textures:")
+    //   val texturesWords = VisualizerApp.textures.keySet
+    //   println(texturesWords.mkString("\n"))
+    //   println(
+    //     "select which texture you want to apply to the walls, empty for no texture:"
+    //   )
+    //   val textureRead = readLine()
+    //   if (textureRead == "" || texturesWords.contains(texture))
+    //     texture = textureRead
+    // }
 
     var playerPos = Vec3d(0, 0, 0)
     val walls = Buffer[Wall]()
