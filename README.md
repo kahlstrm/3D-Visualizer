@@ -23,7 +23,7 @@ To run the project you will need <strong>Java (JDK 11)</strong> and <strong>sbt<
 4. In VisualizerApp, add a new object to the World by adding an Object to worldObjects (line 25). There are example imports. Setting a starting scale of 100 is recommended due to scaling differences.
 
 ### Loading textures (for walls, floors and cubes)
-1. Move a (continuous) texture image to textures-folder.
+1. Move a (continuous) texture image (.png/.jpg confirmed to be working) to textures-folder.
 2. Load the texture by adding it to the Map 
 'textures' in VisualizerApp (line 16). There are example textures in the file.
 3. Apply the new texture by giving the key you gave your texture in step 2 to either 'wallTexture' or 'floorTexture' (lines 22 & 23 in VisualizerApp) OR create a new Cube inside worldObjects and give the texture-key to that.
