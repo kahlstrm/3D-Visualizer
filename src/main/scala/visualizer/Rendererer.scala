@@ -27,7 +27,7 @@ object Rendererer {
         })
 
     val triangles = generateViewTriangles(worldSpaceTriangles)
-    //parallel ends here
+    // parallel ends here
     VisualizerApp.triangleCount = triangles.size
     // val res = generateDrawableTriangles(viewTris)
     triangles
@@ -57,7 +57,7 @@ object Rendererer {
                 n.color,
                 n.texture
               )
-            if ( newTri.texture==null && newTri.color == null) newTri.color = {
+            if (newTri.texture == null && newTri.color == null) newTri.color = {
               val col = getColor(newTri)
               new Color(col, col, col)
             }
@@ -70,10 +70,18 @@ object Rendererer {
           // and with the normal pointing towards the screen
           .flatMap(calcClipping(_, Vec3d(0, 0, 0), Vec3d(1, 0, 0)))
           .flatMap(
-            calcClipping(_, Vec3d((screenWidth - 1).toFloat, 0, 0), Vec3d(-1, 0, 0))
+            calcClipping(
+              _,
+              Vec3d((screenWidth - 1).toFloat, 0, 0),
+              Vec3d(-1, 0, 0)
+            )
           )
           .flatMap(
-            calcClipping(_, Vec3d(0, clippingPlaneTop.toFloat, 0), Vec3d(0, 1, 0))
+            calcClipping(
+              _,
+              Vec3d(0, clippingPlaneTop.toFloat, 0),
+              Vec3d(0, 1, 0)
+            )
           )
           .flatMap(
             calcClipping(
@@ -187,13 +195,15 @@ object Rendererer {
           tLocV = (1 - t) * teyS + t * teyE
           tLocW = (1 - t) * tezS + t * tezE
           val screenLoc = i + j * screenWidth
-          if (tLocW > zBuffer.getElemDouble(screenLoc)) {
-            val col =
-              if (texture != null)
-                texture.getColor(tLocU / tLocW, tLocV / tLocW)
-              else tri.color.getRGB()
-            pixels.setElem(screenLoc, col)
-            zBuffer.setElemDouble(screenLoc, tLocW)
+          if (screenLoc > 0) {
+            if (tLocW > zBuffer.getElemDouble(screenLoc)) {
+              val col =
+                if (texture != null)
+                  texture.getColor(tLocU / tLocW, tLocV / tLocW)
+                else tri.color.getRGB()
+              pixels.setElem(screenLoc, col)
+              zBuffer.setElemDouble(screenLoc, tLocW)
+            }
           }
           t += texStep
           i += 1
@@ -250,13 +260,15 @@ object Rendererer {
           tLocV = (1 - t) * teyS + t * teyE
           tLocW = (1 - t) * tezS + t * tezE
           val screenLoc = i + j * screenWidth
-          if (tLocW > zBuffer.getElemDouble(screenLoc)) {
-            val col =
-              if (texture != null)
-                texture.getColor(tLocU / tLocW, tLocV / tLocW)
-              else tri.color.getRGB()
-            pixels.setElem(screenLoc, col)
-            zBuffer.setElemDouble(screenLoc, tLocW)
+          if (screenLoc > 0) {
+            if (tLocW > zBuffer.getElemDouble(screenLoc)) {
+              val col =
+                if (texture != null)
+                  texture.getColor(tLocU / tLocW, tLocV / tLocW)
+                else tri.color.getRGB()
+              pixels.setElem(screenLoc, col)
+              zBuffer.setElemDouble(screenLoc, tLocW)
+            }
           }
           t += texStep
           i += 1
@@ -292,9 +304,9 @@ object Rendererer {
       // wireFrame: Boolean
   ): Unit = {
     /*if (wireFrame)*/
-    val start=misc.timeNanos()
+    val start = misc.timeNanos()
     triangles.foreach(_.draw(g))
-    VisualizerApp.othertime=misc.timeBetween(start,misc.timeNanos())
+    VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
     // else
     //   triangles.foreach(tri => {
     //     if (tri.color != null) tri.draw(g, tri.color)
