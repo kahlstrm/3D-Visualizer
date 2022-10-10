@@ -89,7 +89,7 @@ object Rendererer {
               Vec3d(0, (screenHeight - 1).toFloat, 0),
               Vec3d(0, -1, 0)
             )
-          )
+          ).map(_.sortbyYAsc)
       })
     newTriangles.toVector
   }
@@ -100,29 +100,30 @@ object Rendererer {
       pixels: DataBuffer,
       zBuffer: DataBuffer
   ): Unit = {
-    val texture = tri.texture
-    val yDescTri = tri.sortbyYAsc
 
-    // rename the position variables from triangles yDescTri
+    //assumes that triangles are sortbyYAsc
+    val texture = tri.texture
+
+    // rename the position variables from triangles tri
     val (x1, y1, x2, y2, x3, y3) = (
-      yDescTri.pos1.x.toInt,
-      yDescTri.pos1.y.toInt,
-      yDescTri.pos2.x.toInt,
-      yDescTri.pos2.y.toInt,
-      yDescTri.pos3.x.toInt,
-      yDescTri.pos3.y.toInt
+      tri.pos1.x.toInt,
+      tri.pos1.y.toInt,
+      tri.pos2.x.toInt,
+      tri.pos2.y.toInt,
+      tri.pos3.x.toInt,
+      tri.pos3.y.toInt
     )
-    // rename the texture variables from triangles yDescTri
+    // rename the texture variables from triangles tri
     val (tx1, ty1, tz1, tx2, ty2, tz2, tx3, ty3, tz3) = (
-      yDescTri.texPos1.x,
-      yDescTri.texPos1.y,
-      yDescTri.texPos1.z,
-      yDescTri.texPos2.x,
-      yDescTri.texPos2.y,
-      yDescTri.texPos2.z,
-      yDescTri.texPos3.x,
-      yDescTri.texPos3.y,
-      yDescTri.texPos3.z
+      tri.texPos1.x,
+      tri.texPos1.y,
+      tri.texPos1.z,
+      tri.texPos2.x,
+      tri.texPos2.y,
+      tri.texPos2.z,
+      tri.texPos3.x,
+      tri.texPos3.y,
+      tri.texPos3.z
     )
     var dy1 = y2 - y1
     var dx1 = x2 - x1
@@ -202,7 +203,7 @@ object Rendererer {
                   texture.getColor(tLocU / tLocW, tLocV / tLocW)
                 else tri.color.getRGB()
               pixels.setElem(screenLoc, col)
-              zBuffer.setElemDouble(screenLoc, tLocW)
+              zBuffer.setElemFloat(screenLoc, tLocW)
             }
           }
           t += texStep
@@ -267,7 +268,7 @@ object Rendererer {
                   texture.getColor(tLocU / tLocW, tLocV / tLocW)
                 else tri.color.getRGB()
               pixels.setElem(screenLoc, col)
-              zBuffer.setElemDouble(screenLoc, tLocW)
+              zBuffer.setElemFloat(screenLoc, tLocW)
             }
           }
           t += texStep

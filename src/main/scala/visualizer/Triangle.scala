@@ -59,46 +59,46 @@ class Triangle(
       if (pos1.y < pos3.y) {
         // y1<y2 & y1<y3 & y3<y2
         if (pos3.y < pos2.y) {
-          return Triangle(
-            (pos1, pos3, pos2),
-            (texPos1, texPos3, texPos2),
-            texture
+          return new Triangle(
+            Array(pos1, pos3, pos2),
+            Array(texPos1, texPos3, texPos2),
+            color,texture
           )
         }
         // y1<y2 & y1<y3 & y3>y2
         return this
       }
       // y1<y2 & y3<y1
-      return Triangle(
-        (pos3, pos1, pos2),
-        (texPos3, texPos1, texPos2),
-        texture
+      return new Triangle(
+        Array(pos3, pos1, pos2),
+        Array(texPos3, texPos1, texPos2),
+        color,texture
       )
     } else // y2<y1
       {
         if (pos3.y < pos2.y) {
           // y3<y2<y1
-          return Triangle(
-            (pos3, pos2, pos1),
-            (texPos3, texPos2, texPos1),
-            texture
+          return new Triangle(
+            Array(pos3, pos2, pos1),
+            Array(texPos3, texPos2, texPos1),
+            color,texture
           )
         }
         // y2<y3 & y2<1
         if (pos3.y < pos1.y) {
           // y2<y3 & y2<1 & y3<y1
-          return Triangle(
-            (pos2, pos3, pos1),
-            (texPos2, texPos3, texPos1),
-            texture
+          return new Triangle(
+            Array(pos2, pos3, pos1),
+            Array(texPos2, texPos3, texPos1),
+            color,texture
           )
         }
 
       }
-    Triangle(
-      (pos2, pos1, pos3),
-      (texPos2, texPos1, texPos3),
-      texture
+    new Triangle(
+      Array(pos2, pos1, pos3),
+      Array(texPos2, texPos1, texPos3),
+      color,texture
     )
   }
   override def toString(): String =
