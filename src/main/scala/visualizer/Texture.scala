@@ -10,7 +10,7 @@ class Texture(image: BufferedImage) {
 
   // returns colors
   def getColorPixel(x: Int, y: Int): Int = {
-    return texturePixels.getElem(x%width + y%height * width)
+    return texturePixels.getElem(x % width + y % height * width)
   }
   def getColor(x: Float, y: Float): Int = {
     val xPixel = Math.max(0, Math.ceil(x * width).toInt - 1)
@@ -18,9 +18,9 @@ class Texture(image: BufferedImage) {
     return getColorPixel(xPixel, yPixel)
   }
 }
-object Texture{
-  def apply(imageSource:String):Texture={
-    val image =FileLoader.loadTexture(imageSource)
-    if(image!=null) new Texture(image) else null
+object Texture {
+  def apply(imageSource: String): Texture = {
+    val image = FileLoader.loadTexture(imageSource)
+    if (image != null) new Texture(image) else null
   }
 }

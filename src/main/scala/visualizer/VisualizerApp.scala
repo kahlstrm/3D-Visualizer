@@ -14,28 +14,36 @@ object VisualizerApp extends App {
     ExecutionContext.global
 //USER CONFIG START
   val textures: Map[String, Texture] = Map(
-    "stonebrick"     -> Texture("stone_bricks.png"),
-    "dirt"           -> Texture("dirt.png"),
-    "brick"          -> Texture("bricks.png"),
+    "stonebrick" -> Texture("stone_bricks.png"),
+    "dirt" -> Texture("dirt.png"),
+    "brick" -> Texture("bricks.png"),
     "dark_oak_plank" -> Texture("dark_oak_planks.png")
   )
   val wallTexture = "dark_oak_plank"
   val floorTexture = "stonebrick"
-  val (walls, floors, playerPos) = FileLoader.loadFile("hello.map",wallTexture,floorTexture) // to test other objects, I suggest using test.map
+  val (walls, floors, playerPos) = FileLoader.loadFile(
+    "test.map",
+    wallTexture,
+    floorTexture
+  ) // to test other objects, I suggest using test.map
   val worldObjects = walls ++ floors ++ Vector[Shapes](
-    // Object("dragon.obj",(0, 0, 0), (0, 0, 0), 100),                                         // a .obj with 210729 Triangles, quite big
-    // Object("dragon_low_poly.obj", (8200, -100, -1800), (0, 0, 0), 100),                        // 10x smaller triangle count dragon, still quite big 
+    Object(
+      "dragon.obj",
+      (0, 0, 0),
+      (0, 0, 0),
+      100
+    ) // a .obj with 210729 Triangles, quite big
+    // Object("dragon_low_poly.obj", (8200, -100, -1800), (0, 0, 0), 100),                        // 10x smaller triangle count dragon, still quite big
     // Object("REALpallo.obj", (8200, -100, -1800), (0, 0, 0), 100),                                     // a ball object with 5940 Triangles
-    Cube((7500, 100, -1800), (0, 0, 0), "dirt"),
-    Cube((7300, 100, -1800), (0, 0, 0), "brick"),
-    Cube((7100, 100, -1800), (0, 0, 0), "stonebrick")
+    // Cube((7500, 100, -1800), (0, 0, 0), "dirt"),
+    // Cube((7300, 100, -1800), (0, 0, 0), "brick"),
+    // Cube((7100, 100, -1800), (0, 0, 0), "stonebrick")
   )
   val renderDistance = 20000
-  val width = 1600
-  val height = 900
+  val width = 1280
+  val height = 720
   val fov = 90
-  
-  
+
   // USER CONFIG END
   val worldTris = worldObjects.flatMap(_.triangles).par
   var frames = 0
@@ -82,7 +90,7 @@ object VisualizerApp extends App {
       render()
       frames += 1;
     }
-	frame.dispose()
+    frame.dispose()
   }
   private def update() = {
     Player.move(collisionEnabled)
@@ -133,9 +141,9 @@ object VisualizerApp extends App {
     bs.show()
     VisualizerApp.frametime = time
   }
-  val thread = new Thread(new Runnable{
+  val thread = new Thread(new Runnable {
 
-   def run =runGameNow()
+    def run = runGameNow()
 
   })
   thread.start()

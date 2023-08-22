@@ -89,7 +89,8 @@ object Rendererer {
               Vec3d(0, (screenHeight - 1).toFloat, 0),
               Vec3d(0, -1, 0)
             )
-          ).map(_.sortbyYAsc)
+          )
+          .map(_.sortbyYAsc)
       })
     newTriangles.toVector
   }
@@ -101,7 +102,7 @@ object Rendererer {
       zBuffer: DataBuffer
   ): Unit = {
 
-    //assumes that triangles are sortbyYAsc
+    // assumes that triangles are sortbyYAsc
     val texture = tri.texture
 
     // rename the position variables from triangles tri

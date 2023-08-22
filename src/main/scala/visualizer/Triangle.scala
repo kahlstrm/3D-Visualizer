@@ -37,7 +37,7 @@ class Triangle(
     val normalZ = a.x * b.y - a.y * b.x
     Vec3d(normalX, normalY, normalZ)
   }
-  def worldSpace(player:Vec3d,camera:Vec3d): Triangle = {
+  def worldSpace(player: Vec3d, camera: Vec3d): Triangle = {
     Triangle(
       this.poses.map(n =>
         n
@@ -62,7 +62,8 @@ class Triangle(
           return new Triangle(
             Array(pos1, pos3, pos2),
             Array(texPos1, texPos3, texPos2),
-            color,texture
+            color,
+            texture
           )
         }
         // y1<y2 & y1<y3 & y3>y2
@@ -72,7 +73,8 @@ class Triangle(
       return new Triangle(
         Array(pos3, pos1, pos2),
         Array(texPos3, texPos1, texPos2),
-        color,texture
+        color,
+        texture
       )
     } else // y2<y1
       {
@@ -81,7 +83,8 @@ class Triangle(
           return new Triangle(
             Array(pos3, pos2, pos1),
             Array(texPos3, texPos2, texPos1),
-            color,texture
+            color,
+            texture
           )
         }
         // y2<y3 & y2<1
@@ -90,7 +93,8 @@ class Triangle(
           return new Triangle(
             Array(pos2, pos3, pos1),
             Array(texPos2, texPos3, texPos1),
-            color,texture
+            color,
+            texture
           )
         }
 
@@ -98,7 +102,8 @@ class Triangle(
     new Triangle(
       Array(pos2, pos1, pos3),
       Array(texPos2, texPos1, texPos3),
-      color,texture
+      color,
+      texture
     )
   }
   override def toString(): String =
@@ -155,21 +160,20 @@ object Triangle {
   }
 }
 
-
 // obsolete methods
-  // def draw(g: Graphics, color: Color) = {
-  //   g.setColor(color)
-  //   g.fillPolygon(
-  //     Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
-  //     Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
-  //     3
-  //   )
-  // }
-  // def draw(g: Graphics, color: Int) = {
-  //   g.setColor(new Color(color, color, color))
-  //   g.fillPolygon(
-  //     poses.map(_.x.toInt),
-  //     poses.map(_.y.toInt),
-  //     3
-  //   )
-  // }
+// def draw(g: Graphics, color: Color) = {
+//   g.setColor(color)
+//   g.fillPolygon(
+//     Array[Int](pos1.x.toInt, pos2.x.toInt, pos3.x.toInt),
+//     Array[Int](pos1.y.toInt, pos2.y.toInt, pos3.y.toInt),
+//     3
+//   )
+// }
+// def draw(g: Graphics, color: Int) = {
+//   g.setColor(new Color(color, color, color))
+//   g.fillPolygon(
+//     poses.map(_.x.toInt),
+//     poses.map(_.y.toInt),
+//     3
+//   )
+// }

@@ -5,12 +5,12 @@ class Vec3d(
     yCoord: Float,
     zCoord: Float
 ) {
-  private var hiddenX=xCoord
-  private var hiddenY=yCoord
-  private var hiddenZ=zCoord
-  def x=hiddenX
-  def y=hiddenY
-  def z=hiddenZ
+  private var hiddenX = xCoord
+  private var hiddenY = yCoord
+  private var hiddenZ = zCoord
+  def x = hiddenX
+  def y = hiddenY
+  def z = hiddenZ
   def distance(that: Vec3d) = {
     math.sqrt(
       math.pow(that.x - this.x, 2) + math.pow(that.y - this.y, 2) + math.pow(
@@ -179,7 +179,6 @@ object Camera extends Vec3d(0, 0, 0) {
   def pos() = this + Vec3d(0, 0, 0)
   // forwardVector for camera movement
 
-  
   def forwardVector = {
     Vec3d(
       -cos(y) * sin(x),
@@ -237,8 +236,8 @@ object Vec3d {
   def apply(pos: Vec3d): Vec3d = {
     new Vec3d(pos.x, pos.y, pos.z)
   }
-  def apply(pos:(Float,Float,Float))={
-    new Vec3d(pos._1,pos._2,pos._3)
+  def apply(pos: (Float, Float, Float)) = {
+    new Vec3d(pos._1, pos._2, pos._3)
   }
   def apply(x: Float, y: Float): Vec3d = {
     new Vec3d(x, y, 1)

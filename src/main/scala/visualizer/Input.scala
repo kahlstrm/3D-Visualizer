@@ -15,7 +15,7 @@ object Input {
       val keyPress = new KeyPressed(e)
       keyPress.key match {
         case Key.Escape =>
-          println("bye"); running = false;scala.sys.exit()
+          println("bye"); running = false; scala.sys.exit()
         case Key.W       => Player.moveForward = true
         case Key.S       => Player.moveBackward = true
         case Key.A       => Player.moveLeft = true
@@ -57,10 +57,10 @@ object Input {
             (newVal + Math.PI * 2).toFloat
           } else newVal.toFloat
         }
-        val newCameraY = ((-Math.PI / 2.0 +0.00001) max
+        val newCameraY = ((-Math.PI / 2.0 + 0.00001) max
           (Camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
-          (Math.PI / 2.0-0.00001)).toFloat
-        Camera.update(Vec3d(newCameraX,newCameraY,Camera.z))
+          (Math.PI / 2.0 - 0.00001)).toFloat
+        Camera.update(Vec3d(newCameraX, newCameraY, Camera.z))
         val centerOfWindow = area.getLocationOnScreen()
         robot.mouseMove(
           centerOfWindow.x + width / 2,

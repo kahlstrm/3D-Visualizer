@@ -1,7 +1,6 @@
 package visualizer
 import scala.collection.parallel.CollectionConverters._
 
-
 trait Shapes {
   val position: Vec3d
   val rotation: Vec3d
@@ -20,7 +19,7 @@ trait Shapes {
             .translate(-player)
             .fpsRotate(0, camera.x)
             .fpsRotate(camera.y, 0)
-            // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0)),
+        // .cameraRotate(Camera.forwardVector().dropX(),Pos(0,1,0)),
         ),
         tri.texPoses,
         tri.color,
@@ -34,14 +33,13 @@ trait Shapes {
 
   def isInside(pos: Vec3d) = {
     def isBetween(a: Double, b: Double, c: Double) =
-      Math.min(a, b) < c+10 && Math.max(a, b) > c-10
+      Math.min(a, b) < c + 10 && Math.max(a, b) > c - 10
     isBetween(bottomCornerWorld.x, topCornerWorld.x, pos.x) &&
     isBetween(bottomCornerWorld.y, topCornerWorld.y, pos.y) &&
     isBetween(bottomCornerWorld.z, topCornerWorld.z, pos.z)
   }
   val texture: Texture
 }
-
 
 class Object(
     objInfo: (Vector[Vec3d], Vector[Triangle]),
@@ -90,15 +88,18 @@ class Object(
   val texture: Texture = null
 }
 object Object {
- def apply(
-      objFile:String,
-      pos: (Float,Float,Float),
-      rot: (Float,Float,Float),
+  def apply(
+      objFile: String,
+      pos: (Float, Float, Float),
+      rot: (Float, Float, Float),
       scale: Float
   ) = new Object(FileLoader.loadObject(objFile), Vec3d(pos), Vec3d(rot), scale)
 }
-class Wall(val position: Vec3d, val rotation: Vec3d, textureString: String = null)
-    extends Shapes {
+class Wall(
+    val position: Vec3d,
+    val rotation: Vec3d,
+    textureString: String = null
+) extends Shapes {
   val poses = Vector[Vec3d](
     Vec3d(-300, -200, -100),
     Vec3d(300, -200, -100),
@@ -189,12 +190,19 @@ class Wall(val position: Vec3d, val rotation: Vec3d, textureString: String = nul
   val bottomCornerWorld = poses(0)
   val topCornerWorld = poses(3)
 }
-object Wall{
-  def apply(pos:(Float,Float,Float), rotation:(Float,Float,Float), textureString: String) =
+object Wall {
+  def apply(
+      pos: (Float, Float, Float),
+      rotation: (Float, Float, Float),
+      textureString: String
+  ) =
     new Wall(Vec3d(pos), Vec3d(rotation), textureString)
 }
-class Floor(val position: Vec3d, val rotation: Vec3d, textureString: String = null)
-    extends Shapes {
+class Floor(
+    val position: Vec3d,
+    val rotation: Vec3d,
+    textureString: String = null
+) extends Shapes {
   val poses = Vector[Vec3d](
     Vec3d(-300, -100, -300),
     Vec3d(300, -100, -300),
@@ -285,8 +293,12 @@ class Floor(val position: Vec3d, val rotation: Vec3d, textureString: String = nu
   val bottomCornerWorld = poses(0)
   val topCornerWorld = poses(3)
 }
-object Floor{
-  def apply(pos:(Float,Float,Float), rotation:(Float,Float,Float), textureString: String) =
+object Floor {
+  def apply(
+      pos: (Float, Float, Float),
+      rotation: (Float, Float, Float),
+      textureString: String
+  ) =
     new Floor(Vec3d(pos), Vec3d(rotation), textureString)
 }
 
@@ -389,7 +401,10 @@ class Cube(val position: Vec3d, val rotation: Vec3d, textureString: String)
 }
 
 object Cube {
-  def apply(pos:(Float,Float,Float), rotation:(Float,Float,Float), textureString: String) =
+  def apply(
+      pos: (Float, Float, Float),
+      rotation: (Float, Float, Float),
+      textureString: String
+  ) =
     new Cube(Vec3d(pos), Vec3d(rotation), textureString)
 }
-

@@ -5,10 +5,10 @@ object GfxMath {
   val screenWidth = VisualizerApp.realWidth
   val screenHeight = VisualizerApp.realHeight
   val fovinRadians = VisualizerApp.fov * math.Pi / 180.0
-  val zNear = ((VisualizerApp.realWidth / 2.0) / tan(fovinRadians / 2.0)).toFloat
+  val zNear =
+    ((VisualizerApp.realWidth / 2.0) / tan(fovinRadians / 2.0)).toFloat
   val zPlane = Vec3d(0, 0, 1)
   val zPlaneNormal = Vec3d(0, 0, 1)
-
 
   def getColor(tri: Triangle): Int = {
     val normal = tri.getNormal().unit()
@@ -265,7 +265,6 @@ object GfxMath {
   }
 
 }
-
 
 // A test for intersectPoint calculations
 
