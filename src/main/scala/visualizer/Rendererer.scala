@@ -10,7 +10,6 @@ import scala.collection.parallel.CollectionConverters._
 object Rendererer {
   implicit val ec: ExecutionContext =
     ExecutionContext.global
-  private val clippingPlaneTop = screenHeight - VisualizerApp.height - 8
 
   def createFrameTriangles(player: Vec3d, camera: Vec3d): Vector[Triangle] = {
 
@@ -79,7 +78,7 @@ object Rendererer {
           .flatMap(
             calcClipping(
               _,
-              Vec3d(0, clippingPlaneTop.toFloat, 0),
+              Vec3d(0, 0, 0),
               Vec3d(0, 1, 0)
             )
           )
