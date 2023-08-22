@@ -261,7 +261,7 @@ object Rendererer {
           tLocV = (1 - t) * teyS + t * teyE
           tLocW = (1 - t) * tezS + t * tezE
           val screenLoc = i + j * screenWidth
-          if (screenLoc > 0) {
+          if (screenLoc >= 0) {
             if (tLocW > zBuffer.getElemDouble(screenLoc)) {
               val col =
                 if (texture != null)
