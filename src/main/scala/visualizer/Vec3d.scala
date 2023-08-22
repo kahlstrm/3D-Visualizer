@@ -101,9 +101,9 @@ class Vec3d(
     val sinP = sin(pitch)
     val cosY = cos(yaw)
     val sinY = sin(yaw)
-    val xAxis = -Vec3d(cosY, 0, -sinY) // fix up angles
+    val xAxis = Vec3d(-cosY, 0, sinY) // fix up angles
     val yAxis = Vec3d(sinY * sinP, cosP, cosY * sinP)
-    val zAxis = -Vec3d(sinY * cosP, -sinP, cosP * cosY)
+    val zAxis = Vec3d(-sinY * cosP, sinP, -cosP * cosY)
     (xAxis, yAxis, zAxis)
   }
   def fpsRotate(pitch: Float, y: Float): Vec3d = {
