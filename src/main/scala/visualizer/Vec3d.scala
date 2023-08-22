@@ -189,9 +189,9 @@ object Camera extends Vec3d(0, 0, 0) {
   // rightVector for camera movement
   def rightVector = {
     Vec3d(
-      -sin(x - Math.PI / 2),
+      cos(x),
       0,
-      cos(x - Math.PI / 2)
+      sin(x)
     ).unit()
   }
   // upvector, always orthogonal from forwad and right
