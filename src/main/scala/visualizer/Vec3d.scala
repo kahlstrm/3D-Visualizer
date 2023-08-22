@@ -11,20 +11,20 @@ class Vec3d(
   def x = hiddenX
   def y = hiddenY
   def z = hiddenZ
-  def distance(that: Vec3d) = {
+  def distance(other: Vec3d) = {
     math.sqrt(
-      math.pow(that.x - this.x, 2) + math.pow(that.y - this.y, 2) + math.pow(
-        that.z - this.z,
+      math.pow(other.x - this.x, 2) + math.pow(other.y - this.y, 2) + math.pow(
+        other.z - this.z,
         2
       )
     )
   }
   def length = this.distance(Vec3d(0, 0, 0))
 
-  def update(that: Vec3d): Unit = {
-    hiddenX = that.x
-    hiddenY = that.y
-    hiddenZ = that.z
+  def update(other: Vec3d): Unit = {
+    hiddenX = other.x
+    hiddenY = other.y
+    hiddenZ = other.z
   }
   def unary_- : Vec3d = {
     Vec3d(
@@ -47,18 +47,18 @@ class Vec3d(
       this.z / div
     )
   }
-  def dotProduct(that: Vec3d): Float = {
-    this.x * that.x + this.y * that.y + this.z * that.z
+  def dotProduct(other: Vec3d): Float = {
+    this.x * other.x + this.y * other.y + this.z * other.z
   }
-  def crossProduct(that: Vec3d): Vec3d = {
+  def crossProduct(other: Vec3d): Vec3d = {
     Vec3d(
-      this.y * that.z - this.z * that.y,
-      this.z * that.x - this.x * that.z,
-      this.x * that.y - this.y * that.x
+      this.y * other.z - this.z * other.y,
+      this.z * other.x - this.x * other.z,
+      this.x * other.y - this.y * other.x
     )
   }
-  def cosBetween(that: Vec3d): Double = {
-    this.dotProduct(that) / (this.length * that.length)
+  def cosBetween(other: Vec3d): Double = {
+    this.dotProduct(other) / (this.length * other.length)
   }
 
   def +(pos: Vec3d) = translate(pos)
