@@ -2,6 +2,7 @@ package visualizer
 
 import java.awt.event.KeyListener
 import java.awt.event.KeyEvent
+import java.awt.Point
 import scala.swing.event.KeyPressed
 import scala.swing.event.Key
 import VisualizerApp._
@@ -46,11 +47,13 @@ object Input {
   val mouseListener = new MouseMotionListener {
     def mouseMoved(e: MouseEvent): Unit = {
       val point = e.getPoint()
-      if (previousMouse.isDefined && area.isFocusOwner()) {
-        val prev = previousMouse.get
+      if (area.isFocusOwner()) {
+
+        val middleOfScreen =
+          new Point(width / 2, height / 2)
         val newCameraX = {
           val newVal =
-            (Camera.x + (prev.x - point.x).toDouble / 500) % (2 * math.Pi)
+            (Camera.x + (middleOfScreen.x - point.x).toDouble / 500) % (2 * math.Pi)
           if (newVal > Math.PI) {
             (newVal - Math.PI * 2).toFloat
           } else if (newVal < -Math.PI) {
@@ -58,17 +61,15 @@ object Input {
           } else newVal.toFloat
         }
         val newCameraY = ((-Math.PI / 2.0 + 0.00001) max
-          (Camera.y + (prev.y - point.y).toDouble / 500) % (2 * math.Pi) min
+          (Camera.y + (middleOfScreen.y - point.y).toDouble / 500) % (2 * math.Pi) min
           (Math.PI / 2.0 - 0.00001)).toFloat
         Camera.update(Vec3d(newCameraX, newCameraY, Camera.z))
-        val centerOfWindow = area.getLocationOnScreen()
+
+        val windowLocation = area.getLocationOnScreen()
         robot.mouseMove(
-          centerOfWindow.x + width / 2,
-          centerOfWindow.y + height / 2
+          windowLocation.x + middleOfScreen.x,
+          windowLocation.y + middleOfScreen.y
         );
-        previousMouse = None
-      } else {
-        previousMouse = Some(point)
       }
     }
     def mouseDragged(e: MouseEvent): Unit = mouseMoved(e)

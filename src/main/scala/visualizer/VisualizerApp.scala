@@ -22,22 +22,22 @@ object VisualizerApp extends App {
   val wallTexture = "dark_oak_plank"
   val floorTexture = "stonebrick"
   val (walls, floors, playerPos) = FileLoader.loadFile(
-    "test.map",
+    "hello.map",
     wallTexture,
     floorTexture
   ) // to test other objects, I suggest using test.map
   val worldObjects = walls ++ floors ++ Vector[Shapes](
-    Object(
-      "dragon.obj",
-      (0, 0, 0),
-      (0, 0, 0),
-      100
-    ) // a .obj with 210729 Triangles, quite big
-    // Object("dragon_low_poly.obj", (8200, -100, -1800), (0, 0, 0), 100),                        // 10x smaller triangle count dragon, still quite big
-    // Object("REALpallo.obj", (8200, -100, -1800), (0, 0, 0), 100),                                     // a ball object with 5940 Triangles
-    // Cube((7500, 100, -1800), (0, 0, 0), "dirt"),
-    // Cube((7300, 100, -1800), (0, 0, 0), "brick"),
-    // Cube((7100, 100, -1800), (0, 0, 0), "stonebrick")
+    //Object(
+    //  "dragon.obj",
+    //  (0, 0, 0),
+    //  (0, 0, 0),
+    //  100
+    //) // a .obj with 210729 Triangles, quite big
+    Object("dragon_low_poly.obj", (8200, -100, -1800), (0, 0, 0), 100),                        // 10x smaller triangle count dragon, still quite big
+    Object("REALpallo.obj", (8200, -100, -1800), (0, 0, 0), 100),                                     // a ball object with 5940 Triangles
+    Cube((7500, 100, -1800), (0, 0, 0), "dirt"),
+    Cube((7300, 100, -1800), (0, 0, 0), "brick"),
+    Cube((7100, 100, -1800), (0, 0, 0), "stonebrick")
   )
   val renderDistance = 20000
   val width = 1280
@@ -54,7 +54,6 @@ object VisualizerApp extends App {
   var othertime = 0.0f
   var triangleCount = 0
   var running = true
-  var previousMouse: Option[Point] = None
   frame.setResizable(false)
   val area: JPanel = new JPanel {
     setPreferredSize(new Dimension(width, height))
