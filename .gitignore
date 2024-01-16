@@ -5,6 +5,5 @@ target/
 /.idea
 .bloop/
 /null
-.scalafmt.conf
 
 

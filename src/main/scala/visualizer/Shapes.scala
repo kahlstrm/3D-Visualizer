@@ -188,7 +188,7 @@ class Wall(
     )
   )
   val bottomCornerWorld = poses(0)
-  val topCornerWorld = poses(3) 
+  val topCornerWorld = poses(3)
 }
 object Wall {
   def apply(
