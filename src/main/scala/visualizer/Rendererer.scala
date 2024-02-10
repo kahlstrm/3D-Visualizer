@@ -296,6 +296,10 @@ object Rendererer {
     })
 
     VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
+    VisualizerApp.otherTimes += VisualizerApp.othertime
+    if (VisualizerApp.otherTimes.size > 100) {
+      VisualizerApp.otherTimes.remove(0)
+    }
     image
   }
   // old method which is still used for drawing wireframes which slight remodeling
@@ -308,6 +312,10 @@ object Rendererer {
     val start = misc.timeNanos()
     triangles.foreach(_.draw(g))
     VisualizerApp.othertime = misc.timeBetween(start, misc.timeNanos())
+    VisualizerApp.otherTimes += VisualizerApp.othertime
+    if (VisualizerApp.otherTimes.size > 100) {
+      VisualizerApp.otherTimes.remove(0)
+    }
     // else
     //   triangles.foreach(tri => {
     //     if (tri.color != null) tri.draw(g, tri.color)

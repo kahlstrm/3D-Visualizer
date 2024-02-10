@@ -9,6 +9,7 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants
 import java.awt.image.DataBufferFloat
+import scala.collection.mutable.Buffer
 object VisualizerApp extends App {
   implicit val ec: scala.concurrent.ExecutionContext =
     ExecutionContext.global
@@ -61,7 +62,9 @@ object VisualizerApp extends App {
   var collisionEnabled = true
   val frame: JFrame = new JFrame("3d-visualizer")
   var frametime = 0.0f
+  val frameTimes = Buffer[Float]()
   var othertime = 0.0f
+  val otherTimes = Buffer[Float]()
   var triangleCount = 0
   var running = true
   frame.setResizable(false)
@@ -138,17 +141,26 @@ object VisualizerApp extends App {
       50,
       120
     )
-    g.drawString(f"frames: $frames, $triangleCount triangles", 50, 140)
+    g.drawString(
+      f"avg 100: ${frameTimes.sum / frameTimes.length}%.3f s, avg 100 ${otherTimes.sum / otherTimes.length}%.3f s",
+      50,
+      140
+    )
+    g.drawString(f"frames: $frames, $triangleCount triangles", 50, 160)
     g.drawString(
       "press R to toggle wireframe, C to toggle collision",
       50,
-      160
+      180
     )
     drawCrosshair(g)
     val time = timeBetween(start, timeNanos())
     g.dispose()
     bs.show()
     VisualizerApp.frametime = time
+    frameTimes += (time)
+    if (frameTimes.size > 100) {
+      frameTimes.remove(0)
+    }
   }
   val thread = new Thread(new Runnable {
 
