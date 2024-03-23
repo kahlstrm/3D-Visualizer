@@ -8,13 +8,9 @@ A 3D-renderer using Swing and basic Graphics. Supports .obj-file loading (no tex
 
 To run the project you will need <strong>Java (JDK 21)</strong> and <strong>sbt</strong>
 
-## Installation
+## Usage
 
-1. Clone the repo
-
-   git clone git@github.com:kqlski/3D-Visualizer.git
-
-2. Inside the repository root, do `sbt run`
+In the repository root, do `sbt run`
 
 ## Other Instructions
 
